@@ -108,40 +108,6 @@ export default function BlueskyAnalyzer() {
     );
   }
 
-  // Render function for word cloud
-  function renderWordCloud(wordCloud: Array<{ word: string; count: number }>) {
-    if (!wordCloud || wordCloud.length === 0) {
-      return (
-        <div className="text-gray-500">{t("analysis.noWordCloudData")}</div>
-      );
-    }
-
-    const max = wordCloud[0]?.count || 1;
-    const min = wordCloud[wordCloud.length - 1]?.count || 1;
-    const scale = (count: number) =>
-      0.9 + ((count - min) / Math.max(1, max - min)) * 1.6;
-
-    return (
-      <div className="flex flex-wrap gap-2 p-2">
-        {wordCloud.map(({ word, count }) => (
-          <span
-            key={word}
-            title={`${word} (${count})`}
-            style={{
-              fontSize: `${scale(count)}rem`,
-              color: `hsl(${(count * 37) % 360}, 60%, 40%)`,
-              fontWeight: 500,
-              lineHeight: 1.2,
-              cursor: "pointer",
-            }}
-          >
-            {word}
-          </span>
-        ))}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <Card className="mx-auto max-w-md">
@@ -324,12 +290,19 @@ export default function BlueskyAnalyzer() {
                       </div>
                     </div>
 
-                    {/* Word Cloud */}
+                    {/* Word Cloud - Placeholder */}
                     <div className="bg-white p-4 rounded-lg border">
                       <h3 className="text-lg font-medium mb-2">
                         {t("analysis.wordCloud")}
                       </h3>
-                      {renderWordCloud(result.processedFeed.wordCloud)}
+                      <div className="text-gray-500 text-center p-4">
+                        <div className="mb-2">
+                          Word cloud functionality will be reimplemented
+                        </div>
+                        <div className="text-sm text-gray-400">
+                          Coming soon with improved performance
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                   <CardFooter>

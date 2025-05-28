@@ -93,6 +93,14 @@ export interface ProcessedFeedData {
     displayName: string;
     count: number;
   }>;
+  commonHashtags: Array<{
+    tag: string;
+    count: number;
+  }>;
+  wordCloudData: Array<{
+    text: string;
+    value: number;
+  }>;
   insights: {
     totalPosts: number;
     totalReplies: number;
@@ -104,7 +112,6 @@ export interface ProcessedFeedData {
     postsWithLinks: number;
     languagesUsed: Record<string, number>;
   };
-  wordCloud: Array<{ word: string; count: number }>;
 }
 
 export async function analyzeUser(

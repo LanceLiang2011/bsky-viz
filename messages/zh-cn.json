@@ -70,6 +70,7 @@
     "night": "凌晨 (0时-6时)",
     "timeZoneNote": "所有时间基于您的本地时区: {timezone}",
     "wordCloud": "词云",
+    "wordCloudSubtitle": "在帖子和回复中最常使用的词汇",
     "noWordCloudData": "无词云数据可用"
   },
   "loading": {

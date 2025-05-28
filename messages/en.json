@@ -70,6 +70,7 @@
     "night": "Night (12AM-6AM)",
     "timeZoneNote": "All times shown in your local timezone: {timezone}",
     "wordCloud": "Word Cloud",
+    "wordCloudSubtitle": "Most frequently used words in posts and replies",
     "noWordCloudData": "No word cloud data available"
   },
   "loading": {

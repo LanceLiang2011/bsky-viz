@@ -11,6 +11,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
+import WordCloud from "./WordCloud";
 
 interface ProcessedFeedData {
   activityByHour: Record<number, number>;
@@ -28,6 +29,14 @@ interface ProcessedFeedData {
     displayName: string;
     count: number;
   }>;
+  commonHashtags: Array<{
+    tag: string;
+    count: number;
+  }>;
+  wordCloudData: Array<{
+    text: string;
+    value: number;
+  }>;
   insights: {
     totalPosts: number;
     totalReplies: number;
@@ -39,7 +48,6 @@ interface ProcessedFeedData {
     postsWithLinks: number;
     languagesUsed: Record<string, number>;
   };
-  wordCloud: Array<{ word: string; count: number }>;
 }
 
 interface AnalysisResultsProps {
@@ -101,40 +109,6 @@ export default function AnalysisResults({
             </div>
           ))}
         </div>
-      </div>
-    );
-  }
-
-  // Render function for word cloud
-  function renderWordCloud(wordCloud: Array<{ word: string; count: number }>) {
-    if (!wordCloud || wordCloud.length === 0) {
-      return (
-        <div className="text-gray-500">{t("analysis.noWordCloudData")}</div>
-      );
-    }
-
-    const max = wordCloud[0]?.count || 1;
-    const min = wordCloud[wordCloud.length - 1]?.count || 1;
-    const scale = (count: number) =>
-      0.9 + ((count - min) / Math.max(1, max - min)) * 1.6;
-
-    return (
-      <div className="flex flex-wrap gap-2 p-2">
-        {wordCloud.map(({ word, count }) => (
-          <span
-            key={word}
-            title={`${word} (${count})`}
-            style={{
-              fontSize: `${scale(count)}rem`,
-              color: `hsl(${(count * 37) % 360}, 60%, 40%)`,
-              fontWeight: 500,
-              lineHeight: 1.2,
-              cursor: "pointer",
-            }}
-          >
-            {word}
-          </span>
-        ))}
       </div>
     );
   }
@@ -258,12 +232,20 @@ export default function AnalysisResults({
         </div>
 
         {/* Word Cloud */}
-        <div className="bg-white p-4 rounded-lg border">
-          <h3 className="text-lg font-medium mb-2">
-            {t("analysis.wordCloud")}
-          </h3>
-          {renderWordCloud(processedFeed.wordCloud)}
-        </div>
+        <WordCloud
+          words={processedFeed.wordCloudData}
+          title={t("analysis.wordCloud")}
+          subtitle={t("analysis.wordCloudSubtitle")}
+          config={{
+            maxWords: 100,
+            minFontSize: 12,
+            maxFontSize: 48,
+            showControls: true,
+          }}
+          onWordClick={(word: { text: string; value: number }) => {
+            console.log("Clicked word:", word);
+          }}
+        />
       </CardContent>
       <CardFooter>
         <details className="cursor-pointer w-full">

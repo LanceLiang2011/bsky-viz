@@ -8,7 +8,8 @@
     "description": "Enter a Bluesky username (e.g., username.bsky.social or @username)",
     "placeholder": "username.bsky.social",
     "button": "Analyze User",
-    "loading": "Analyzing..."
+    "loading": "Analyzing...",
+    "analyzingData": "Processing data, please wait..."
   },
   "results": {
     "title": "Analysis Result",

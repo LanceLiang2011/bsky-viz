@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
 import { analyzeUser } from "../actions";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import ProfileCard from "./ProfileCard";
 import { analyzeFeed } from "@/app/utils/feedAnalyzer";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
 
 interface BlueskyProfile {
   did: string;
@@ -79,23 +81,35 @@ interface AnalysisResult {
   processedFeed?: ProcessedFeed;
 }
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  const t = useTranslations();
+
+  return (
+    <Button type="submit" className="w-full" disabled={pending}>
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          {t("form.loading")}
+        </>
+      ) : (
+        t("form.button")
+      )}
+    </Button>
+  );
+}
+
 export default function BlueskyAnalyzer() {
   const t = useTranslations();
   const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(formData: FormData) {
-    setLoading(true);
+  // Create a client action wrapper around the server action
+  async function clientAction(formData: FormData) {
     setResult(null);
-
     try {
       const response = await analyzeUser(formData);
-
-      // Process the feed data if available
       if (response.success && response.feed) {
         const processedFeed = analyzeFeed(response.feed);
-
-        // Create a new object with all existing properties plus processedFeed
         setResult({
           ...response,
           processedFeed,
@@ -106,8 +120,6 @@ export default function BlueskyAnalyzer() {
     } catch (e) {
       console.error(e);
       setResult({ error: t("errors.unexpected") });
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -176,17 +188,14 @@ export default function BlueskyAnalyzer() {
           <CardDescription>{t("form.description")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={handleSubmit} className="space-y-4">
+          <form action={clientAction} className="space-y-4">
             <Input
               name="handle"
               placeholder={t("form.placeholder")}
               required
               className="w-full"
-              disabled={loading}
             />
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? t("form.loading") : t("form.button")}
-            </Button>
+            <SubmitButton />
           </form>
         </CardContent>
       </Card>
@@ -351,23 +360,6 @@ export default function BlueskyAnalyzer() {
                   </CardFooter>
                 </Card>
               )}
-
-              <Card className="mx-auto max-w-4xl">
-                <CardHeader>
-                  <CardTitle>{t("results.feedData")}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <details className="cursor-pointer">
-                    <summary className="text-sm font-medium text-gray-700 mb-2">
-                      {t("analysis.viewRawFeedData")}
-                    </summary>
-                    <pre className="bg-gray-100 p-4 rounded-lg overflow-auto text-sm mt-2">
-                      {/* Add type assertion to resolve the unknown type issue */}
-                      {JSON.stringify(result.feed, null, 2)}
-                    </pre>
-                  </details>
-                </CardContent>
-              </Card>
             </div>
           ) : (
             <Card className="mx-auto max-w-4xl">

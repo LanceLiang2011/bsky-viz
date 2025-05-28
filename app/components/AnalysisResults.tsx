@@ -181,7 +181,13 @@ export default function AnalysisResults({
                 {t("analysis.mostActiveDay")}
               </p>
               <p className="text-xl font-semibold">
-                {format(new Date(processedFeed.insights.mostActiveDay), "PPP")}
+                {processedFeed.insights.mostActiveDay &&
+                !isNaN(new Date(processedFeed.insights.mostActiveDay).getTime())
+                  ? format(
+                      new Date(processedFeed.insights.mostActiveDay),
+                      "PPP"
+                    )
+                  : t("analysis.noData")}
               </p>
             </div>
           </div>

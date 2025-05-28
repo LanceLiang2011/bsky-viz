@@ -72,7 +72,10 @@ function extractDateAndHour(isoString: string, userTimezone?: string) {
 }
 
 // Main analyzer function
-export function analyzeFeed(feedData: any): ProcessedFeedData {
+export function analyzeFeed(
+  feedData: any,
+  options: { locale?: string } = {}
+): ProcessedFeedData {
   console.log(
     `Starting feed analysis with ${feedData?.feed?.length || 0} items`
   );
@@ -255,7 +258,9 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
   // Process text for word cloud
   console.log(`Processing ${allTexts.length} texts for word cloud...`);
   const combinedText = allTexts.join(" ");
-  const wordCloudData = WordProcessor.processText(combinedText).slice(0, 150); // Limit to top 150 words
+  const wordCloudData = WordProcessor.processText(combinedText, {
+    locale: options.locale,
+  }).slice(0, 150); // Limit to top 150 words
   console.log(`Generated word cloud with ${wordCloudData.length} words`);
 
   console.log(`Analysis complete, returning processed data`);

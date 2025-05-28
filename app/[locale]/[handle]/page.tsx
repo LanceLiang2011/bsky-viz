@@ -138,7 +138,7 @@ async function getOpenAISummary(
   }
 }
 
-async function fetchBlueskyData(handle: string) {
+async function fetchBlueskyData(handle: string, locale?: string) {
   const t = await getTranslations();
 
   // Clean and format the handle
@@ -243,7 +243,7 @@ async function fetchBlueskyData(handle: string) {
 
     // Process the feed data
     console.log("Starting feed analysis on server...");
-    const processedFeed = analyzeFeed({ feed: allFeedItems });
+    const processedFeed = analyzeFeed({ feed: allFeedItems }, { locale });
     console.log("Feed analysis completed on server");
 
     // Prepare text for OpenAI
@@ -280,13 +280,13 @@ export default async function HandlePage({
   params: Promise<{ handle: string; locale: string }>;
 }) {
   const t = await getTranslations();
-  const { handle } = await params;
+  const { handle, locale } = await params;
 
   if (!handle) {
     notFound();
   }
 
-  const result = await fetchBlueskyData(decodeURIComponent(handle));
+  const result = await fetchBlueskyData(decodeURIComponent(handle), locale);
 
   if (result.error) {
     if (result.error === "User not found") {

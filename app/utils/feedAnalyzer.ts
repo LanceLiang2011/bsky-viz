@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
+import { useDefault, Segment } from "segmentit";
+// eslint-disable-next-line react-hooks/rules-of-hooks
+const segmentit = useDefault(new Segment());
 
 // Types for processed data
 interface ActivityByHour {
@@ -31,12 +34,18 @@ interface WordCount {
   [word: string]: number;
 }
 
+interface WordCloudEntry {
+  word: string;
+  count: number;
+}
+
 interface ProcessedFeedData {
   activityByHour: ActivityByHour;
   activityTimeline: DayActivity[];
   activityByDay: ActivityByDay;
   topInteractions: InteractionAccount[];
   wordCloudData: WordCount;
+  wordCloud: WordCloudEntry[]; // NEW: Top N words for word cloud
   commonHashtags: { tag: string; count: number }[];
   insights: {
     totalPosts: number;
@@ -239,27 +248,20 @@ const englishStopWords = new Set([
 
 // Extract text content from a post
 function extractTextContent(post: any): string {
-  // Get main post text
   const text = post.post?.record?.text || "";
-
-  // Get text from reply parent if exists
   const replyParentText = post.reply?.parent?.record?.text || "";
-
   return text + " " + replyParentText;
 }
 
 // Extract date and hour from ISO string with proper timezone support
 function extractDateAndHour(isoString: string, userTimezone?: string) {
   try {
-    // Get browser timezone if none provided
     const timezone =
       userTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-
     const date = parseISO(isoString);
     const zonedDate = toZonedTime(date, timezone);
     const hour = zonedDate.getHours();
     const formattedDate = format(zonedDate, "yyyy-MM-dd");
-
     return { date: formattedDate, hour };
   } catch (e) {
     console.error("Error parsing date:", isoString, e);
@@ -270,56 +272,31 @@ function extractDateAndHour(isoString: string, userTimezone?: string) {
 // Extract words for word cloud
 function extractWords(text: string): string[] {
   if (!text) return [];
-
-  // Handle both English and Chinese text
-  // For English: split by spaces and remove punctuation
-  // For Chinese: split by character
-
-  // Remove URLs
   const textWithoutUrls = text.replace(/https?:\/\/\S+/g, "");
-
-  // Remove mentions
   const textWithoutMentions = textWithoutUrls.replace(/@[\w.-]+/g, "");
-
-  // Remove punctuation and symbols
   const cleanText = textWithoutMentions.replace(/[^\p{L}\p{N}\s]/gu, " ");
-
-  // Split into words
-  // This will work for English, and for Chinese each character will be treated as a "word"
-  let words: string[] = [];
-
-  // Check if text contains Chinese characters
   const hasChinese = /[\u4e00-\u9fa5]/.test(cleanText);
 
+  let words: string[] = [];
   if (hasChinese) {
-    // For Chinese, we need a different approach
-    // Extract individual Chinese characters
-    const chineseChars = cleanText.match(/[\u4e00-\u9fa5]/g) || [];
-
-    // Extract English words
-    const englishWords = cleanText
-      .replace(/[\u4e00-\u9fa5]/g, " ")
-      .split(/\s+/)
-      .filter((word) => word.length > 1);
-
-    words = [...chineseChars, ...englishWords];
+    // Use segmentit for Chinese segmentation
+    words = segmentit.doSegment(cleanText, { simple: true });
+    // Filter out stop words and single characters
+    words = words.filter(
+      (word) => word.length > 1 && !chineseStopWords.has(word)
+    );
   } else {
-    // For non-Chinese text, split by spaces
-    words = cleanText.split(/\s+/).filter((word) => word.length > 1);
+    words = cleanText
+      .split(/\s+/)
+      .filter(
+        (word) => word.length > 1 && !englishStopWords.has(word.toLowerCase())
+      );
   }
-
-  // Filter out stop words
-  words = words.filter((word) => {
-    const lowerWord = word.toLowerCase();
-    return !englishStopWords.has(lowerWord) && !chineseStopWords.has(word);
-  });
-
   return words;
 }
 
 // Main analyzer function
 export function analyzeFeed(feedData: any): ProcessedFeedData {
-  // Initialize data structures
   const activityByHour: ActivityByHour = {};
   const activityByDay: ActivityByDay = {};
   const interactionCounts: {
@@ -337,38 +314,23 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
   let postsWithLinks = 0;
   const languagesUsed: { [lang: string]: number } = {};
 
-  // Initialize hours
   for (let i = 0; i < 24; i++) {
     activityByHour[i] = 0;
   }
 
-  // Process each feed item
   const feed = feedData?.feed || [];
 
   feed.forEach((item: any) => {
-    // Skip if no post data
     if (!item.post && !item.reason) return;
-
-    // Determine if it's a post, reply or repost
     const isRepost = !!item.reason;
     const isReply = !isRepost && !!item.reply;
     const isPost = !isRepost && !isReply;
-
-    // Get the post object
     const post = isRepost ? item.post : item.post;
     if (!post) return;
-
-    // Get created date
     const createdAt = post.record?.createdAt || post.indexedAt;
     if (!createdAt) return;
-
-    // Extract date and hour
     const { date, hour } = extractDateAndHour(createdAt);
-
-    // Update activity by hour
     activityByHour[hour] = (activityByHour[hour] || 0) + 1;
-
-    // Initialize or update activity by day
     if (!activityByDay[date]) {
       activityByDay[date] = {
         posts: 0,
@@ -379,8 +341,6 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
         date,
       };
     }
-
-    // Update counts
     if (isPost) {
       totalPosts++;
       activityByDay[date].posts++;
@@ -391,12 +351,8 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
       totalReposts++;
       activityByDay[date].reposts++;
     }
-
     activityByDay[date].total++;
-
-    // Track interactions with other accounts
     if (isReply && item.reply) {
-      // Count interaction with parent post author
       const parentAuthor = item.reply.parent?.author;
       if (parentAuthor && parentAuthor.did) {
         if (!interactionCounts[parentAuthor.did]) {
@@ -408,8 +364,6 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
         }
         interactionCounts[parentAuthor.did].count++;
       }
-
-      // Count interaction with root post author if different
       const rootAuthor = item.reply.root?.author;
       if (
         rootAuthor &&
@@ -426,27 +380,20 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
         interactionCounts[rootAuthor.did].count++;
       }
     }
-
-    // Extract text for word cloud
     const text = extractTextContent(item);
     if (text) {
       postsWithText++;
       totalTextLength += text.length;
-
-      // Process for word cloud
+      // Improved word cloud: count all words
       const words = extractWords(text);
       words.forEach((word) => {
         wordCounts[word] = (wordCounts[word] || 0) + 1;
       });
-
-      // Extract hashtags
       const hashtags = text.match(/#[\w\u4e00-\u9fa5]+/g) || [];
       hashtags.forEach((tag) => {
         hashtagCounts[tag] = (hashtagCounts[tag] || 0) + 1;
       });
     }
-
-    // Check for media
     const hasEmbed = post.embed || post.record?.embed;
     if (hasEmbed) {
       const embedType = post.embed?.$type || post.record?.embed?.$type;
@@ -454,21 +401,16 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
         postsWithMedia++;
       }
     }
-
-    // Check for external links
     const hasLinks = text && /https?:\/\/\S+/g.test(text);
     if (hasLinks) {
       postsWithLinks++;
     }
-
-    // Track languages used
     const langs = post.record?.langs || [];
     langs.forEach((lang: string) => {
       languagesUsed[lang] = (languagesUsed[lang] || 0) + 1;
     });
   });
 
-  // Find most active hour and day
   let mostActiveHour = 0;
   let maxHourCount = 0;
   for (const [hour, count] of Object.entries(activityByHour)) {
@@ -487,7 +429,6 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
     }
   }
 
-  // Sort interactions by count
   const topInteractions = Object.values(interactionCounts)
     .map(({ count, handle, displayName }) => ({
       did: handle.split(".")[0],
@@ -498,24 +439,28 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
     .sort((a, b) => b.count - a.count)
     .slice(0, 20);
 
-  // Sort hashtags by count
   const commonHashtags = Object.entries(hashtagCounts)
     .map(([tag, count]) => ({ tag, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 20);
 
-  // Convert activityByDay to sorted timeline
   const activityTimeline = Object.values(activityByDay).sort((a, b) =>
     a.date.localeCompare(b.date)
   );
 
-  // Return processed data
+  // NEW: Generate top N words for word cloud
+  const wordCloud: WordCloudEntry[] = Object.entries(wordCounts)
+    .map(([word, count]) => ({ word, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 50); // Top 50 words
+
   return {
     activityByHour,
     activityTimeline,
     activityByDay,
     topInteractions,
     wordCloudData: wordCounts,
+    wordCloud, // NEW
     commonHashtags,
     insights: {
       totalPosts,

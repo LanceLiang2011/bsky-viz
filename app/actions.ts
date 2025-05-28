@@ -2,11 +2,12 @@
 "use server";
 
 import { getTranslations } from "next-intl/server";
-import { subMonths } from "date-fns";
 
 export async function analyzeUser(formData: FormData) {
   const t = await getTranslations();
   const handle = formData.get("handle")?.toString()?.trim();
+
+  console.log(`Analyzing user with handle: ${handle}`);
 
   if (!handle) {
     return { error: t("errors.noHandle") };
@@ -18,11 +19,11 @@ export async function analyzeUser(formData: FormData) {
 
     // Remove any invisible/non-printable characters and extra whitespace
     cleanHandle = cleanHandle
-      .replace(/[\u200B-\u200D\uFEFF\u202C\u202D\u202E]/g, "") // Remove zero-width and formatting characters
-      .replace(/\s+/g, "") // Remove all whitespace
-      .toLowerCase(); // Normalize to lowercase
+      .replace(/[\u200B-\u200D\uFEFF\u202C\u202D\u202E]/g, "")
+      .replace(/\s+/g, "")
+      .toLowerCase();
 
-    // Ensure handle has proper format (add .bsky.social if it's just a username)
+    // Ensure handle has proper format
     if (!cleanHandle.includes(".") && !cleanHandle.includes(":")) {
       cleanHandle = `${cleanHandle}.bsky.social`;
     }
@@ -33,7 +34,6 @@ export async function analyzeUser(formData: FormData) {
     const profileUrl = `https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${encodeURIComponent(
       cleanHandle
     )}`;
-    console.log(`Profile URL: ${profileUrl}`);
 
     const profileRes = await fetch(profileUrl, {
       headers: {
@@ -55,19 +55,16 @@ export async function analyzeUser(formData: FormData) {
 
     const profileData = await profileRes.json();
 
-    // Calculate the date 6 months ago
-    const sixMonthsAgo = subMonths(new Date(), 6);
-
     // Initialize variables for pagination
     let cursor = undefined;
     let hasMoreData = true;
-    let reachedSixMonthsAgo = false;
     let allFeedItems: FeedItem[] = [];
     let pageCount = 0;
-    const MAX_PAGES = 10; // Limit to 10 pages (1000 posts) to prevent excessive API calls
+    const MAX_PAGES = 10;
 
     // Fetch feed data with pagination
-    while (hasMoreData && !reachedSixMonthsAgo && pageCount < MAX_PAGES) {
+    while (hasMoreData && pageCount < MAX_PAGES) {
+      // Remove reachedTimeLimit from condition
       pageCount++;
 
       // Build the URL with cursor if we have one
@@ -104,38 +101,23 @@ export async function analyzeUser(formData: FormData) {
       const feedData = await feedRes.json();
 
       // Add this page's feed items to our collection
-      allFeedItems = allFeedItems.concat(feedData.feed || []);
+      if (feedData.feed && feedData.feed.length > 0) {
+        // Add filtered items to our collection
+        allFeedItems = allFeedItems.concat(feedData.feed);
+      }
 
       // Check if there's a cursor for the next page
       if (feedData.cursor) {
         cursor = feedData.cursor;
-
-        // Check if we've reached data from 6 months ago
-        if (feedData.feed && feedData.feed.length > 0) {
-          const oldestPost = feedData.feed[feedData.feed.length - 1];
-          if (oldestPost.post && oldestPost.post.indexedAt) {
-            const postDate = new Date(oldestPost.post.indexedAt);
-            if (postDate < sixMonthsAgo) {
-              reachedSixMonthsAgo = true;
-              console.log(
-                `Reached data from 6 months ago, stopping pagination`
-              );
-            }
-          }
-        }
-
         // Add a small delay to avoid rate limiting
-        if (!reachedSixMonthsAgo && pageCount < MAX_PAGES) {
-          await new Promise((resolve) => setTimeout(resolve, 300));
-        }
+        await new Promise((resolve) => setTimeout(resolve, 300));
       } else {
-        // No more data available
         hasMoreData = false;
       }
     }
 
     console.log(
-      `Fetched ${pageCount} pages with ${allFeedItems.length} total feed items`
+      `Fetched ${pageCount} pages with ${allFeedItems.length} total feed items` // Update log message
     );
 
     return {

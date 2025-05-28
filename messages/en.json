@@ -9,7 +9,11 @@
     "placeholder": "username.bsky.social",
     "button": "Analyze User",
     "loading": "Analyzing...",
-    "analyzingData": "Processing data, please wait..."
+    "analyzingData": "Processing data, please wait...",
+    "rangeLabel": "Analyze time range",
+    "range1m": "Past 1 month",
+    "range6m": "Past 6 months",
+    "range1y": "Past 1 year"
   },
   "results": {
     "title": "Analysis Result",
@@ -63,6 +67,8 @@
     "afternoon": "Afternoon (12PM-6PM)",
     "evening": "Evening (6PM-12AM)",
     "night": "Night (12AM-6AM)",
-    "timeZoneNote": "All times shown in your local timezone: {timezone}"
+    "timeZoneNote": "All times shown in your local timezone: {timezone}",
+    "wordCloud": "Word Cloud",
+    "noWordCloudData": "No word cloud data available"
   }
 }

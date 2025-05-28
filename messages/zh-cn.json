@@ -9,7 +9,11 @@
     "placeholder": "username.bsky.social",
     "button": "分析用户",
     "loading": "分析中...",
-    "analyzingData": "正在处理数据，请稍候..."
+    "analyzingData": "正在处理数据，请稍候...",
+    "rangeLabel": "分析时间范围",
+    "range1m": "过去1个月",
+    "range6m": "过去6个月",
+    "range1y": "过去1年"
   },
   "results": {
     "title": "分析结果",
@@ -63,6 +67,8 @@
     "afternoon": "下午 (12时-18时)",
     "evening": "晚上 (18时-24时)",
     "night": "凌晨 (0时-6时)",
-    "timeZoneNote": "所有时间基于您的本地时区: {timezone}"
+    "timeZoneNote": "所有时间基于您的本地时区: {timezone}",
+    "wordCloud": "词云",
+    "noWordCloudData": "无词云数据可用"
   }
 }

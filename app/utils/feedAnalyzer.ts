@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { format, parseISO } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 
 // Types for processed data
 interface ActivityByHour {
@@ -247,14 +248,18 @@ function extractTextContent(post: any): string {
   return text + " " + replyParentText;
 }
 
-// Extract date and hour from ISO string
-function extractDateAndHour(isoString: string) {
+// Extract date and hour from ISO string with proper timezone support
+function extractDateAndHour(isoString: string, userTimezone?: string) {
   try {
+    // Get browser timezone if none provided
+    const timezone =
+      userTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     const date = parseISO(isoString);
-    // Adjust for user's timezone if needed
-    // For now using browser's local timezone
-    const hour = date.getHours();
-    const formattedDate = format(date, "yyyy-MM-dd");
+    const zonedDate = toZonedTime(date, timezone);
+    const hour = zonedDate.getHours();
+    const formattedDate = format(zonedDate, "yyyy-MM-dd");
+
     return { date: formattedDate, hour };
   } catch (e) {
     console.error("Error parsing date:", isoString, e);

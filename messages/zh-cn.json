@@ -39,5 +39,29 @@
     "pinnedPost": "置顶帖子",
     "viewProfile": "查看资料",
     "viewPost": "查看帖子"
+  },
+  "analysis": {
+    "title": "活动分析",
+    "description": "用户活动模式和互动分析",
+    "activityByHour": "每小时活动",
+    "hourOfDay": "一天中的小时 (本地时间)",
+    "mostActiveTime": "最活跃的时间",
+    "mostActiveHour": "最活跃的时间",
+    "mostActiveDay": "最活跃的日期",
+    "languagesUsed": "使用的语言",
+    "topInteractions": "主要互动",
+    "viewRawData": "查看原始数据",
+    "viewRawFeedData": "查看原始动态数据",
+    "interactions": "次互动",
+    "posts": "发文",
+    "replies": "回复",
+    "reposts": "转发",
+    "avgLength": "平均长度",
+    "chars": "字符",
+    "morning": "早晨 (6时-12时)",
+    "afternoon": "下午 (12时-18时)",
+    "evening": "晚上 (18时-24时)",
+    "night": "凌晨 (0时-6时)",
+    "timeZoneNote": "所有时间基于您的本地时区: {timezone}"
   }
 }

@@ -39,5 +39,29 @@
     "pinnedPost": "Pinned Post",
     "viewProfile": "View Profile",
     "viewPost": "View Post"
+  },
+  "analysis": {
+    "title": "Activity Analysis",
+    "description": "Analysis of user activity patterns and interactions",
+    "activityByHour": "Activity by Hour",
+    "hourOfDay": "Hour of day (local time)",
+    "mostActiveTime": "Most Active Times",
+    "mostActiveHour": "Most active hour",
+    "mostActiveDay": "Most active day",
+    "languagesUsed": "Languages Used",
+    "topInteractions": "Top Interactions",
+    "viewRawData": "View Raw Data",
+    "viewRawFeedData": "View Raw Feed Data",
+    "interactions": "interactions",
+    "posts": "Posts",
+    "replies": "Replies",
+    "reposts": "Reposts",
+    "avgLength": "Avg Length",
+    "chars": "chars",
+    "morning": "Morning (6AM-12PM)",
+    "afternoon": "Afternoon (12PM-6PM)",
+    "evening": "Evening (6PM-12AM)",
+    "night": "Night (12AM-6AM)",
+    "timeZoneNote": "All times shown in your local timezone: {timezone}"
   }
 }

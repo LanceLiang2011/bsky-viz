@@ -861,10 +861,10 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
   }
 
   const feed = feedData?.feed || [];
-  
+
   // Extract the user's DID from the first post in the feed (which should be the user's own post)
-  const userDid = feed.length > 0 ? feed[0]?.post?.author?.did : '';
-  
+  const userDid = feed.length > 0 ? feed[0]?.post?.author?.did : "";
+
   feed.forEach((item: any) => {
     if (!item.post && !item.reason) return;
     const isRepost = !!item.reason;

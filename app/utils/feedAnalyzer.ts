@@ -861,7 +861,10 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
   }
 
   const feed = feedData?.feed || [];
-
+  
+  // Extract the user's DID from the first post in the feed (which should be the user's own post)
+  const userDid = feed.length > 0 ? feed[0]?.post?.author?.did : '';
+  
   feed.forEach((item: any) => {
     if (!item.post && !item.reason) return;
     const isRepost = !!item.reason;
@@ -971,8 +974,10 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
     }
   }
 
-  const topInteractions = Object.values(interactionCounts)
-    .map(({ count, handle, displayName }) => ({
+  // When building topInteractions, filter out the user's own DID
+  const topInteractions = Object.entries(interactionCounts)
+    .filter(([did, _]) => did !== userDid) // Filter out user's own DID
+    .map(([did, { count, handle, displayName }]) => ({
       did: handle.split(".")[0],
       handle,
       displayName,

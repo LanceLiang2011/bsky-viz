@@ -3,19 +3,19 @@
 
 import { getTranslations } from "next-intl/server";
 import OpenAI from "openai";
+import { analyzeFeed } from "./utils/feedAnalyzer";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // Reads from your .env file
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 async function getOpenAISummary(
   postsText: string,
   t: any,
-  userDisplayName?: string // Pass user's display name for the placeholder
+  userDisplayName?: string
 ): Promise<string | null> {
   if (process.env.USE_OPENAI !== "True") {
     const nameToUse = userDisplayName || t("openai.genericUser");
-    // It's good to have a specific translation for this placeholder
     return t("openai.disabledSummary", { username: nameToUse });
   }
 
@@ -35,18 +35,81 @@ async function getOpenAISummary(
           content: `Please summarize the following posts from a user:\n\n${postsText}`,
         },
       ],
-      max_tokens: 300, // Adjust based on desired summary length and cost
-      temperature: 0.7, // Adjust for creativity vs. factuality
+      max_tokens: 300,
+      temperature: 0.7,
     });
     return completion.choices[0]?.message?.content?.trim() || null;
   } catch (error) {
     console.error("Error calling OpenAI API:", error);
-    // It's good to have a specific translation for this error
     return t("errors.openaiError");
   }
 }
 
-export async function analyzeUser(formData: FormData) {
+// Define interfaces for the response data
+export interface AnalysisResponse {
+  success?: boolean;
+  error?: string;
+  profile?: BlueskyProfile;
+  processedFeed?: ProcessedFeedData;
+  openAISummary?: string | null;
+}
+
+export interface BlueskyProfile {
+  did: string;
+  handle: string;
+  displayName?: string;
+  avatar?: string;
+  banner?: string;
+  description?: string;
+  followersCount: number;
+  followsCount: number;
+  postsCount: number;
+  createdAt: string;
+  associated?: {
+    lists: number;
+    feedgens: number;
+    starterPacks: number;
+    labeler: boolean;
+  };
+  pinnedPost?: {
+    cid: string;
+    uri: string;
+  };
+}
+
+export interface ProcessedFeedData {
+  activityByHour: Record<number, number>;
+  activityTimeline: Array<{
+    date: string;
+    posts: number;
+    replies: number;
+    reposts: number;
+    likes: number;
+    total: number;
+  }>;
+  topInteractions: Array<{
+    did: string;
+    handle: string;
+    displayName: string;
+    count: number;
+  }>;
+  insights: {
+    totalPosts: number;
+    totalReplies: number;
+    totalReposts: number;
+    averagePostLength: number;
+    mostActiveHour: number;
+    mostActiveDay: string;
+    postsWithMedia: number;
+    postsWithLinks: number;
+    languagesUsed: Record<string, number>;
+  };
+  wordCloud: Array<{ word: string; count: number }>;
+}
+
+export async function analyzeUser(
+  formData: FormData
+): Promise<AnalysisResponse> {
   const t = await getTranslations();
   const handle = formData.get("handle")?.toString()?.trim();
 
@@ -107,7 +170,6 @@ export async function analyzeUser(formData: FormData) {
 
     // Fetch feed data with pagination
     while (hasMoreData && pageCount < MAX_PAGES) {
-      // Remove reachedTimeLimit from condition
       pageCount++;
 
       // Build the URL with cursor if we have one
@@ -162,6 +224,11 @@ export async function analyzeUser(formData: FormData) {
       `Fetched ${pageCount} pages with ${allFeedItems.length} total feed items`
     );
 
+    // Process the feed data on the server
+    console.log("Starting feed analysis on server...");
+    const processedFeed = analyzeFeed({ feed: allFeedItems });
+    console.log("Feed analysis completed on server");
+
     // Prepare text from posts for OpenAI
     const postsTextForOpenAI = allFeedItems
       .map((item) => item.post?.record?.text)
@@ -171,19 +238,18 @@ export async function analyzeUser(formData: FormData) {
 
     let openAISummary = null;
     if (postsTextForOpenAI || process.env.USE_OPENAI !== "True") {
-      // Ensure we call it even if disabled to get placeholder
       openAISummary = await getOpenAISummary(
         postsTextForOpenAI,
         t,
-        profileData?.displayName || profileData?.handle // Pass displayName or handle
+        profileData?.displayName || profileData?.handle
       );
     }
 
     return {
       success: true,
       profile: profileData,
-      feed: { feed: allFeedItems },
-      openAISummary, // Add the summary to the result
+      processedFeed, // Return the processed data instead of raw feed
+      openAISummary,
     };
   } catch (err) {
     console.error("Error fetching Bluesky data:", err);

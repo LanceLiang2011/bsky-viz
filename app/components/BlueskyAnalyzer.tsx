@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
-import { analyzeUser } from "../actions";
+import { analyzeUser, type AnalysisResponse } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,73 +15,9 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import ProfileCard from "./ProfileCard";
-import { analyzeFeed } from "@/app/utils/feedAnalyzer";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
-
-interface BlueskyProfile {
-  did: string;
-  handle: string;
-  displayName?: string;
-  avatar?: string;
-  banner?: string;
-  description?: string;
-  followersCount: number;
-  followsCount: number;
-  postsCount: number;
-  createdAt: string;
-  associated?: {
-    lists: number;
-    feedgens: number;
-    starterPacks: number;
-    labeler: boolean;
-  };
-  pinnedPost?: {
-    cid: string;
-    uri: string;
-  };
-}
-
-interface ProcessedFeed {
-  activityByHour: Record<number, number>;
-  activityTimeline: Array<{
-    date: string;
-    posts: number;
-    replies: number;
-    reposts: number;
-    likes: number;
-    total: number;
-  }>;
-  topInteractions: Array<{
-    did: string;
-    handle: string;
-    displayName: string;
-    count: number;
-  }>;
-  insights: {
-    totalPosts: number;
-    totalReplies: number;
-    totalReposts: number;
-    averagePostLength: number;
-    mostActiveHour: number;
-    mostActiveDay: string;
-    postsWithMedia: number;
-    postsWithLinks: number;
-    languagesUsed: Record<string, number>;
-  };
-  wordCloud: Array<{ word: string; count: number }>;
-  // ...other properties as needed
-}
-
-interface AnalysisResult {
-  success?: boolean;
-  error?: string;
-  profile?: BlueskyProfile;
-  feed?: unknown;
-  processedFeed?: ProcessedFeed;
-  openAISummary?: string | null; // Add this for the OpenAI summary
-}
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -103,35 +39,24 @@ function SubmitButton() {
 
 export default function BlueskyAnalyzer() {
   const t = useTranslations();
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [result, setResult] = useState<AnalysisResponse | null>(null);
 
-  // Create a client action wrapper around the server action
+  // Simplified client action - no more feed processing on client
   async function clientAction(formData: FormData) {
     setResult(null);
     try {
       const response = await analyzeUser(formData);
-      if (response.success && response.feed) {
-        const processedFeed = analyzeFeed(response.feed);
-        setResult({
-          ...response,
-          processedFeed,
-          openAISummary: response.openAISummary, // Ensure summary is passed through
-        });
-      } else {
-        setResult(response);
-      }
+      setResult(response);
     } catch (e) {
       console.error(e);
       setResult({ error: t("errors.unexpected") });
     }
   }
 
-  // Updated renderActivityByHour function
+  // Render function for activity by hour visualization
   function renderActivityByHour(activityByHour: Record<number, number>) {
-    // Find the max value for scaling
-    const maxActivity = Math.max(...Object.values(activityByHour), 1); // Prevent division by zero
+    const maxActivity = Math.max(...Object.values(activityByHour), 1);
 
-    // Create time segments for better readability
     const timeSegments = [
       { label: t("analysis.morning"), hours: [6, 7, 8, 9, 10, 11] },
       { label: t("analysis.afternoon"), hours: [12, 13, 14, 15, 16, 17] },
@@ -158,7 +83,6 @@ export default function BlueskyAnalyzer() {
               <div className="grid grid-cols-6 gap-2">
                 {segment.hours.map((hour) => {
                   const count = activityByHour[hour] || 0;
-                  // Calculate height percentage - min 5% for visibility when there's data
                   const heightPercentage =
                     count > 0 ? Math.max(10, (count / maxActivity) * 100) : 3;
 
@@ -183,13 +107,14 @@ export default function BlueskyAnalyzer() {
     );
   }
 
+  // Render function for word cloud
   function renderWordCloud(wordCloud: Array<{ word: string; count: number }>) {
     if (!wordCloud || wordCloud.length === 0) {
       return (
         <div className="text-gray-500">{t("analysis.noWordCloudData")}</div>
       );
     }
-    // Scale font size between 0.9rem and 2.5rem
+
     const max = wordCloud[0]?.count || 1;
     const min = wordCloud[wordCloud.length - 1]?.count || 1;
     const scale = (count: number) =>

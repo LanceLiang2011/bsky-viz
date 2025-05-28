@@ -1,10 +1,13 @@
 "use server";
 
+import { getTranslations } from "next-intl/server";
+
 export async function analyzeUser(formData: FormData) {
+  const t = await getTranslations();
   const handle = formData.get("handle")?.toString()?.trim();
 
   if (!handle) {
-    return { error: "No handle provided" };
+    return { error: t("errors.noHandle") };
   }
 
   try {
@@ -81,6 +84,6 @@ export async function analyzeUser(formData: FormData) {
     };
   } catch (err) {
     console.error("Error fetching Bluesky data:", err);
-    return { error: "Failed to fetch data from Bluesky" };
+    return { error: t("errors.fetchFailed") };
   }
 }

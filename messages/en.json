@@ -1,0 +1,30 @@
+{
+  "app": {
+    "title": "Bluesky User Analytics",
+    "description": "Analyze any Bluesky user's activity and engagement patterns"
+  },
+  "form": {
+    "title": "Enter Bluesky Handle",
+    "description": "Enter a Bluesky username (e.g., username.bsky.social or @username)",
+    "placeholder": "username.bsky.social",
+    "button": "Analyze User",
+    "loading": "Analyzing..."
+  },
+  "results": {
+    "title": "Analysis Result",
+    "error": "Error",
+    "profileData": "Profile Data",
+    "feedData": "Feed Data",
+    "noData": "No data available"
+  },
+  "errors": {
+    "noHandle": "No handle provided",
+    "fetchFailed": "Failed to fetch data from Bluesky",
+    "unexpected": "An unexpected error occurred"
+  },
+  "language": {
+    "switch": "Language",
+    "english": "English",
+    "chinese": "中文"
+  }
+}

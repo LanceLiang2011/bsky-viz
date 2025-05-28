@@ -24,7 +24,7 @@ async function getOpenAISummary(
   }
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // Or "gpt-4" if you have access and prefer it (higher cost)
+      model: "gpt-4.1-nano",
       messages: [
         {
           role: "system",

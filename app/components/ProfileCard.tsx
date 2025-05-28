@@ -77,7 +77,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
   };
 
   return (
-    <Card className="max-w-2xl mx-auto overflow-hidden shadow-lg border-0 bg-gradient-to-br from-white to-gray-50 overflow-hiddenß">
+    <Card className="max-w-2xl mx-auto overflow-auto shadow-lg border-0 bg-gradient-to-br from-white to-gray-50 overflow-hiddenß">
       {/* Banner */}
       {profile.banner ? (
         <div className="h-32 bg-gradient-to-r from-blue-400 to-purple-500 relative">

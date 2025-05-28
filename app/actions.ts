@@ -158,8 +158,8 @@ export async function analyzeUser(formData: FormData) {
 
     // Prepare text from posts for OpenAI
     const postsTextForOpenAI = allFeedItems
-      .map(item => item.post?.record?.text)
-      .filter(text => typeof text === 'string' && text.trim() !== '')
+      .map((item) => item.post?.record?.text)
+      .filter((text) => typeof text === "string" && text.trim() !== "")
       .slice(0, 100) // Limit to the latest 100 posts with text to manage token count
       .join("\n\n---\n\n");
 

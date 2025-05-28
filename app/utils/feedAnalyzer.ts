@@ -839,6 +839,10 @@ function extractWords(text: string): string[] {
 
 // Main analyzer function
 export function analyzeFeed(feedData: any): ProcessedFeedData {
+  console.log(
+    `Starting feed analysis with ${feedData?.feed?.length || 0} items`
+  );
+
   const activityByHour: ActivityByHour = {};
   const activityByDay: ActivityByDay = {};
   const interactionCounts: {
@@ -864,6 +868,10 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
 
   // Extract the user's DID from the first post in the feed (which should be the user's own post)
   const userDid = feed.length > 0 ? feed[0]?.post?.author?.did : "";
+  console.log(`User DID identified as: ${userDid || "Not found"}`);
+
+  console.log(`Processing ${feed.length} feed items...`);
+  let processedItems = 0;
 
   feed.forEach((item: any) => {
     if (!item.post && !item.reason) return;
@@ -954,7 +962,13 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
     langs.forEach((lang: string) => {
       languagesUsed[lang] = (languagesUsed[lang] || 0) + 1;
     });
+    processedItems++;
+    if (processedItems % 100 === 0) {
+      console.log(`Processed ${processedItems}/${feed.length} items`);
+    }
   });
+
+  console.log(`Processing complete. Building statistics...`);
 
   let mostActiveHour = 0;
   let maxHourCount = 0;
@@ -974,17 +988,28 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
     }
   }
 
+  console.log(`Building top interactions, filtering out user DID: ${userDid}`);
+  console.log(
+    `Total interaction accounts before filtering: ${
+      Object.keys(interactionCounts).length
+    }`
+  );
+
   // When building topInteractions, filter out the user's own DID
+  // Fix TypeScript errors by using the did parameter
   const topInteractions = Object.entries(interactionCounts)
-    .filter(([did, _]) => did !== userDid) // Filter out user's own DID
-    .map(([did, { count, handle, displayName }]) => ({
-      did: handle.split(".")[0],
+    .filter(([interactionDid]) => interactionDid !== userDid) // Fixed unused variable
+    .map(([interactionDid, { count, handle, displayName }]) => ({
+      did: interactionDid,
       handle,
       displayName,
       count,
     }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 20);
+
+  console.log(`Top interactions after filtering: ${topInteractions.length}`);
+  console.log(`First few interactions:`, topInteractions.slice(0, 3));
 
   const commonHashtags = Object.entries(hashtagCounts)
     .map(([tag, count]) => ({ tag, count }))
@@ -1001,6 +1026,7 @@ export function analyzeFeed(feedData: any): ProcessedFeedData {
     .sort((a, b) => b.count - a.count)
     .slice(0, 50); // Top 50 words
 
+  console.log(`Analysis complete, returning processed data`);
   return {
     activityByHour,
     activityTimeline,

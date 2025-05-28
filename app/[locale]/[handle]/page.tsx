@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { analyzeFeed } from "../../utils/feedAnalyzer";
 import ProfileCard from "../../components/ProfileCard";
 import AnalysisResults from "../../components/AnalysisResults";
+import BackButton from "../../components/BackButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Define interfaces for the data
@@ -287,6 +288,7 @@ export default async function HandlePage({
 
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <BackButton />
         <Card>
           <CardContent className="pt-6">
             <div className="text-red-600 p-4 bg-red-50 rounded-lg">
@@ -301,6 +303,7 @@ export default async function HandlePage({
   if (!result.success || !result.profile) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <BackButton />
         <Card>
           <CardContent className="pt-6">
             <div className="text-gray-600">{t("results.noData")}</div>
@@ -312,6 +315,7 @@ export default async function HandlePage({
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
+      <BackButton />
       <ProfileCard profile={result.profile} />
 
       {/* OpenAI Summary Card */}

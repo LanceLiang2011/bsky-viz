@@ -72,6 +72,13 @@
     "wordCloud": "词云",
     "noWordCloudData": "无词云数据可用"
   },
+  "loading": {
+    "analyzing": "正在分析用户数据",
+    "pleaseWait": "正在获取并分析用户的 Bluesky 活动数据，请稍候..."
+  },
+  "navigation": {
+    "backToHome": "返回首页"
+  },
   "openai": {
     "summaryTitle": "AI 生成摘要",
     "systemPrompt": "你是一位富有洞察力的社交媒体分析师。根据用户最近的100条帖子，请提供一个简洁的摘要（约100-150字），总结他们的个性、主要兴趣话题和总体语气。突出任何反复出现的主题或显著特征。请保持客观。",

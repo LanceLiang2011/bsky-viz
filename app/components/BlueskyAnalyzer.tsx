@@ -70,7 +70,7 @@ interface ProcessedFeed {
     postsWithLinks: number;
     languagesUsed: Record<string, number>;
   };
-  wordCloud: Array<{ word: string; count: number }>; // <-- Move here, not inside insights
+  wordCloud: Array<{ word: string; count: number }>;
   // ...other properties as needed
 }
 
@@ -80,6 +80,7 @@ interface AnalysisResult {
   profile?: BlueskyProfile;
   feed?: unknown;
   processedFeed?: ProcessedFeed;
+  openAISummary?: string | null; // Add this for the OpenAI summary
 }
 
 function SubmitButton() {
@@ -114,6 +115,7 @@ export default function BlueskyAnalyzer() {
         setResult({
           ...response,
           processedFeed,
+          openAISummary: response.openAISummary, // Ensure summary is passed through
         });
       } else {
         setResult(response);
@@ -247,6 +249,20 @@ export default function BlueskyAnalyzer() {
           ) : result.success && result.profile ? (
             <div className="space-y-6">
               <ProfileCard profile={result.profile} />
+
+              {/* OpenAI Summary Card */}
+              {result.openAISummary && (
+                <Card className="mx-auto max-w-4xl">
+                  <CardHeader>
+                    <CardTitle>{t("openai.summaryTitle")}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 whitespace-pre-line text-sm leading-relaxed">
+                      {result.openAISummary}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
 
               {result.processedFeed && (
                 <Card className="mx-auto max-w-4xl">

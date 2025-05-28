@@ -25,7 +25,8 @@
   "errors": {
     "noHandle": "未提供用户名",
     "fetchFailed": "从 Bluesky 获取数据失败",
-    "unexpected": "发生意外错误"
+    "unexpected": "发生意外错误",
+    "openaiError": "未能从 AI 助手获取摘要。AI 可能不可用或发生错误。"
   },
   "language": {
     "switch": "语言",
@@ -70,5 +71,10 @@
     "timeZoneNote": "所有时间基于您的本地时区: {timezone}",
     "wordCloud": "词云",
     "noWordCloudData": "无词云数据可用"
+  },
+  "openai": {
+    "summaryTitle": "AI 生成摘要（根据最近100条帖子）",
+    "systemPrompt": "你是一位富有洞察力的社交媒体分析师。根据用户最近的100条帖子，请提供一个简洁的摘要（约100-150字），总结他们的个性、主要兴趣话题和总体语气。突出任何反复出现的主题或显著特征。请保持客观。",
+    "noTextForSummary": "近期帖子文本内容不足，无法生成 AI 摘要。"
   }
 }

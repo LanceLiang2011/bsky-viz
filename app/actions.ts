@@ -2,6 +2,43 @@
 "use server";
 
 import { getTranslations } from "next-intl/server";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY, // Reads from your .env file
+});
+
+async function getOpenAISummary(
+  postsText: string,
+  t: any
+): Promise<string | null> {
+  if (!postsText.trim()) {
+    // It's good to have a specific translation for this case
+    return t("openai.noTextForSummary");
+  }
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo", // Or "gpt-4" if you have access and prefer it (higher cost)
+      messages: [
+        {
+          role: "system",
+          content: t("openai.systemPrompt"),
+        },
+        {
+          role: "user",
+          content: `Please summarize the following posts from a user:\n\n${postsText}`,
+        },
+      ],
+      max_tokens: 200, // Adjust based on desired summary length and cost
+      temperature: 0.7, // Adjust for creativity vs. factuality
+    });
+    return completion.choices[0]?.message?.content?.trim() || null;
+  } catch (error) {
+    console.error("Error calling OpenAI API:", error);
+    // It's good to have a specific translation for this error
+    return t("errors.openaiError");
+  }
+}
 
 export async function analyzeUser(formData: FormData) {
   const t = await getTranslations();
@@ -102,7 +139,6 @@ export async function analyzeUser(formData: FormData) {
 
       // Add this page's feed items to our collection
       if (feedData.feed && feedData.feed.length > 0) {
-        // Add filtered items to our collection
         allFeedItems = allFeedItems.concat(feedData.feed);
       }
 
@@ -117,13 +153,26 @@ export async function analyzeUser(formData: FormData) {
     }
 
     console.log(
-      `Fetched ${pageCount} pages with ${allFeedItems.length} total feed items` // Update log message
+      `Fetched ${pageCount} pages with ${allFeedItems.length} total feed items`
     );
+
+    // Prepare text from posts for OpenAI
+    const postsTextForOpenAI = allFeedItems
+      .map(item => item.post?.record?.text)
+      .filter(text => typeof text === 'string' && text.trim() !== '')
+      .slice(0, 100) // Limit to the latest 100 posts with text to manage token count
+      .join("\n\n---\n\n");
+
+    let openAISummary = null;
+    if (postsTextForOpenAI) {
+      openAISummary = await getOpenAISummary(postsTextForOpenAI, t);
+    }
 
     return {
       success: true,
       profile: profileData,
       feed: { feed: allFeedItems },
+      openAISummary, // Add the summary to the result
     };
   } catch (err) {
     console.error("Error fetching Bluesky data:", err);

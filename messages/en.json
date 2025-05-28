@@ -25,7 +25,8 @@
   "errors": {
     "noHandle": "No handle provided",
     "fetchFailed": "Failed to fetch data from Bluesky",
-    "unexpected": "An unexpected error occurred"
+    "unexpected": "An unexpected error occurred",
+    "openaiError": "Failed to get summary from AI assistant. The AI might be unavailable or an error occurred."
   },
   "language": {
     "switch": "Language",
@@ -70,5 +71,10 @@
     "timeZoneNote": "All times shown in your local timezone: {timezone}",
     "wordCloud": "Word Cloud",
     "noWordCloudData": "No word cloud data available"
+  },
+  "openai": {
+    "summaryTitle": "AI Generated Summary(based on recent 100 posts)",
+    "systemPrompt": "You are an insightful social media analyst. Based on the following posts from a user, provide a concise summary (around 100-150 words) of their personality, main topics of interest, and general tone. Highlight any recurring themes or notable characteristics. Be objective.",
+    "noTextForSummary": "Not enough text content from recent posts to generate an AI summary."
   }
 }

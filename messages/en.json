@@ -26,5 +26,18 @@
     "switch": "Language",
     "english": "English",
     "chinese": "中文"
+  },
+  "profile": {
+    "title": "Profile",
+    "followers": "Followers",
+    "following": "Following",
+    "posts": "Posts",
+    "memberSince": "Member since",
+    "lists": "Lists",
+    "starterPacks": "Starter Packs",
+    "feedGens": "Feed Generators",
+    "pinnedPost": "Pinned Post",
+    "viewProfile": "View Profile",
+    "viewPost": "View Post"
   }
 }

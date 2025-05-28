@@ -12,11 +12,35 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import ProfileCard from "./ProfileCard";
+
+interface BlueskyProfile {
+  did: string;
+  handle: string;
+  displayName?: string;
+  avatar?: string;
+  banner?: string;
+  description?: string;
+  followersCount: number;
+  followsCount: number;
+  postsCount: number;
+  createdAt: string;
+  associated?: {
+    lists: number;
+    feedgens: number;
+    starterPacks: number;
+    labeler: boolean;
+  };
+  pinnedPost?: {
+    cid: string;
+    uri: string;
+  };
+}
 
 interface AnalysisResult {
   success?: boolean;
   error?: string;
-  profile?: unknown;
+  profile?: BlueskyProfile;
   feed?: unknown;
 }
 
@@ -63,39 +87,50 @@ export default function BlueskyAnalyzer() {
       </Card>
 
       {result && (
-        <Card className="mx-auto max-w-4xl">
-          <CardHeader>
-            <CardTitle>{t("results.title")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {result.error ? (
-              <div className="text-red-600 p-4 bg-red-50 rounded-lg">
-                <strong>{t("results.error")}:</strong> {result.error}
-              </div>
-            ) : result.success && result.profile && result.feed ? (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    {t("results.profileData")}
-                  </h3>
-                  <pre className="bg-gray-100 p-4 rounded-lg overflow-auto text-sm">
-                    {JSON.stringify(result.profile, null, 2)}
-                  </pre>
+        <div className="space-y-6">
+          {result.error ? (
+            <Card className="mx-auto max-w-4xl">
+              <CardContent className="pt-6">
+                <div className="text-red-600 p-4 bg-red-50 rounded-lg">
+                  <strong>{t("results.error")}:</strong> {result.error}
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    {t("results.feedData")}
-                  </h3>
-                  <pre className="bg-gray-100 p-4 rounded-lg overflow-auto text-sm">
-                    {JSON.stringify(result.feed, null, 2)}
-                  </pre>
-                </div>
-              </div>
-            ) : (
-              <div className="text-gray-600">{t("results.noData")}</div>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          ) : result.success && result.profile ? (
+            <div className="space-y-6">
+              <ProfileCard profile={result.profile} />
+
+              {(() => {
+                if (result.feed && typeof result.feed === "object") {
+                  return (
+                    <Card className="mx-auto max-w-4xl">
+                      <CardHeader>
+                        <CardTitle>{t("results.feedData")}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <details className="cursor-pointer">
+                          <summary className="text-sm font-medium text-gray-700 mb-2">
+                            View Raw Feed Data
+                          </summary>
+                          <pre className="bg-gray-100 p-4 rounded-lg overflow-auto text-sm mt-2">
+                            {JSON.stringify(result.feed, null, 2)}
+                          </pre>
+                        </details>
+                      </CardContent>
+                    </Card>
+                  );
+                }
+                return null;
+              })()}
+            </div>
+          ) : (
+            <Card className="mx-auto max-w-4xl">
+              <CardContent className="pt-6">
+                <div className="text-gray-600">{t("results.noData")}</div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
     </div>
   );

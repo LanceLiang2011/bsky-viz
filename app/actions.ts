@@ -10,10 +10,16 @@ const openai = new OpenAI({
 
 async function getOpenAISummary(
   postsText: string,
-  t: any
+  t: any,
+  userDisplayName?: string // Pass user's display name for the placeholder
 ): Promise<string | null> {
+  if (process.env.USE_OPENAI !== "True") {
+    const nameToUse = userDisplayName || t("openai.genericUser");
+    // It's good to have a specific translation for this placeholder
+    return t("openai.disabledSummary", { username: nameToUse });
+  }
+
   if (!postsText.trim()) {
-    // It's good to have a specific translation for this case
     return t("openai.noTextForSummary");
   }
   try {
@@ -164,8 +170,13 @@ export async function analyzeUser(formData: FormData) {
       .join("\n\n---\n\n");
 
     let openAISummary = null;
-    if (postsTextForOpenAI) {
-      openAISummary = await getOpenAISummary(postsTextForOpenAI, t);
+    if (postsTextForOpenAI || process.env.USE_OPENAI !== "True") {
+      // Ensure we call it even if disabled to get placeholder
+      openAISummary = await getOpenAISummary(
+        postsTextForOpenAI,
+        t,
+        profileData?.displayName || profileData?.handle // Pass displayName or handle
+      );
     }
 
     return {

@@ -73,8 +73,10 @@
     "noWordCloudData": "No word cloud data available"
   },
   "openai": {
-    "summaryTitle": "AI Generated Summary(based on recent 100 posts)",
-    "systemPrompt": "You are an insightful social media analyst. Based on the following posts from a user, provide a concise summary (around 100-150 words) of their personality, main topics of interest, and general tone. Highlight any recurring themes or notable characteristics. Be objective.",
-    "noTextForSummary": "Not enough text content from recent posts to generate an AI summary."
+    "summaryTitle": "AI Generated Summary",
+    "systemPrompt": "You are an insightful social media analyst. Based on the user's latest 100 posts, provide a concise summary (around 100-150 words) of their personality, main topics of interest, and general tone. Highlight any recurring themes or notable characteristics. Be objective.",
+    "noTextForSummary": "Not enough text content from recent posts to generate an AI summary.",
+    "disabledSummary": "AI summary generation is currently disabled. User {username} has posted various content.",
+    "genericUser": "this user"
   }
 }

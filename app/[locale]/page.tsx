@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import BlueskyAnalyzer from "../components/BlueskyAnalyzer";
+import HandleSearchForm from "../components/HandleSearchForm";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default function Home() {
@@ -22,7 +22,7 @@ export default function Home() {
           </p>
         </div>
 
-        <BlueskyAnalyzer />
+        <HandleSearchForm />
       </div>
     </div>
   );

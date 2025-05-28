@@ -1,3 +1,4 @@
+// This file is no longer used. Save for reference.
 "use client";
 
 import { useState } from "react";

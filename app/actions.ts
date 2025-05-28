@@ -29,7 +29,7 @@ async function getOpenAISummary(
           content: `Please summarize the following posts from a user:\n\n${postsText}`,
         },
       ],
-      max_tokens: 200, // Adjust based on desired summary length and cost
+      max_tokens: 300, // Adjust based on desired summary length and cost
       temperature: 0.7, // Adjust for creativity vs. factuality
     });
     return completion.choices[0]?.message?.content?.trim() || null;

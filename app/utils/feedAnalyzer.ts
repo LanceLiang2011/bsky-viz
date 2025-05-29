@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { WordProcessor, type WordData } from "./wordProcessor";
+import { WordProcessor, type WordData } from "./wordProcessor.enhanced";
 
 // Types for processed data
 interface ActivityByHour {
@@ -72,10 +72,10 @@ function extractDateAndHour(isoString: string, userTimezone?: string) {
 }
 
 // Main analyzer function
-export function analyzeFeed(
+export async function analyzeFeed(
   feedData: any,
   options: { locale?: string } = {}
-): ProcessedFeedData {
+): Promise<ProcessedFeedData> {
   console.log(
     `Starting feed analysis with ${feedData?.feed?.length || 0} items`
   );
@@ -258,9 +258,11 @@ export function analyzeFeed(
   // Process text for word cloud
   console.log(`Processing ${allTexts.length} texts for word cloud...`);
   const combinedText = allTexts.join(" ");
-  const wordCloudData = WordProcessor.processText(combinedText, {
-    locale: options.locale,
-  }).slice(0, 150); // Limit to top 150 words
+  const wordCloudData = (
+    await WordProcessor.processText(combinedText, {
+      locale: options.locale,
+    })
+  ).slice(0, 150); // Limit to top 150 words
   console.log(`Generated word cloud with ${wordCloudData.length} words`);
 
   console.log(`Analysis complete, returning processed data`);

@@ -243,7 +243,7 @@ async function fetchBlueskyData(handle: string, locale?: string) {
 
     // Process the feed data
     console.log("Starting feed analysis on server...");
-    const processedFeed = analyzeFeed({ feed: allFeedItems }, { locale });
+    const processedFeed = await analyzeFeed({ feed: allFeedItems }, { locale });
     console.log("Feed analysis completed on server");
 
     // Prepare text for OpenAI

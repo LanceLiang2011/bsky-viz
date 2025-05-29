@@ -233,7 +233,7 @@ export async function analyzeUser(
 
     // Process the feed data on the server
     console.log("Starting feed analysis on server...");
-    const processedFeed = analyzeFeed({ feed: allFeedItems });
+    const processedFeed = await analyzeFeed({ feed: allFeedItems });
     console.log("Feed analysis completed on server");
 
     // Prepare text from posts for OpenAI

@@ -7,15 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Palette,
-  Type,
-  Download,
-  RefreshCw,
-  Hash,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { Palette, Type, RefreshCw, Hash, Eye, EyeOff } from "lucide-react";
 import { type WordData } from "../utils/wordProcessor";
 
 // Word cloud configuration interface
@@ -191,13 +183,6 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
       }
     };
 
-    // Download word cloud as image
-    const downloadImage = () => {
-      // This would require additional canvas manipulation
-      // For now, we'll show a placeholder
-      console.log("Download functionality would be implemented here");
-    };
-
     // Loading state
     if (isLoading) {
       return (
@@ -322,16 +307,6 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
                     </Button>
                   ))}
                 </div>
-                <Separator orientation="vertical" className="h-6" />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={downloadImage}
-                  className="text-xs"
-                >
-                  <Download className="h-4 w-4 mr-1" />
-                  Download
-                </Button>
               </div>
             </>
           )}

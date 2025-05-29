@@ -2,13 +2,26 @@
 
 ## Overview
 
-Successfully removed all leftover server-side Chinese processing and centralized word cloud processing to avoid confusion.
+Successfully cleaned up development/test files and enhanced English word filtering. The project now has a clean, focused architecture with proper separation between Chinese and English text processing.
 
-## Files Removed
+## Files Removed (Previous Cleanup)
 
 - ✅ `app/utils/chineseProcessor.server.ts` - Server-side Chinese processor (no longer needed)
 - ✅ `app/api/test-chinese/` - Test API route that used server-side processing
 - ✅ `test-chinese-processing.js` - Temporary test file
+
+## Files Removed (Latest Cleanup - Enhanced English Processing)
+
+- ✅ `test-chinese-client.js` - Development test file for Chinese processing
+- ✅ `test-chinese-processing.js` - Additional test file
+- ✅ `app/components/ChineseTestComponent.tsx` - Development component for testing
+- ✅ `app/[locale]/test-chinese/page.tsx` - Test page with missing imports
+- ✅ `app/api/test-jieba/` - Unused API endpoint for jieba testing
+
+## Files Added (Enhanced English Processing)
+
+- ✅ `app/utils/englishFilterWords.ts` - Comprehensive English filter words (200+ terms)
+- ✅ `app/utils/englishProcessor.client.ts` - Client-side English processing with advanced filtering
 
 ## Dependencies Removed
 

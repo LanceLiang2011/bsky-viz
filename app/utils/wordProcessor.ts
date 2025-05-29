@@ -1,6 +1,8 @@
 // Enhanced Word processor utility for text analysis and word cloud generation
 // This file can be used on both client and server side
 
+import { ENGLISH_FILTER_WORDS } from "./englishFilterWords";
+
 // Word cloud data interface
 export interface WordData {
   text: string;
@@ -1515,12 +1517,18 @@ export class WordProcessor {
 
     // Count word frequencies
     for (const word of words) {
+      const trimmedWord = word.trim();
+
       if (
-        word.length >= minWordLength &&
-        !this.ENGLISH_STOP_WORDS.has(word) &&
-        !/^\d+$/.test(word) // Skip numbers
+        trimmedWord.length >= minWordLength &&
+        !ENGLISH_FILTER_WORDS.has(trimmedWord) && // Use enhanced filter list
+        !this.ENGLISH_STOP_WORDS.has(trimmedWord) && // Keep original for backward compatibility
+        !/^\d+$/.test(trimmedWord) && // Skip pure numbers
+        !this.isWebFragment(trimmedWord) && // Filter web fragments
+        !this.isRepetitivePattern(trimmedWord) && // Filter repetitive patterns
+        this.isValidEnglishWord(trimmedWord) // Additional validation
       ) {
-        wordFreq.set(word, (wordFreq.get(word) || 0) + 1);
+        wordFreq.set(trimmedWord, (wordFreq.get(trimmedWord) || 0) + 1);
       }
     }
 
@@ -1531,6 +1539,119 @@ export class WordProcessor {
 
     const maxWords = options.maxWords || result.length;
     return result.slice(0, maxWords);
+  }
+
+  // Check if a word is a web fragment (URLs, domains, etc.)
+  private static isWebFragment(word: string): boolean {
+    // Check for common web patterns
+    if (
+      word.includes(".") &&
+      (word.includes("com") ||
+        word.includes("org") ||
+        word.includes("net") ||
+        word.includes("edu") ||
+        word.includes("gov") ||
+        word.includes("co."))
+    ) {
+      return true;
+    }
+
+    // Check for protocol indicators
+    if (
+      word.startsWith("http") ||
+      word.startsWith("www") ||
+      word.startsWith("ftp")
+    ) {
+      return true;
+    }
+
+    // Check for common file extensions
+    if (
+      /(\.jpg|\.png|\.gif|\.pdf|\.doc|\.txt|\.zip|\.exe|\.mp3|\.mp4)$/i.test(
+        word
+      )
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Check for repetitive patterns in English (similar to Chinese)
+  private static isRepetitivePattern(word: string): boolean {
+    if (word.length < 3) return false;
+
+    // Check for character repetition (like "hahaha", "hehe", etc.)
+    const chars = [...word];
+    const uniqueChars = new Set(chars);
+
+    // If word has very few unique characters relative to length, it might be repetitive
+    if (uniqueChars.size === 1) return true; // All same character
+    if (word.length >= 4 && uniqueChars.size <= 2) {
+      // Check if it's just alternating characters like "haha", "lolo"
+      const firstTwo = word.substring(0, 2);
+      const pattern = firstTwo.repeat(Math.ceil(word.length / 2));
+      if (word === pattern.substring(0, word.length)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Additional validation for English words
+  private static isValidEnglishWord(word: string): boolean {
+    // Must contain at least one vowel (basic English word pattern)
+    if (!/[aeiou]/.test(word)) {
+      // Exception for common consonant-only words and abbreviations
+      const consonantOnlyExceptions = new Set([
+        "by",
+        "my",
+        "gym",
+        "try",
+        "cry",
+        "dry",
+        "fly",
+        "fry",
+        "shy",
+        "sky",
+        "spy",
+        "why",
+      ]);
+      if (!consonantOnlyExceptions.has(word) && word.length > 2) {
+        return false;
+      }
+    }
+
+    // Reject words that are mostly punctuation or special characters
+    const alphaCount = (word.match(/[a-z]/g) || []).length;
+    if (alphaCount / word.length < 0.7) {
+      return false;
+    }
+
+    // Reject words with unusual character patterns (like "aaaaaa")
+    if (this.isRepetitivePattern(word)) {
+      return false;
+    }
+
+    // Reject common meaningless patterns
+    const meaninglessPatterns = [
+      /^(ha)+$/, // haha, hahaha
+      /^(he)+$/, // hehe, hehehe
+      /^(lo)+l?$/, // lol, lolo
+      /^(o)+h?$/, // ooo, oooh
+      /^(a)+h?$/, // aaa, aaah
+      /^(e)+$/, // eee
+      /^(u)+h?$/, // uuu, uuuh
+    ];
+
+    for (const pattern of meaninglessPatterns) {
+      if (pattern.test(word)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   // Fallback Chinese segmentation (used when Jieba is not available)

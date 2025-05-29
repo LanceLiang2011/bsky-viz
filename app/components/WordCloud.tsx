@@ -106,7 +106,9 @@ const COLOR_SCHEMES = {
 
 // Props interface for the WordCloud component
 interface WordCloudProps {
-  words: WordData[];
+  // Either pre-processed words OR raw text for client-side processing
+  words?: WordData[];
+  rawText?: string;
   config?: Partial<WordCloudConfig>;
   className?: string;
   title?: string;
@@ -131,17 +133,25 @@ const transformWordsForCloud = (
     }));
 };
 
-// Main WordCloud component
+// Convert word frequency map to WordData array
+const mapToWordData = (wordMap: Map<string, number>): WordData[] => {
+  return Array.from(wordMap.entries())
+    .map(([text, value]) => ({ text, value }))
+    .sort((a, b) => b.value - a.value);
+};
+
+// Main WordCloud component with enhanced English processing
 export const WordCloud: React.FC<WordCloudProps> = React.memo(
   ({
-    words,
+    words: providedWords,
+    rawText,
     config = {},
     className = "",
     title = "Word Cloud",
     subtitle,
     onWordClick,
-    isLoading = false,
-    error,
+    isLoading: externalLoading = false,
+    error: externalError,
   }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [mergedConfig, setMergedConfig] = useState<WordCloudConfig>({
@@ -152,6 +162,56 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
       useState<keyof typeof COLOR_SCHEMES>("bluesky");
     const [showControls, setShowControls] = useState(mergedConfig.showControls);
     const [dimensions, setDimensions] = useState({ width: 600, height: 400 });
+
+    // Client-side processing state
+    const [processedWords, setProcessedWords] = useState<WordData[]>([]);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [processingError, setProcessingError] = useState<string | null>(null);
+    const [isEnglishContent, setIsEnglishContent] = useState<boolean>(false);
+
+    // Process raw text client-side if provided and no processed words
+    useEffect(() => {
+      if (!rawText || providedWords) return;
+
+      const processText = async () => {
+        try {
+          setIsProcessing(true);
+          setProcessingError(null);
+
+          // Dynamically import English processor functions to avoid SSR issues
+          const { isEnglishText, processEnglishText } = await import(
+            "../utils/englishProcessor.client"
+          );
+
+          // Check if text contains English content
+          const hasEnglishText = isEnglishText(rawText);
+          setIsEnglishContent(hasEnglishText);
+
+          if (!hasEnglishText) {
+            setProcessingError("No English text detected");
+            return;
+          }
+
+          // Process English text
+          const wordMap = await processEnglishText(rawText);
+          const words = mapToWordData(wordMap);
+
+          setProcessedWords(words);
+        } catch (error) {
+          console.error("Error processing English text:", error);
+          setProcessingError("Failed to process English text");
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+
+      processText();
+    }, [rawText, providedWords]);
+
+    // Use provided words or processed words
+    const words = useMemo(() => {
+      return providedWords || processedWords;
+    }, [providedWords, processedWords]);
 
     // Update dimensions based on container size
     useEffect(() => {
@@ -191,7 +251,7 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
     // Handle word click
     const handleWordClick = useCallback(
       (word: FinalWordData) => {
-        if (onWordClick) {
+        if (onWordClick && words) {
           // Find original word data
           const originalWord = words.find(
             (w) =>
@@ -231,6 +291,12 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
       [mergedConfig.colors]
     );
 
+    // Determine loading state
+    const isLoading = externalLoading || isProcessing;
+
+    // Determine error state
+    const error = externalError || processingError;
+
     // Loading state
     if (isLoading) {
       return (
@@ -248,7 +314,9 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
             <div className="flex items-center justify-center h-96">
               <div className="text-center">
                 <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Processing words...</p>
+                <p className="text-muted-foreground">
+                  {isProcessing ? "Processing English text..." : "Loading..."}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -295,7 +363,9 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
                 No words to display
               </h3>
               <p className="text-muted-foreground">
-                No significant words found in the analyzed content.
+                {rawText && !isEnglishContent
+                  ? "No English text detected in the content."
+                  : "No significant words found in the analyzed content."}
               </p>
             </div>
           </CardContent>

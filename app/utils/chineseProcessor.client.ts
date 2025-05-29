@@ -1,7 +1,7 @@
 // Client-side Chinese text processing with jieba-wasm
 "use client";
 
-import { CHINESE_FILTER_WORDS } from "./stopWords";
+import { CHINESE_FILTER_WORDS } from "./filterWords";
 
 let jiebaInitialized = false;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,7 +17,7 @@ function isEnglishWord(word: string): boolean {
 }
 
 // Helper function to check if it's a stop word
-function isStopWord(word: string): boolean {
+function isFilteredOutWord(word: string): boolean {
   const trimmed = word.trim().toLowerCase();
   return CHINESE_FILTER_WORDS.has(trimmed);
 }
@@ -30,7 +30,7 @@ function isValidWord(word: string): boolean {
   if (trimmed.length < 2) return false;
 
   // Filter out stop words
-  if (isStopWord(trimmed)) return false;
+  if (isFilteredOutWord(trimmed)) return false;
 
   // Filter out English words for Chinese processing
   if (isEnglishWord(trimmed)) return false;

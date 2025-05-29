@@ -281,6 +281,7 @@ export default function AnalysisResults({
         ) : (
           <WordCloud
             words={processedFeed.wordCloudData}
+            rawText={processedFeed.rawText} // Provide raw text for enhanced English processing
             title={t("analysis.wordCloud")}
             subtitle={t("analysis.wordCloudSubtitle")}
             config={{

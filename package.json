@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "npm install --legacy-peer-deps && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -12,7 +12,6 @@
     "@node-rs/jieba": "^2.0.1",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
-    "@types/d3-cloud": "^1.2.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -22,7 +21,6 @@
     "next-intl": "^4.1.0",
     "openai": "^4.103.0",
     "react": "^19.0.0",
-    "react-d3-cloud": "^1.0.6",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.3.0"
   },

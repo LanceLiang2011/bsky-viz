@@ -1,8 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useMemo, useRef, useEffect, useState } from "react";
-import ReactWordcloud from "react-d3-cloud";
+import React, {
+  useMemo,
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +22,6 @@ export interface WordCloudConfig {
   maxFontSize: number;
   colors: string[];
   fontFamily: string;
-  spiral: "archimedean" | "rectangular";
   enableTooltips: boolean;
   showControls: boolean;
 }
@@ -38,7 +42,6 @@ const DEFAULT_CONFIG: WordCloudConfig = {
     "#0084B4", // Even Darker Blue
   ],
   fontFamily: "Inter, system-ui, sans-serif",
-  spiral: "archimedean",
   enableTooltips: true,
   showControls: true,
 };
@@ -97,6 +100,17 @@ const COLOR_SCHEMES = {
   ],
 };
 
+// Simple word positioning algorithm
+interface WordPosition {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fontSize: number;
+  color: string;
+  rotation: number;
+}
+
 // Props interface for the WordCloud component
 interface WordCloudProps {
   words: WordData[];
@@ -108,6 +122,124 @@ interface WordCloudProps {
   isLoading?: boolean;
   error?: string;
 }
+
+// Custom word cloud implementation
+const generateWordPositions = (
+  words: WordData[],
+  config: WordCloudConfig,
+  width: number,
+  height: number
+): (WordData & WordPosition)[] => {
+  if (!words.length) return [];
+
+  const maxValue = Math.max(...words.map((w) => w.value));
+  const minValue = Math.min(...words.map((w) => w.value));
+  const valueRange = maxValue - minValue || 1;
+
+  const positions: (WordData & WordPosition)[] = [];
+  const occupied: { x: number; y: number; width: number; height: number }[] =
+    [];
+
+  // Helper function to check if a position overlaps with existing words
+  const isOverlapping = (x: number, y: number, w: number, h: number) => {
+    return occupied.some(
+      (pos) =>
+        x < pos.x + pos.width + 10 &&
+        x + w + 10 > pos.x &&
+        y < pos.y + pos.height + 5 &&
+        y + h + 5 > pos.y
+    );
+  };
+
+  // Helper function to find a valid position using spiral placement
+  const findPosition = (wordWidth: number, wordHeight: number) => {
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const maxRadius =
+      Math.min(width, height) / 2 - Math.max(wordWidth, wordHeight);
+
+    // Try center first
+    if (
+      !isOverlapping(
+        centerX - wordWidth / 2,
+        centerY - wordHeight / 2,
+        wordWidth,
+        wordHeight
+      )
+    ) {
+      return { x: centerX - wordWidth / 2, y: centerY - wordHeight / 2 };
+    }
+
+    // Spiral outward
+    for (let radius = 20; radius < maxRadius; radius += 15) {
+      for (let angle = 0; angle < 360; angle += 30) {
+        const x =
+          centerX + radius * Math.cos((angle * Math.PI) / 180) - wordWidth / 2;
+        const y =
+          centerY + radius * Math.sin((angle * Math.PI) / 180) - wordHeight / 2;
+
+        if (
+          x >= 0 &&
+          y >= 0 &&
+          x + wordWidth <= width &&
+          y + wordHeight <= height
+        ) {
+          if (!isOverlapping(x, y, wordWidth, wordHeight)) {
+            return { x, y };
+          }
+        }
+      }
+    }
+
+    // Fallback to random position
+    return {
+      x: Math.random() * (width - wordWidth),
+      y: Math.random() * (height - wordHeight),
+    };
+  };
+
+  // Process words in order of importance (highest value first)
+  const sortedWords = [...words].sort((a, b) => b.value - a.value);
+
+  sortedWords.forEach((word, index) => {
+    if (index >= config.maxWords) return;
+
+    // Calculate font size based on word value
+    const normalizedValue = (word.value - minValue) / valueRange;
+    const fontSize =
+      config.minFontSize +
+      normalizedValue * (config.maxFontSize - config.minFontSize);
+
+    // Estimate word dimensions (rough approximation)
+    const wordWidth = word.text.length * fontSize * 0.6;
+    const wordHeight = fontSize * 1.2;
+
+    // Find position
+    const position = findPosition(wordWidth, wordHeight);
+
+    // Add to occupied areas
+    occupied.push({
+      x: position.x,
+      y: position.y,
+      width: wordWidth,
+      height: wordHeight,
+    });
+
+    // Create positioned word
+    positions.push({
+      ...word,
+      x: position.x,
+      y: position.y,
+      width: wordWidth,
+      height: wordHeight,
+      fontSize,
+      color: config.colors[index % config.colors.length],
+      rotation: Math.random() > 0.7 ? (Math.random() - 0.5) * 60 : 0, // 30% chance of rotation
+    });
+  });
+
+  return positions;
+};
 
 // Main WordCloud component
 export const WordCloud: React.FC<WordCloudProps> = React.memo(
@@ -130,6 +262,7 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
       useState<keyof typeof COLOR_SCHEMES>("bluesky");
     const [showControls, setShowControls] = useState(mergedConfig.showControls);
     const [dimensions, setDimensions] = useState({ width: 600, height: 400 });
+    const [hoveredWord, setHoveredWord] = useState<string | null>(null);
 
     // Update dimensions based on container size
     useEffect(() => {
@@ -137,8 +270,8 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
         if (containerRef.current) {
           const { width } = containerRef.current.getBoundingClientRect();
           setDimensions({
-            width: Math.max(300, width - 32), // Account for padding
-            height: Math.max(300, Math.min(500, width * 0.6)), // Responsive height
+            width: Math.max(300, width - 32),
+            height: Math.max(300, Math.min(500, width * 0.6)),
           });
         }
       };
@@ -148,12 +281,11 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
       return () => window.removeEventListener("resize", updateDimensions);
     }, []);
 
-    // Process and limit words based on configuration
-    const processedWords = useMemo(() => {
+    // Process and position words
+    const positionedWords = useMemo(() => {
       if (!words || words.length === 0) return [];
 
-      return words
-        .slice(0, mergedConfig.maxWords)
+      const processedWords = words
         .filter((word) => word.value > 0)
         .map((word) => ({
           ...word,
@@ -162,26 +294,36 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
               ? `${word.text.substring(0, 17)}...`
               : word.text,
         }));
-    }, [words, mergedConfig.maxWords]);
+
+      return generateWordPositions(
+        processedWords,
+        mergedConfig,
+        dimensions.width,
+        dimensions.height
+      );
+    }, [words, mergedConfig, dimensions]);
 
     // Update color scheme
-    const updateColorScheme = (scheme: keyof typeof COLOR_SCHEMES) => {
-      setColorScheme(scheme);
-      setMergedConfig((prev) => ({
-        ...prev,
-        colors: COLOR_SCHEMES[scheme],
-      }));
-    };
+    const updateColorScheme = useCallback(
+      (scheme: keyof typeof COLOR_SCHEMES) => {
+        setColorScheme(scheme);
+        setMergedConfig((prev) => ({
+          ...prev,
+          colors: COLOR_SCHEMES[scheme],
+        }));
+      },
+      []
+    );
 
-    // Handle word click with callback
-    const handleWordClick = (word: any) => {
-      if (onWordClick) {
-        const wordData = processedWords.find((w) => w.text === word.text);
-        if (wordData) {
-          onWordClick(wordData);
+    // Handle word click
+    const handleWordClick = useCallback(
+      (word: WordData) => {
+        if (onWordClick) {
+          onWordClick(word);
         }
-      }
-    };
+      },
+      [onWordClick]
+    );
 
     // Loading state
     if (isLoading) {
@@ -231,7 +373,7 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
     }
 
     // Empty state
-    if (!processedWords || processedWords.length === 0) {
+    if (!positionedWords || positionedWords.length === 0) {
       return (
         <Card className={`w-full ${className}`}>
           <CardHeader>
@@ -270,7 +412,7 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="text-xs">
-                {processedWords.length} words
+                {positionedWords.length} words
               </Badge>
               <Button
                 variant="ghost"
@@ -314,56 +456,57 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
 
         <CardContent>
           <div
-            className="relative bg-background rounded-lg border p-4"
+            className="relative bg-background rounded-lg border overflow-hidden"
             style={{ height: dimensions.height }}
           >
-            {processedWords.length > 0 && (
-              <ReactWordcloud
-                data={processedWords}
-                width={dimensions.width}
-                height={dimensions.height}
-                fontSize={(word: any) => {
-                  const { value } = word;
-                  const maxValue = Math.max(
-                    ...processedWords.map((w) => w.value)
-                  );
-                  const minValue = Math.min(
-                    ...processedWords.map((w) => w.value)
-                  );
-                  const range = maxValue - minValue || 1;
-                  const normalized = (value - minValue) / range;
-                  return (
-                    mergedConfig.minFontSize +
-                    normalized *
-                      (mergedConfig.maxFontSize - mergedConfig.minFontSize)
-                  );
-                }}
-                spiral={mergedConfig.spiral}
-                rotate={() => Math.random() * 90 - 45} // Random rotation between -45 and 45 degrees
-                padding={2}
-                font={mergedConfig.fontFamily}
-                fill={(_: any, i: number) =>
-                  mergedConfig.colors[i % mergedConfig.colors.length]
-                }
-                onWordClick={handleWordClick}
-                random={() => 0.5} // Consistent layout
-              />
-            )}
+            <svg
+              width={dimensions.width}
+              height={dimensions.height}
+              className="w-full h-full"
+            >
+              {positionedWords.map((word, index) => (
+                <text
+                  key={`${word.text}-${index}`}
+                  x={word.x + word.width / 2}
+                  y={word.y + word.height / 2}
+                  fontSize={word.fontSize}
+                  fill={word.color}
+                  fontFamily={mergedConfig.fontFamily}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  transform={`rotate(${word.rotation} ${
+                    word.x + word.width / 2
+                  } ${word.y + word.height / 2})`}
+                  style={{
+                    cursor: onWordClick ? "pointer" : "default",
+                    opacity: hoveredWord && hoveredWord !== word.text ? 0.6 : 1,
+                    transition: "opacity 0.2s ease",
+                  }}
+                  onClick={() => handleWordClick(word)}
+                  onMouseEnter={() => setHoveredWord(word.text)}
+                  onMouseLeave={() => setHoveredWord(null)}
+                  className="select-none"
+                >
+                  {word.text}
+                </text>
+              ))}
+            </svg>
           </div>
 
-          {processedWords.length > 0 && (
+          {positionedWords.length > 0 && (
             <div className="mt-4">
               <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
                 <Type className="h-4 w-4" />
                 Top Words
               </h4>
               <div className="flex flex-wrap gap-1">
-                {processedWords.slice(0, 20).map((word, index) => (
+                {positionedWords.slice(0, 20).map((word, index) => (
                   <Badge
                     key={`${word.text}-${index}`}
                     variant="secondary"
                     className="text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
                     onClick={() => handleWordClick(word)}
+                    style={{ borderColor: word.color }}
                   >
                     {word.text} ({word.value})
                   </Badge>

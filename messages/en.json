@@ -5,7 +5,7 @@
   },
   "form": {
     "title": "Enter Bluesky Handle",
-    "description": "Enter a Bluesky username (e.g., username.bsky.social or @username)",
+    "description": "Enter a Bluesky username (e.g., username.bsky.social or username)",
     "placeholder": "username.bsky.social",
     "button": "Analyze User",
     "loading": "Analyzing...",

@@ -5,7 +5,7 @@
   },
   "form": {
     "title": "输入 Bluesky 用户名",
-    "description": "输入 Bluesky 用户名 (例如: username.bsky.social 或 @username)",
+    "description": "输入 Bluesky 用户名 (例如: username.bsky.social 或 username)",
     "placeholder": "username.bsky.social",
     "button": "分析用户",
     "loading": "分析中...",

@@ -19,22 +19,40 @@ export default function HandleSearchForm() {
   const router = useRouter();
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [inputValue, setInputValue] = useState("");
 
-  async function handleSubmit(formData: FormData) {
-    const handle = formData.get("handle")?.toString()?.trim();
+  // Function to clean input in real-time, removing invisible characters but keeping @ symbol
+  function cleanInput(value: string): string {
+    return (
+      value
+        // Remove invisible Unicode characters that break URLs
+        .replace(/[\u200B-\u200D\uFEFF\u202A-\u202E\u2066-\u2069]/g, "")
+        // Remove other problematic invisible characters
+        .replace(/[\u00AD\u034F\u061C\u180E\u2000-\u200A\u2028\u2029]/g, "")
+        // Keep @ symbol and other visible characters
+        .trim()
+    );
+  }
 
-    if (!handle) {
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const cleanedValue = cleanInput(e.target.value);
+    setInputValue(cleanedValue);
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!inputValue.trim()) {
       return;
     }
 
     setIsLoading(true);
 
-    // Clean the handle for URL
-    let cleanHandle = handle.startsWith("@") ? handle.slice(1) : handle;
-    cleanHandle = cleanHandle
-      .replace(/[\u200B-\u200D\uFEFF\u202C\u202D\u202E]/g, "")
-      .replace(/\s+/g, "")
-      .toLowerCase();
+    // Clean the handle for URL - remove @ symbol and ensure clean format
+    let cleanHandle = inputValue.startsWith("@")
+      ? inputValue.slice(1)
+      : inputValue;
+    cleanHandle = cleanHandle.replace(/\s+/g, "").toLowerCase();
 
     // Navigate to the dynamic route with locale
     const locale = params.locale || "en";
@@ -48,9 +66,10 @@ export default function HandleSearchForm() {
         <CardDescription>{t("form.description")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            name="handle"
+            value={inputValue}
+            onChange={handleInputChange}
             placeholder={t("form.placeholder")}
             required
             className="w-full"

@@ -75,21 +75,23 @@ export default function AnalysisResults({
 
     return (
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">{t("analysis.activityByHour")}</h3>
+        <h3 className="text-base sm:text-lg font-medium">
+          {t("analysis.activityByHour")}
+        </h3>
 
-        <div className="text-sm text-gray-500 mb-2">
+        <div className="text-xs sm:text-sm text-gray-500 mb-2">
           {t("analysis.timeZoneNote", {
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           })}
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           {timeSegments.map((segment) => (
             <div key={segment.label} className="space-y-1">
               <div className="text-sm font-medium text-gray-700">
                 {segment.label}
               </div>
-              <div className="grid grid-cols-6 gap-2">
+              <div className="grid grid-cols-6 gap-1 sm:gap-2">
                 {segment.hours.map((hour) => {
                   const count = activityByHour[hour] || 0;
                   const heightPercentage =
@@ -99,7 +101,7 @@ export default function AnalysisResults({
                     <div key={hour} className="flex flex-col items-center">
                       <div className="text-xs text-gray-600 mb-1">{count}</div>
                       <div
-                        className="bg-blue-500 w-12 rounded-t-sm"
+                        className="bg-blue-500 w-8 sm:w-12 rounded-t-sm"
                         style={{ height: `${heightPercentage}px` }}
                       ></div>
                       <div className="text-xs text-gray-600 mt-1">
@@ -117,73 +119,80 @@ export default function AnalysisResults({
   }
 
   return (
-    <Card className="mx-auto max-w-4xl">
-      <CardHeader>
-        <CardTitle>{t("analysis.title")}</CardTitle>
-        <CardDescription>{t("analysis.description")}</CardDescription>
+    <Card className="mx-auto max-w-4xl w-full">
+      <CardHeader className="px-4 sm:px-6">
+        <CardTitle className="text-xl sm:text-2xl">
+          {t("analysis.title")}
+        </CardTitle>
+        <CardDescription className="text-sm sm:text-base">
+          {t("analysis.description")}
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
         {/* Key insights section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-slate-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-500">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-slate-50 p-3 sm:p-4 rounded-lg">
+            <h4 className="text-xs sm:text-sm font-medium text-gray-500 truncate">
               {t("analysis.posts")}
             </h4>
-            <p className="text-2xl font-bold">
+            <p className="text-lg sm:text-2xl font-bold">
               {processedFeed.insights.totalPosts}
             </p>
           </div>
-          <div className="bg-slate-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-500">
+          <div className="bg-slate-50 p-3 sm:p-4 rounded-lg">
+            <h4 className="text-xs sm:text-sm font-medium text-gray-500 truncate">
               {t("analysis.replies")}
             </h4>
-            <p className="text-2xl font-bold">
+            <p className="text-lg sm:text-2xl font-bold">
               {processedFeed.insights.totalReplies}
             </p>
           </div>
-          <div className="bg-slate-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-500">
+          <div className="bg-slate-50 p-3 sm:p-4 rounded-lg">
+            <h4 className="text-xs sm:text-sm font-medium text-gray-500 truncate">
               {t("analysis.reposts")}
             </h4>
-            <p className="text-2xl font-bold">
+            <p className="text-lg sm:text-2xl font-bold">
               {processedFeed.insights.totalReposts}
             </p>
           </div>
-          <div className="bg-slate-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-500">
+          <div className="bg-slate-50 p-3 sm:p-4 rounded-lg">
+            <h4 className="text-xs sm:text-sm font-medium text-gray-500 truncate">
               {t("analysis.avgLength")}
             </h4>
-            <p className="text-2xl font-bold">
-              {processedFeed.insights.averagePostLength} {t("analysis.chars")}
+            <p className="text-lg sm:text-2xl font-bold">
+              {processedFeed.insights.averagePostLength}{" "}
+              <span className="text-sm sm:text-base">
+                {t("analysis.chars")}
+              </span>
             </p>
           </div>
         </div>
 
         {/* Activity by Hour chart */}
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-white p-3 sm:p-4 rounded-lg border">
           {renderActivityByHour(processedFeed.activityByHour)}
         </div>
 
         {/* Most active time */}
-        <div className="bg-white p-4 rounded-lg border">
-          <h3 className="text-lg font-medium mb-2">
+        <div className="bg-white p-3 sm:p-4 rounded-lg border">
+          <h3 className="text-base sm:text-lg font-medium mb-2">
             {t("analysis.mostActiveTime")}
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 {t("analysis.mostActiveHour")}
               </p>
-              <p className="text-xl font-semibold">
+              <p className="text-lg sm:text-xl font-semibold">
                 {processedFeed.insights.mostActiveHour}:00 -{" "}
                 {processedFeed.insights.mostActiveHour + 1}:00
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 {t("analysis.mostActiveDay")}
               </p>
-              <p className="text-xl font-semibold">
+              <p className="text-lg sm:text-xl font-semibold break-words">
                 {processedFeed.insights.mostActiveDay &&
                 !isNaN(new Date(processedFeed.insights.mostActiveDay).getTime())
                   ? format(
@@ -197,14 +206,18 @@ export default function AnalysisResults({
         </div>
 
         {/* Languages used */}
-        <div className="bg-white p-4 rounded-lg border">
-          <h3 className="text-lg font-medium mb-2">
+        <div className="bg-white p-3 sm:p-4 rounded-lg border">
+          <h3 className="text-base sm:text-lg font-medium mb-2">
             {t("analysis.languagesUsed")}
           </h3>
           <div className="flex flex-wrap gap-2">
             {Object.entries(processedFeed.insights.languagesUsed).map(
               ([lang, count]) => (
-                <Badge key={lang} variant="secondary">
+                <Badge
+                  key={lang}
+                  variant="secondary"
+                  className="text-xs sm:text-sm"
+                >
                   {lang} ({count})
                 </Badge>
               )
@@ -213,26 +226,28 @@ export default function AnalysisResults({
         </div>
 
         {/* Top interactions */}
-        <div className="bg-white p-4 rounded-lg border">
-          <h3 className="text-lg font-medium mb-2">
+        <div className="bg-white p-3 sm:p-4 rounded-lg border">
+          <h3 className="text-base sm:text-lg font-medium mb-2">
             {t("analysis.topInteractions")}
           </h3>
           <div className="overflow-y-auto max-h-60">
             {processedFeed.topInteractions.map((interaction, index) => (
               <div
                 key={interaction.handle}
-                className="flex justify-between items-center p-2 border-b last:border-b-0"
+                className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2 border-b last:border-b-0 gap-2 sm:gap-0"
               >
-                <div className="flex items-center">
-                  <span className="text-gray-400 mr-2">#{index + 1}</span>
-                  <span className="font-medium">
+                <div className="flex items-center min-w-0 flex-1">
+                  <span className="text-gray-400 mr-2 text-sm">
+                    #{index + 1}
+                  </span>
+                  <span className="font-medium truncate text-sm sm:text-base">
                     {interaction.displayName || interaction.handle}
                   </span>
-                  <span className="text-gray-500 text-sm ml-2">
+                  <span className="text-gray-500 text-xs sm:text-sm ml-2 truncate">
                     @{interaction.handle}
                   </span>
                 </div>
-                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs sm:text-sm self-start sm:self-auto whitespace-nowrap">
                   {interaction.count} {t("analysis.interactions")}
                 </span>
               </div>
@@ -287,12 +302,12 @@ export default function AnalysisResults({
           />
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="px-4 sm:px-6">
         <details className="cursor-pointer w-full">
           <summary className="text-sm font-medium text-gray-700 mb-2">
             {t("analysis.viewRawData")}
           </summary>
-          <pre className="bg-gray-100 p-4 rounded-lg overflow-auto text-sm mt-2 max-h-96">
+          <pre className="bg-gray-100 p-3 sm:p-4 rounded-lg overflow-auto text-xs sm:text-sm mt-2 max-h-96">
             {JSON.stringify(processedFeed, null, 2)}
           </pre>
         </details>

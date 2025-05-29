@@ -350,18 +350,20 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
 
     return (
       <Card className={`w-full ${className}`}>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Hash className="h-5 w-5" />
-                {title}
+        <CardHeader className="pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Hash className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                <span className="truncate">{title}</span>
               </CardTitle>
               {subtitle && (
-                <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  {subtitle}
+                </p>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Badge variant="secondary" className="text-xs">
                 {cloudWords.length} words
               </Badge>
@@ -370,6 +372,7 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowControls(!showControls)}
+                className="h-8 w-8 p-0"
               >
                 {showControls ? (
                   <EyeOff className="h-4 w-4" />
@@ -383,23 +386,29 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
           {showControls && (
             <>
               <Separator className="my-3" />
-              <div className="flex flex-wrap gap-2 items-center">
-                <div className="flex items-center gap-2">
-                  <Palette className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Theme:</span>
-                  {Object.keys(COLOR_SCHEMES).map((scheme) => (
-                    <Button
-                      key={scheme}
-                      variant={colorScheme === scheme ? "default" : "outline"}
-                      size="sm"
-                      onClick={() =>
-                        updateColorScheme(scheme as keyof typeof COLOR_SCHEMES)
-                      }
-                      className="text-xs capitalize"
-                    >
-                      {scheme}
-                    </Button>
-                  ))}
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Palette className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Theme:</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1 sm:gap-2">
+                    {Object.keys(COLOR_SCHEMES).map((scheme) => (
+                      <Button
+                        key={scheme}
+                        variant={colorScheme === scheme ? "default" : "outline"}
+                        size="sm"
+                        onClick={() =>
+                          updateColorScheme(
+                            scheme as keyof typeof COLOR_SCHEMES
+                          )
+                        }
+                        className="text-xs capitalize px-2 py-1 h-auto min-w-0"
+                      >
+                        {scheme}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </>
@@ -426,16 +435,16 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
 
           {cloudWords.length > 0 && (
             <div className="mt-4">
-              <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+              <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
                 <Type className="h-4 w-4" />
                 Top Words
               </h4>
-              <div className="flex flex-wrap gap-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
                 {cloudWords.slice(0, 20).map((word, index) => (
                   <Badge
                     key={`${word.text}-${index}`}
                     variant="secondary"
-                    className="text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                    className="text-xs cursor-pointer hover:bg-secondary/80 transition-colors justify-between px-2 py-1 min-w-0"
                     onClick={() => {
                       const originalWord = words.find(
                         (w) =>
@@ -452,7 +461,10 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
                         mergedConfig.colors[index % mergedConfig.colors.length],
                     }}
                   >
-                    {word.text} ({word.value})
+                    <span className="truncate flex-1 mr-1">{word.text}</span>
+                    <span className="text-xs opacity-70 flex-shrink-0">
+                      ({word.value})
+                    </span>
                   </Badge>
                 ))}
               </div>

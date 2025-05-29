@@ -35,6 +35,8 @@ interface ProcessedFeedData {
   topInteractions: InteractionAccount[];
   commonHashtags: { tag: string; count: number }[];
   wordCloudData: WordData[];
+  rawText?: string; // Raw text for client-side Chinese processing
+  isChineseContent?: boolean; // Flag to indicate Chinese content
   insights: {
     totalPosts: number;
     totalReplies: number;
@@ -53,6 +55,17 @@ function extractTextContent(post: any): string {
   const text = post.post?.record?.text || "";
   const replyParentText = post.reply?.parent?.record?.text || "";
   return text + " " + replyParentText;
+}
+
+// Check if the combined text is predominantly Chinese
+function isPredominantlyChinese(text: string): boolean {
+  if (!text || text.length === 0) return false;
+  
+  const chineseCharCount = (text.match(/[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/g) || []).length;
+  const totalChars = text.replace(/\s/g, '').length;
+  
+  // If more than 30% of non-space characters are Chinese, consider it Chinese content
+  return totalChars > 0 && (chineseCharCount / totalChars) > 0.3;
 }
 
 // Extract date and hour from ISO string with proper timezone support
@@ -258,12 +271,27 @@ export async function analyzeFeed(
   // Process text for word cloud
   console.log(`Processing ${allTexts.length} texts for word cloud...`);
   const combinedText = allTexts.join(" ");
-  const wordCloudData = (
-    await WordProcessor.processTextAsync(combinedText, {
-      locale: options.locale,
-    })
-  ).slice(0, 150); // Limit to top 150 words
-  console.log(`Generated word cloud with ${wordCloudData.length} words`);
+  
+  // Check if content is predominantly Chinese
+  const isChineseContent = isPredominantlyChinese(combinedText);
+  console.log(`Chinese content detected: ${isChineseContent}`);
+  
+  let wordCloudData: WordData[] = [];
+  let rawText: string | undefined;
+  
+  if (isChineseContent) {
+    // For Chinese content, pass raw text to client for processing
+    rawText = combinedText;
+    console.log(`Passing raw Chinese text to client (${combinedText.length} characters)`);
+  } else {
+    // For non-Chinese content, process server-side as usual
+    wordCloudData = (
+      await WordProcessor.processTextAsync(combinedText, {
+        locale: options.locale,
+      })
+    ).slice(0, 150); // Limit to top 150 words
+    console.log(`Generated word cloud with ${wordCloudData.length} words`);
+  }
 
   console.log(`Analysis complete, returning processed data`);
   return {
@@ -273,6 +301,8 @@ export async function analyzeFeed(
     topInteractions,
     commonHashtags,
     wordCloudData,
+    rawText,
+    isChineseContent,
     insights: {
       totalPosts,
       totalReplies,

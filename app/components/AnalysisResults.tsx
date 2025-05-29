@@ -12,6 +12,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import WordCloud from "./WordCloud";
+import ChineseWordCloud from "./ChineseWordCloud";
 
 interface ProcessedFeedData {
   activityByHour: Record<number, number>;
@@ -37,6 +38,8 @@ interface ProcessedFeedData {
     text: string;
     value: number;
   }>;
+  rawText?: string; // Raw text for client-side Chinese processing
+  isChineseContent?: boolean; // Flag to indicate Chinese content
   insights: {
     totalPosts: number;
     totalReplies: number;
@@ -238,20 +241,37 @@ export default function AnalysisResults({
         </div>
 
         {/* Word Cloud */}
-        <WordCloud
-          words={processedFeed.wordCloudData}
-          title={t("analysis.wordCloud")}
-          subtitle={t("analysis.wordCloudSubtitle")}
-          config={{
-            maxWords: 100,
-            minFontSize: 12,
-            maxFontSize: 48,
-            showControls: true,
-          }}
-          onWordClick={(word: { text: string; value: number }) => {
-            console.log("Clicked word:", word);
-          }}
-        />
+        {processedFeed.isChineseContent && processedFeed.rawText ? (
+          <ChineseWordCloud
+            rawText={processedFeed.rawText}
+            title={t("analysis.wordCloud")}
+            subtitle={t("analysis.wordCloudSubtitle")}
+            config={{
+              maxWords: 100,
+              minFontSize: 12,
+              maxFontSize: 48,
+              showControls: true,
+            }}
+            onWordClick={(word: { text: string; value: number }) => {
+              console.log("Clicked word:", word);
+            }}
+          />
+        ) : (
+          <WordCloud
+            words={processedFeed.wordCloudData}
+            title={t("analysis.wordCloud")}
+            subtitle={t("analysis.wordCloudSubtitle")}
+            config={{
+              maxWords: 100,
+              minFontSize: 12,
+              maxFontSize: 48,
+              showControls: true,
+            }}
+            onWordClick={(word: { text: string; value: number }) => {
+              console.log("Clicked word:", word);
+            }}
+          />
+        )}
       </CardContent>
       <CardFooter>
         <details className="cursor-pointer w-full">

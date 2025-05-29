@@ -18,6 +18,7 @@ import {
   FinalWordData,
 } from "@isoterik/react-word-cloud";
 import { WordData } from "../utils/wordProcessor.enhanced";
+import { processChineseText, isChineseText } from "../utils/chineseProcessor.client";
 
 // Word cloud configuration interface
 export interface WordCloudConfig {
@@ -104,9 +105,11 @@ const COLOR_SCHEMES = {
   ],
 };
 
-// Props interface for the WordCloud component
-interface WordCloudProps {
-  words: WordData[];
+// Props interface for the ChineseWordCloud component
+interface ChineseWordCloudProps {
+  // Either pre-processed words OR raw text for client-side processing
+  words?: WordData[];
+  rawText?: string;
   config?: Partial<WordCloudConfig>;
   className?: string;
   title?: string;
@@ -131,17 +134,25 @@ const transformWordsForCloud = (
     }));
 };
 
-// Main WordCloud component
-export const WordCloud: React.FC<WordCloudProps> = React.memo(
+// Convert word frequency map to WordData array
+const mapToWordData = (wordMap: Map<string, number>): WordData[] => {
+  return Array.from(wordMap.entries())
+    .map(([text, value]) => ({ text, value }))
+    .sort((a, b) => b.value - a.value);
+};
+
+// Enhanced WordCloud component with Chinese processing
+export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
   ({
-    words,
+    words: providedWords,
+    rawText,
     config = {},
     className = "",
     title = "Word Cloud",
     subtitle,
     onWordClick,
-    isLoading = false,
-    error,
+    isLoading: externalLoading = false,
+    error: externalError,
   }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [mergedConfig, setMergedConfig] = useState<WordCloudConfig>({
@@ -152,6 +163,42 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
       useState<keyof typeof COLOR_SCHEMES>("bluesky");
     const [showControls, setShowControls] = useState(mergedConfig.showControls);
     const [dimensions, setDimensions] = useState({ width: 600, height: 400 });
+    
+    // Client-side processing state
+    const [processedWords, setProcessedWords] = useState<WordData[]>([]);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [processingError, setProcessingError] = useState<string | null>(null);
+
+    // Process raw text client-side if provided
+    useEffect(() => {
+      if (!rawText || providedWords) return;
+
+      const processText = async () => {
+        try {
+          setIsProcessing(true);
+          setProcessingError(null);
+          
+          // Check if text contains Chinese characters
+          if (!isChineseText(rawText)) {
+            setProcessingError("No Chinese text detected");
+            return;
+          }
+
+          // Process Chinese text using jieba-wasm
+          const wordMap = await processChineseText(rawText);
+          const words = mapToWordData(wordMap);
+          
+          setProcessedWords(words);
+        } catch (error) {
+          console.error("Error processing Chinese text:", error);
+          setProcessingError("Failed to process Chinese text");
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+
+      processText();
+    }, [rawText, providedWords]);
 
     // Update dimensions based on container size
     useEffect(() => {
@@ -169,6 +216,11 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
       window.addEventListener("resize", updateDimensions);
       return () => window.removeEventListener("resize", updateDimensions);
     }, []);
+
+    // Use provided words or processed words
+    const words = useMemo(() => {
+      return providedWords || processedWords;
+    }, [providedWords, processedWords]);
 
     // Transform words for the react-word-cloud library
     const cloudWords = useMemo(() => {
@@ -231,6 +283,12 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
       [mergedConfig.colors]
     );
 
+    // Determine loading state
+    const isLoading = externalLoading || isProcessing;
+
+    // Determine error state
+    const error = externalError || processingError;
+
     // Loading state
     if (isLoading) {
       return (
@@ -248,7 +306,9 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
             <div className="flex items-center justify-center h-96">
               <div className="text-center">
                 <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Processing words...</p>
+                <p className="text-muted-foreground">
+                  {isProcessing ? "Processing Chinese text..." : "Loading..."}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -295,7 +355,9 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
                 No words to display
               </h3>
               <p className="text-muted-foreground">
-                No significant words found in the analyzed content.
+                {rawText && !isChineseText(rawText) 
+                  ? "No Chinese text detected in the content."
+                  : "No significant words found in the analyzed content."}
               </p>
             </div>
           </CardContent>
@@ -320,6 +382,11 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
               <Badge variant="secondary" className="text-xs">
                 {cloudWords.length} words
               </Badge>
+              {rawText && (
+                <Badge variant="outline" className="text-xs">
+                  Client-side processed
+                </Badge>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -421,6 +488,6 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
   }
 );
 
-WordCloud.displayName = "WordCloud";
+ChineseWordCloud.displayName = "ChineseWordCloud";
 
-export default WordCloud;
+export default ChineseWordCloud;

@@ -259,7 +259,7 @@ export async function analyzeFeed(
   console.log(`Processing ${allTexts.length} texts for word cloud...`);
   const combinedText = allTexts.join(" ");
   const wordCloudData = (
-    await WordProcessor.processText(combinedText, {
+    await WordProcessor.processTextAsync(combinedText, {
       locale: options.locale,
     })
   ).slice(0, 150); // Limit to top 150 words

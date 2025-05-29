@@ -13,12 +13,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Palette, Type, RefreshCw, Hash, Eye, EyeOff } from "lucide-react";
-import { type WordData } from "../utils/wordProcessor";
 import {
   WordCloud as ReactWordCloud,
   Word,
   FinalWordData,
 } from "@isoterik/react-word-cloud";
+import { WordData } from "../utils/wordProcessor.enhanced";
 
 // Word cloud configuration interface
 export interface WordCloudConfig {

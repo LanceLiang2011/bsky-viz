@@ -89,7 +89,8 @@ function extractDateAndHour(isoString: string, userTimezone?: string) {
 // Main analyzer function
 export async function analyzeFeed(
   feedData: any,
-  options: { locale?: string } = {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  options: { locale?: string } = {} // locale parameter kept for compatibility but ignored for route independence
 ): Promise<ProcessedFeedData> {
   console.log(
     `Starting feed analysis with ${feedData?.feed?.length || 0} items`
@@ -289,11 +290,11 @@ export async function analyzeFeed(
     );
   } else {
     // For non-Chinese content, process server-side as usual
-    wordCloudData = (
-      await WordProcessor.processTextAsync(combinedText, {
-        locale: options.locale,
-      })
-    ).slice(0, 150); // Limit to top 150 words
+    // Remove locale parameter to ensure route-independent processing
+    wordCloudData = (await WordProcessor.processTextAsync(combinedText)).slice(
+      0,
+      150
+    ); // Limit to top 150 words
     console.log(`Generated word cloud with ${wordCloudData.length} words`);
   }
 

@@ -1484,8 +1484,9 @@ export class WordProcessor {
     let nonChineseCharCount = 0;
 
     for (const char of text) {
-      // Chinese character range check (basic CJK Unified Ideographs)
-      if (/[\u4e00-\u9fa5]/.test(char)) {
+      // Chinese character range check (comprehensive CJK ranges)
+      // Using same ranges as feedAnalyzer for consistency
+      if (/[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/.test(char)) {
         chineseCharCount++;
       } else if (/[a-zA-Z]/.test(char)) {
         nonChineseCharCount++;
@@ -1600,17 +1601,11 @@ export class WordProcessor {
     options: ProcessingOptions = {}
   ): Promise<WordData[]> {
     try {
-      // Detect language from locale or text content
-      let language: "chinese" | "english" = "english";
-
-      if (options.locale) {
-        language = options.locale.includes("zh") ? "chinese" : "english";
-      } else {
-        language = this.detectLanguage(text);
-      }
+      // Always detect language from content, ignore locale parameter to ensure route independence
+      const language = this.detectLanguage(text);
 
       console.log(
-        `Processing text asynchronously with detected language: ${language}`
+        `Processing text asynchronously with detected language: ${language} (route-independent detection)`
       );
 
       // For Chinese content, we now handle this client-side only
@@ -1639,24 +1634,15 @@ export class WordProcessor {
   ): WordData[] {
     return this.processTextSync(text, options);
   }
-
-  // Synchronous text processing method (fallback when Jieba is not available)
   static processTextSync(
     text: string,
     options: ProcessingOptions = {}
   ): WordData[] {
     try {
-      // Detect language from locale or text content
-      let language: "chinese" | "english" = "english";
-
-      if (options.locale) {
-        language = options.locale.includes("zh") ? "chinese" : "english";
-      } else {
-        language = this.detectLanguage(text);
-      }
-
+      // Always detect language from content, ignore locale parameter to ensure route independence
+      const language = this.detectLanguage(text);
       console.log(
-        `Processing text synchronously with detected language: ${language}`
+        `Processing text synchronously with detected language: ${language} (route-independent detection)`
       );
 
       // For synchronous processing, use fallback for Chinese

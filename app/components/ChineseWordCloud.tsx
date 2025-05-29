@@ -164,10 +164,10 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
     const [dimensions, setDimensions] = useState({ width: 600, height: 400 });
 
     // Client-side processing state
-  const [processedWords, setProcessedWords] = useState<WordData[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processingError, setProcessingError] = useState<string | null>(null);
-  const [isChineseContent, setIsChineseContent] = useState<boolean>(false);
+    const [processedWords, setProcessedWords] = useState<WordData[]>([]);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [processingError, setProcessingError] = useState<string | null>(null);
+    const [isChineseContent, setIsChineseContent] = useState<boolean>(false);
 
     // Process raw text client-side if provided
     useEffect(() => {
@@ -179,15 +179,14 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
           setProcessingError(null);
 
           // Dynamically import Chinese processor functions to avoid SSR issues
-          const { 
-            isChineseText, 
-            processChineseText 
-          } = await import("../utils/chineseProcessor.client");
+          const { isChineseText, processChineseText } = await import(
+            "../utils/chineseProcessor.client"
+          );
 
           // Check if text contains Chinese characters
           const hasChineseText = isChineseText(rawText);
           setIsChineseContent(hasChineseText);
-          
+
           if (!hasChineseText) {
             setProcessingError("No Chinese text detected");
             return;

@@ -1,6 +1,7 @@
 // Client-side Chinese text processing with jieba-wasm
 "use client";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let jiebaInitialized = false;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let jiebaFunctions: any = null;

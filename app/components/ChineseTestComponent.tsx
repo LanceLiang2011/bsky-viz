@@ -13,11 +13,8 @@ export default function ChineseTestComponent() {
 
     try {
       // Dynamic import to avoid SSR issues
-      const {
-        segmentChineseText,
-        processChineseText,
-        isChineseText,
-      } = await import("../utils/chineseProcessor.client");
+      const { segmentChineseText, processChineseText, isChineseText } =
+        await import("../utils/chineseProcessor.client");
 
       console.log(`Testing text: "${testText}"`);
       console.log(`Is Chinese text: ${isChineseText(testText)}`);

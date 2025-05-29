@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import Footer from "../components/Footer";
 import "../globals.css";
 
@@ -78,6 +79,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <main className="flex-1">{children}</main>
           <Footer />
+          <Analytics />
         </NextIntlClientProvider>
       </body>
     </html>

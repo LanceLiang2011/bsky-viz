@@ -37,6 +37,9 @@ export const CHINESE_FILTER_WORDS = new Set([
   "那个",
   "这样",
   "那样",
+  "这里",
+  "那里",
+  "哪里",
   "什么",
 
   // Temporal words

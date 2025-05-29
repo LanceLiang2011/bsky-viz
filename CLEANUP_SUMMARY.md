@@ -17,7 +17,7 @@ Successfully removed all leftover server-side Chinese processing and centralized
 
 ## Files Updated
 
-### `/app/utils/wordProcessor.enhanced.ts`
+### `/app/utils/wordProcessor.ts`
 
 - ✅ Removed import of server-side Chinese processor
 - ✅ Removed `segmentChineseText` and `isServerSide` imports

@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  useMemo,
-  useRef,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
+import React, { useMemo, useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +11,7 @@ import {
   Word,
   FinalWordData,
 } from "@isoterik/react-word-cloud";
-import { WordData } from "../utils/wordProcessor.enhanced";
+import { WordData } from "../utils/wordProcessor";
 
 // Word cloud configuration interface
 export interface WordCloudConfig {
@@ -153,7 +147,6 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
     isLoading: externalLoading = false,
     error: externalError,
   }) => {
-    const containerRef = useRef<HTMLDivElement>(null);
     const [mergedConfig, setMergedConfig] = useState<WordCloudConfig>({
       ...DEFAULT_CONFIG,
       ...config,
@@ -161,7 +154,6 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
     const [colorScheme, setColorScheme] =
       useState<keyof typeof COLOR_SCHEMES>("bluesky");
     const [showControls, setShowControls] = useState(mergedConfig.showControls);
-    const [dimensions, setDimensions] = useState({ width: 600, height: 400 });
 
     // Client-side processing state
     const [processedWords, setProcessedWords] = useState<WordData[]>([]);
@@ -207,23 +199,6 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
 
       processText();
     }, [rawText, providedWords]);
-
-    // Update dimensions based on container size
-    useEffect(() => {
-      const updateDimensions = () => {
-        if (containerRef.current) {
-          const { width } = containerRef.current.getBoundingClientRect();
-          setDimensions({
-            width: Math.max(300, width - 64), // Account for padding
-            height: Math.max(300, Math.min(500, width * 0.6)),
-          });
-        }
-      };
-
-      updateDimensions();
-      window.addEventListener("resize", updateDimensions);
-      return () => window.removeEventListener("resize", updateDimensions);
-    }, []);
 
     // Use provided words or processed words
     const words = useMemo(() => {
@@ -374,7 +349,7 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
     }
 
     return (
-      <Card className={`w-full ${className}`} ref={containerRef}>
+      <Card className={`w-full ${className}`}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -390,11 +365,7 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
               <Badge variant="secondary" className="text-xs">
                 {cloudWords.length} words
               </Badge>
-              {rawText && (
-                <Badge variant="outline" className="text-xs">
-                  Client-side processed
-                </Badge>
-              )}
+
               <Button
                 variant="ghost"
                 size="sm"
@@ -436,14 +407,11 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
         </CardHeader>
 
         <CardContent>
-          <div
-            className="relative bg-background rounded-lg border overflow-hidden"
-            style={{ height: dimensions.height }}
-          >
+          <div className="relative bg-background rounded-lg border overflow-hidden w-full">
             <ReactWordCloud
               words={cloudWords}
-              width={dimensions.width}
-              height={dimensions.height}
+              width={600}
+              height={400}
               font={mergedConfig.fontFamily}
               fontSize={fontSizeFunction}
               fill={fillFunction}

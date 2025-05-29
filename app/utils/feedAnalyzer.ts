@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { WordProcessor, type WordData } from "./wordProcessor.enhanced";
+import { WordProcessor, type WordData } from "./wordProcessor";
 
 // Types for processed data
 interface ActivityByHour {

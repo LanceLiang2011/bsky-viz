@@ -253,7 +253,14 @@ export default function AnalysisResults({
               showControls: true,
             }}
             onWordClick={(word: { text: string; value: number }) => {
-              console.log("Clicked word:", word);
+              // Open Bluesky compose page with the clicked word as a hashtag
+              const hashtag = word.text.startsWith("#")
+                ? word.text.substring(1)
+                : word.text;
+              const composeUrl = `https://bsky.app/intent/compose?text=%23${encodeURIComponent(
+                hashtag
+              )}`;
+              window.open(composeUrl, "_blank");
             }}
           />
         ) : (
@@ -268,7 +275,14 @@ export default function AnalysisResults({
               showControls: true,
             }}
             onWordClick={(word: { text: string; value: number }) => {
-              console.log("Clicked word:", word);
+              // Open Bluesky compose page with the clicked word as a hashtag
+              const hashtag = word.text.startsWith("#")
+                ? word.text.substring(1)
+                : word.text;
+              const composeUrl = `https://bsky.app/intent/compose?text=%23${encodeURIComponent(
+                hashtag
+              )}`;
+              window.open(composeUrl, "_blank");
             }}
           />
         )}

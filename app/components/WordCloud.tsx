@@ -17,7 +17,7 @@ import {
   Word,
   FinalWordData,
 } from "@isoterik/react-word-cloud";
-import { WordData } from "../utils/wordProcessor.enhanced";
+import { WordData } from "../utils/wordProcessor";
 
 // Word cloud configuration interface
 export interface WordCloudConfig {
@@ -362,7 +362,7 @@ export const WordCloud: React.FC<WordCloudProps> = React.memo(
 
         <CardContent>
           <div
-            className="relative bg-background rounded-lg border overflow-hidden"
+            className="relative bg-background rounded-lg border overflow-auto"
             style={{ height: dimensions.height }}
           >
             <ReactWordCloud

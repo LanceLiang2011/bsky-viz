@@ -8,4 +8,7 @@ const chineseText = `
 
 console.log("Test Chinese text:", chineseText);
 console.log("Character count:", chineseText.length);
-console.log("Contains Chinese characters:", /[\u4e00-\u9fff]/.test(chineseText));
+console.log(
+  "Contains Chinese characters:",
+  /[\u4e00-\u9fff]/.test(chineseText)
+);

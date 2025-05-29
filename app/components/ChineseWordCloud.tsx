@@ -18,7 +18,6 @@ import {
   FinalWordData,
 } from "@isoterik/react-word-cloud";
 import { WordData } from "../utils/wordProcessor.enhanced";
-import { processChineseText, isChineseText } from "../utils/chineseProcessor.client";
 
 // Word cloud configuration interface
 export interface WordCloudConfig {
@@ -163,11 +162,12 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
       useState<keyof typeof COLOR_SCHEMES>("bluesky");
     const [showControls, setShowControls] = useState(mergedConfig.showControls);
     const [dimensions, setDimensions] = useState({ width: 600, height: 400 });
-    
+
     // Client-side processing state
-    const [processedWords, setProcessedWords] = useState<WordData[]>([]);
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [processingError, setProcessingError] = useState<string | null>(null);
+  const [processedWords, setProcessedWords] = useState<WordData[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingError, setProcessingError] = useState<string | null>(null);
+  const [isChineseContent, setIsChineseContent] = useState<boolean>(false);
 
     // Process raw text client-side if provided
     useEffect(() => {
@@ -177,9 +177,18 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
         try {
           setIsProcessing(true);
           setProcessingError(null);
-          
+
+          // Dynamically import Chinese processor functions to avoid SSR issues
+          const { 
+            isChineseText, 
+            processChineseText 
+          } = await import("../utils/chineseProcessor.client");
+
           // Check if text contains Chinese characters
-          if (!isChineseText(rawText)) {
+          const hasChineseText = isChineseText(rawText);
+          setIsChineseContent(hasChineseText);
+          
+          if (!hasChineseText) {
             setProcessingError("No Chinese text detected");
             return;
           }
@@ -187,7 +196,7 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
           // Process Chinese text using jieba-wasm
           const wordMap = await processChineseText(rawText);
           const words = mapToWordData(wordMap);
-          
+
           setProcessedWords(words);
         } catch (error) {
           console.error("Error processing Chinese text:", error);
@@ -355,7 +364,7 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
                 No words to display
               </h3>
               <p className="text-muted-foreground">
-                {rawText && !isChineseText(rawText) 
+                {rawText && !isChineseContent
                   ? "No Chinese text detected in the content."
                   : "No significant words found in the analyzed content."}
               </p>

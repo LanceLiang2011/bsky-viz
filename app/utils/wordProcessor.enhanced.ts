@@ -14,9 +14,6 @@ export interface ProcessingOptions {
   maxWords?: number;
 }
 
-// Import Chinese processor (server-only)
-import { segmentChineseText, isServerSide } from "./chineseProcessor.server";
-
 // Word frequency processor with enhanced multilingual support
 export class WordProcessor {
   // English stop words (comprehensive list)
@@ -1390,61 +1387,15 @@ export class WordProcessor {
         `Processing text asynchronously with detected language: ${language}`
       );
 
-      // For Chinese, try to use server-side segmentation
-      if (language === "chinese" && isServerSide()) {
-        const minLength = options.minWordLength || 2;
-
-        try {
-          // Use server-side Chinese segmentation
-          console.log("Using server-side Chinese word segmentation");
-          const wordFreq = new Map<string, number>();
-
-          // Clean text
-          const cleaned = text
-            .replace(/[^\u4e00-\u9fa5\w\s]/g, " ")
-            .replace(/\s+/g, " ")
-            .trim();
-
-          if (cleaned) {
-            // Get segmented words from server-side processor
-            const segments = await segmentChineseText(cleaned);
-
-            // Count word frequencies
-            for (const word of segments) {
-              if (
-                word.length >= minLength &&
-                !this.CHINESE_STOP_WORDS.has(word) &&
-                !this.isRepetitiveExpression(word) &&
-                !this.isEnglishWord(word) && // Filter out English words
-                (word.length > 1 || this.isMeaningfulChineseChar(word))
-              ) {
-                // Weight by length (favor longer words)
-                const weight = word.length;
-                wordFreq.set(word, (wordFreq.get(word) || 0) + weight);
-              }
-            }
-          }
-
-          let result = Array.from(wordFreq.entries())
-            .map(([text, value]) => ({ text, value }))
-            .sort((a, b) => b.value - a.value);
-
-          // Apply quality filtering
-          result = result.filter(({ text, value }) => {
-            if (text.length === 1 && value < 5) return false;
-            if (this.isRepetitiveExpression(text)) return false;
-            return true;
-          });
-
-          const maxWords = options.maxWords || result.length;
-          return result.slice(0, maxWords);
-        } catch (segmentError) {
-          console.log(
-            "Server-side Chinese segmentation failed, using fallback:",
-            segmentError
-          );
-          return this.processTextSync(text, options);
-        }
+      // For Chinese content, we now handle this client-side only
+      // Server-side processing is not supported for Chinese
+      if (language === "chinese") {
+        console.log(
+          "Chinese content detected - should be processed client-side"
+        );
+        // Return empty array for server-side Chinese processing
+        // Chinese processing is now handled client-side in ChineseWordCloud component
+        return [];
       } else {
         return this.processEnglishText(text, options);
       }

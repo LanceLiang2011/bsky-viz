@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@isoterik/react-word-cloud": "^1.2.0",
-    "@node-rs/jieba": "^2.0.1",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",

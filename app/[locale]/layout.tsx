@@ -79,8 +79,8 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <main className="flex-1">{children}</main>
           <Footer />
-          <Analytics />
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );

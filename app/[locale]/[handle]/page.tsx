@@ -245,7 +245,7 @@ async function fetchBlueskyData(handle: string, locale?: string) {
     console.log("Starting feed analysis on server...");
     const processedFeed = await analyzeFeed(
       { feed: allFeedItems },
-      { locale, userHandle: cleanHandle }
+      { locale, userHandle: cleanHandle, userTimezone: "UTC" }
     );
     console.log("Feed analysis completed on server");
 

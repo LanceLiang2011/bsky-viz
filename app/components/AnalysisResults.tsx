@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import WordCloud from "./WordCloud";
 import ChineseWordCloud from "./ChineseWordCloud";
+import { useMemo } from "react";
 
 interface ProcessedFeedData {
   activityByHour: Record<number, number>;
@@ -61,6 +62,36 @@ export default function AnalysisResults({
   processedFeed,
 }: AnalysisResultsProps) {
   const t = useTranslations();
+
+  // Convert UTC-based activity to user's local timezone
+  const localizedActivityByHour = useMemo(() => {
+    const now = new Date();
+    const utcOffset = now.getTimezoneOffset() / 60; // Offset in hours from UTC
+
+    // Create a new activity object shifted by timezone offset
+    const localActivity: Record<number, number> = {};
+
+    // Initialize all hours to 0
+    for (let i = 0; i < 24; i++) {
+      localActivity[i] = 0;
+    }
+
+    // Shift each hour's activity by the timezone offset
+    Object.entries(processedFeed.activityByHour).forEach(([utcHour, count]) => {
+      const hour = parseInt(utcHour);
+      // Convert UTC hour to local hour
+      const localHour = (hour - utcOffset + 24) % 24;
+      localActivity[localHour] = (localActivity[localHour] || 0) + count;
+    });
+
+    return localActivity;
+  }, [processedFeed.activityByHour]);
+
+  // Convert most active hour from UTC to local time
+  const localizedMostActiveHour = useMemo(() => {
+    const utcOffset = new Date().getTimezoneOffset() / 60;
+    return (processedFeed.insights.mostActiveHour - utcOffset + 24) % 24;
+  }, [processedFeed.insights.mostActiveHour]);
 
   // Render function for activity by hour visualization
   function renderActivityByHour(activityByHour: Record<number, number>) {
@@ -170,7 +201,7 @@ export default function AnalysisResults({
 
         {/* Activity by Hour chart */}
         <div className="bg-white p-3 sm:p-4 rounded-lg border">
-          {renderActivityByHour(processedFeed.activityByHour)}
+          {renderActivityByHour(localizedActivityByHour)}
         </div>
 
         {/* Most active time */}
@@ -184,8 +215,8 @@ export default function AnalysisResults({
                 {t("analysis.mostActiveHour")}
               </p>
               <p className="text-lg sm:text-xl font-semibold">
-                {processedFeed.insights.mostActiveHour}:00 -{" "}
-                {processedFeed.insights.mostActiveHour + 1}:00
+                {localizedMostActiveHour}:00 -{" "}
+                {(localizedMostActiveHour + 1) % 24}:00
               </p>
             </div>
             <div>

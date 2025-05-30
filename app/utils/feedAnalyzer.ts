@@ -89,7 +89,7 @@ function extractDateAndHour(isoString: string, userTimezone?: string) {
 // Main analyzer function
 export async function analyzeFeed(
   feedData: any,
-  options: { locale?: string; userHandle?: string } = {} // locale parameter kept for compatibility but ignored for route independence
+  options: { locale?: string; userHandle?: string; userTimezone?: string } = {} // locale parameter kept for compatibility but ignored for route independence
 ): Promise<ProcessedFeedData> {
   console.log(
     `Starting feed analysis with ${feedData?.feed?.length || 0} items`
@@ -120,6 +120,7 @@ export async function analyzeFeed(
 
   // Use the provided user handle, or extract from the first post as fallback
   const userHandle = options.userHandle || "";
+  const userTimezone = options.userTimezone;
   const userDid = feed.length > 0 ? feed[0]?.post?.author?.did : "";
 
   console.log(`User handle provided: ${userHandle || "Not provided"}`);
@@ -137,7 +138,7 @@ export async function analyzeFeed(
     if (!post) return;
     const createdAt = post.record?.createdAt || post.indexedAt;
     if (!createdAt) return;
-    const { date, hour } = extractDateAndHour(createdAt);
+    const { date, hour } = extractDateAndHour(createdAt, userTimezone);
     activityByHour[hour] = (activityByHour[hour] || 0) + 1;
     if (!activityByDay[date]) {
       activityByDay[date] = {

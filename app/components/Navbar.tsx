@@ -21,8 +21,8 @@ export default function Navbar() {
               src="/logo.png"
               alt="Bluesky Analytics Logo"
               width={32}
-              height={32}
-              className="h-8 w-8"
+              height={26}
+              className="h-8 w-auto"
             />
             <span className="font-semibold text-lg hidden sm:inline-block">
               Bluesky Analytics

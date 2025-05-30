@@ -5,6 +5,7 @@ import FadeAnimatedText from "@/components/ui/fade-animation";
 import GradientAnimatedText from "@/components/ui/gradient-animated-text";
 import GSAPLoader from "@/components/ui/gsap-loader";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 interface LoadingStateProps {
   message?: string;
@@ -32,6 +33,20 @@ export default function LoadingState({ message }: LoadingStateProps) {
           />
         </CardContent>
       </Card>
+
+      {/* Loading Animation */}
+      <div className="flex justify-center items-center w-full">
+        <div className="relative w-[600px] h-[338px] sm:w-[800px] sm:h-[450px] md:w-[1000px] md:h-[563px] lg:w-[1200px] lg:h-[675px]">
+          <Image
+            src="/loading-animation.webp"
+            alt="Loading animation"
+            fill
+            className="object-contain"
+            sizes="(max-width: 640px) 600px, (max-width: 768px) 800px, (max-width: 1024px) 1000px, 1200px"
+            priority
+          />
+        </div>
+      </div>
     </div>
   );
 }

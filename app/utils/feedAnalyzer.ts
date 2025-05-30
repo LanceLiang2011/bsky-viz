@@ -89,8 +89,7 @@ function extractDateAndHour(isoString: string, userTimezone?: string) {
 // Main analyzer function
 export async function analyzeFeed(
   feedData: any,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  options: { locale?: string } = {} // locale parameter kept for compatibility but ignored for route independence
+  options: { locale?: string; userHandle?: string } = {} // locale parameter kept for compatibility but ignored for route independence
 ): Promise<ProcessedFeedData> {
   console.log(
     `Starting feed analysis with ${feedData?.feed?.length || 0} items`
@@ -119,8 +118,11 @@ export async function analyzeFeed(
 
   const feed = feedData?.feed || [];
 
-  // Extract the user's DID from the first post in the feed (which should be the user's own post)
+  // Use the provided user handle, or extract from the first post as fallback
+  const userHandle = options.userHandle || "";
   const userDid = feed.length > 0 ? feed[0]?.post?.author?.did : "";
+
+  console.log(`User handle provided: ${userHandle || "Not provided"}`);
   console.log(`User DID identified as: ${userDid || "Not found"}`);
 
   console.log(`Processing ${feed.length} feed items...`);
@@ -239,17 +241,23 @@ export async function analyzeFeed(
     }
   }
 
-  console.log(`Building top interactions, filtering out user DID: ${userDid}`);
+  console.log(
+    `Building top interactions, filtering out user DID: ${userDid} and handle: ${userHandle}`
+  );
   console.log(
     `Total interaction accounts before filtering: ${
       Object.keys(interactionCounts).length
     }`
   );
 
-  // When building topInteractions, filter out the user's own DID
-  // Fix TypeScript errors by using the did parameter
+  // When building topInteractions, filter out the user's own DID and handle
   const topInteractions = Object.entries(interactionCounts)
-    .filter(([interactionDid]) => interactionDid !== userDid) // Fixed unused variable
+    .filter(([interactionDid, { handle }]) => {
+      // Filter out both the user's DID and handle to exclude the analyzed user completely
+      const isDifferentDid = !userDid || interactionDid !== userDid;
+      const isDifferentHandle = !userHandle || handle !== userHandle;
+      return isDifferentDid && isDifferentHandle;
+    })
     .map(([interactionDid, { count, handle, displayName }]) => ({
       did: interactionDid,
       handle,

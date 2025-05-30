@@ -243,7 +243,10 @@ async function fetchBlueskyData(handle: string, locale?: string) {
 
     // Process the feed data
     console.log("Starting feed analysis on server...");
-    const processedFeed = await analyzeFeed({ feed: allFeedItems }, { locale });
+    const processedFeed = await analyzeFeed(
+      { feed: allFeedItems },
+      { locale, userHandle: cleanHandle }
+    );
     console.log("Feed analysis completed on server");
 
     // Prepare text for OpenAI
@@ -295,7 +298,7 @@ export default async function HandlePage({
 
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <BackButton />
+        <BackButton locale={locale} />
         <Card>
           <CardContent className="pt-6">
             <div className="text-red-600 p-4 bg-red-50 rounded-lg">
@@ -310,7 +313,7 @@ export default async function HandlePage({
   if (!result.success || !result.profile) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <BackButton />
+        <BackButton locale={locale} />
         <Card>
           <CardContent className="pt-6">
             <div className="text-gray-600">{t("results.noData")}</div>
@@ -322,7 +325,7 @@ export default async function HandlePage({
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
-      <BackButton />
+      <BackButton locale={locale} />
       <ProfileCard profile={result.profile} />
 
       {/* OpenAI Summary Card */}

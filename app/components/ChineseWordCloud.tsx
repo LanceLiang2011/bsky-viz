@@ -27,8 +27,8 @@ export interface WordCloudConfig {
 // Default configuration
 const DEFAULT_CONFIG: WordCloudConfig = {
   maxWords: 100,
-  minFontSize: 14,
-  maxFontSize: 65,
+  minFontSize: 18,
+  maxFontSize: 72,
   colors: [
     "#1DA1F2", // Twitter Blue
     "#657786", // Dark Gray

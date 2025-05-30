@@ -23,7 +23,7 @@ export default function Home() {
           <details className="group">
             <summary className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors list-none">
               <span className="inline-flex items-center">
-                What is Bluesky Analytics?
+                {t("app.whatIsTitle")}
                 <svg
                   className="w-4 h-4 ml-1 transition-transform group-open:rotate-180"
                   fill="none"
@@ -41,10 +41,7 @@ export default function Home() {
             </summary>
             <div className="mt-4 text-sm text-muted-foreground max-w-2xl mx-auto">
               <p>
-                Free tool to visualize Bluesky user activity patterns,
-                engagement metrics, and social interactions. Analyze any public
-                profile with interactive charts and insights while respecting
-                privacy.
+                {t("app.whatIsDescription")}
               </p>
             </div>
           </details>

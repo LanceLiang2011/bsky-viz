@@ -1,7 +1,9 @@
 {
   "app": {
     "title": "Bluesky 用户数据分析",
-    "description": "分析任何 Bluesky 用户的活动和参与模式"
+    "description": "分析任何 Bluesky 用户的活动和参与模式",
+    "whatIsTitle": "什么是 Bluesky 数据分析？",
+    "whatIsDescription": "免费工具，可视化 Bluesky 用户活动模式、参与度指标和社交互动。在尊重隐私的前提下，通过交互式图表和洞察分析任何公开个人资料。"
   },
   "form": {
     "title": "输入 Bluesky 用户名",

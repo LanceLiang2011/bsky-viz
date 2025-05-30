@@ -1,7 +1,9 @@
 {
   "app": {
     "title": "Bluesky User Analytics",
-    "description": "Analyze any Bluesky user's activity and engagement patterns"
+    "description": "Analyze any Bluesky user's activity and engagement patterns",
+    "whatIsTitle": "What is Bluesky Analytics?",
+    "whatIsDescription": "Free tool to visualize Bluesky user activity patterns, engagement metrics, and social interactions. Analyze any public profile with interactive charts and insights while respecting privacy."
   },
   "form": {
     "title": "Enter Bluesky Handle",

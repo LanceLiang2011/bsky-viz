@@ -253,7 +253,7 @@ async function fetchBlueskyData(handle: string, locale?: string) {
     const postsTextForOpenAI = allFeedItems
       .map((item) => item.post?.record?.text)
       .filter((text) => typeof text === "string" && text.trim() !== "")
-      .slice(0, 100)
+      .slice(0, 200)
       .join("\n\n---\n\n");
 
     let openAISummary = null;

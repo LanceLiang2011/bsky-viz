@@ -22,8 +22,42 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bluesky User Analytics",
-  description: "Analyze any Bluesky user's activity and engagement patterns",
+  title: {
+    default: "Bluesky Analytics - Visualize Social Media Activity",
+    template: "%s | Bluesky Analytics",
+  },
+  description:
+    "Free analytics tool to analyze Bluesky user activity patterns, engagement metrics, and social interactions with interactive visualizations.",
+  keywords: [
+    "bluesky analytics",
+    "social media analytics",
+    "activity visualization",
+    "engagement metrics",
+  ],
+  authors: [{ name: "Bluesky Analytics" }],
+  openGraph: {
+    type: "website",
+    url: "https://www.bsky-viz.com",
+    siteName: "Bluesky Analytics",
+    title: "Bluesky Analytics - Visualize Social Media Activity",
+    description:
+      "Free analytics tool to analyze Bluesky user activity patterns and engagement metrics.",
+    images: [
+      {
+        url: "https://www.bsky-viz.com/og-image.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Bluesky Analytics - Visualize Social Media Activity",
+    description:
+      "Free analytics tool to analyze Bluesky user activity patterns.",
+  },
+  metadataBase: new URL("https://www.bsky-viz.com"),
+  robots: { index: true, follow: true },
   icons: {
     icon: [
       { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
@@ -71,8 +105,40 @@ export default async function LocaleLayout({
   // side is the easiest way to get started
   const messages = await getMessages();
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Bluesky Analytics",
+    description:
+      "Free analytics tool to analyze Bluesky user activity patterns, engagement metrics, and social interactions with interactive visualizations.",
+    url: "https://www.bsky-viz.com",
+    applicationCategory: "SocialNetworkingApplication",
+    operatingSystem: "Any",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    creator: {
+      "@type": "Person",
+      name: "Lance",
+    },
+    featureList: [
+      "Activity visualization",
+      "Engagement metrics",
+      "Interactive charts",
+      "Privacy-first analytics",
+    ],
+  };
+
   return (
     <html lang={locale}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >

@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Block indexing of API routes and private pages
+Disallow: /api/
+Disallow: /_next/
+Disallow: /_vercel/
+
+# Allow search engines to crawl main content
+Allow: /en/
+Allow: /zh-cn/
+
+# Sitemap location
+Sitemap: https://www.bsky-viz.com/sitemap.xml
+
+# Crawl delay to be respectful
+Crawl-delay: 1

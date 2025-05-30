@@ -23,6 +23,38 @@ export default function Home() {
         </div>
 
         <HandleSearchForm />
+
+        {/* Minimal SEO content - subtle and collapsible */}
+        <div className="text-center">
+          <details className="group">
+            <summary className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors list-none">
+              <span className="inline-flex items-center">
+                What is Bluesky Analytics?
+                <svg
+                  className="w-4 h-4 ml-1 transition-transform group-open:rotate-180"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </span>
+            </summary>
+            <div className="mt-4 text-sm text-muted-foreground max-w-2xl mx-auto">
+              <p>
+                Free tool to visualize Bluesky user activity patterns,
+                engagement metrics, and social interactions. Analyze any public
+                profile with interactive charts and insights while respecting
+                privacy.
+              </p>
+            </div>
+          </details>
+        </div>
       </div>
     </div>
   );

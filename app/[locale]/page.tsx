@@ -1,6 +1,5 @@
 import { useTranslations } from "next-intl";
 import HandleSearchForm from "../components/HandleSearchForm";
-import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default function Home() {
   const t = useTranslations();
@@ -8,11 +7,6 @@ export default function Home() {
   return (
     <div className="container mx-auto p-8 max-w-4xl">
       <div className="space-y-8">
-        {/* Language Switcher */}
-        <div className="flex justify-end">
-          <LanguageSwitcher />
-        </div>
-
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold tracking-tight">
             {t("app.title")}

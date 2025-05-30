@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import Footer from "../components/Footer";
+import Navbar from "../components/Navbar";
 import "../globals.css";
 
 // Use consistent font configuration to avoid hydration mismatches
@@ -143,6 +144,7 @@ export default async function LocaleLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <NextIntlClientProvider messages={messages}>
+          <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
         </NextIntlClientProvider>

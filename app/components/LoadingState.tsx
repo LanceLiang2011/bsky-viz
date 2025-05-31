@@ -21,6 +21,7 @@ const animations = [
   "https://lottie.host/fe1e8db3-cafd-452b-9a08-5eb75d8f9abd/MuGlhMw0bk.lottie",
   "https://lottie.host/1a64fe0e-1d30-4938-92ac-5c62d0b34434/zXGgXwzSG9.lottie",
   "https://lottie.host/789ba419-1f71-4831-8d34-c7c36f2f107a/7bdEnG4NLw.lottie",
+  "https://lottie.host/0b9da4d4-4554-4037-aca0-05636d021bf5/aUQptlKDz9.lottie",
 ];
 
 function getRandomAnimationString(): string {

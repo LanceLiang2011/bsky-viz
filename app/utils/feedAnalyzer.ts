@@ -275,7 +275,7 @@ export async function analyzeFeed(
       count,
     }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 20);
+    .slice(0, 30);
 
   console.log(`Top interactions after filtering: ${topInteractions.length}`);
   console.log(`First few interactions:`, topInteractions.slice(0, 3));

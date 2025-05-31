@@ -189,7 +189,7 @@ async function fetchBlueskyData(handle: string, locale?: string) {
     let hasMoreData = true;
     let allFeedItems: FeedItem[] = [];
     let pageCount = 0;
-    const MAX_PAGES = 10;
+    const MAX_PAGES = 12; // Limit to 12 pages to avoid excessive data
 
     while (hasMoreData && pageCount < MAX_PAGES) {
       pageCount++;
@@ -383,7 +383,15 @@ export default async function HandlePage({
       )}
 
       {result.processedFeed && (
-        <AnalysisResults processedFeed={result.processedFeed} />
+        <AnalysisResults
+          processedFeed={result.processedFeed}
+          currentUser={{
+            did: result.profile.did,
+            handle: result.profile.handle,
+            displayName: result.profile.displayName,
+            avatar: result.profile.avatar,
+          }}
+        />
       )}
     </div>
   );

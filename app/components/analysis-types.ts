@@ -37,6 +37,12 @@ export interface MostActiveTimeProps {
 
 export interface TopInteractionsProps {
   interactions: InteractionData[];
+  currentUser?: {
+    did: string;
+    handle: string;
+    displayName?: string;
+    avatar?: string;
+  };
   className?: string;
   maxHeight?: string;
 }

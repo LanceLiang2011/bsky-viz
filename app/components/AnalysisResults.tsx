@@ -61,10 +61,17 @@ interface ProcessedFeedData {
 
 interface AnalysisResultsProps {
   processedFeed: ProcessedFeedData;
+  currentUser?: {
+    did: string;
+    handle: string;
+    displayName?: string;
+    avatar?: string;
+  };
 }
 
 export default function AnalysisResults({
   processedFeed,
+  currentUser,
 }: AnalysisResultsProps) {
   const t = useTranslations();
 
@@ -200,7 +207,10 @@ export default function AnalysisResults({
         </div>
 
         {/* Top interactions */}
-        <TopInteractions interactions={processedFeed.topInteractions} />
+        <TopInteractions
+          interactions={processedFeed.topInteractions}
+          currentUser={currentUser}
+        />
 
         {/* Word Cloud */}
         {processedFeed.isChineseContent && processedFeed.rawText ? (

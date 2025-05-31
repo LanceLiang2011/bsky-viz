@@ -206,7 +206,7 @@
       "apiAvailableAnswer": "目前我们不提供公开 API。所有分析都通过我们的网页界面提供。",
       "contactSupport": "联系与支持",
       "reportBug": "如何报告错误或请求功能？",
-      "reportBugAnswer": "作为开源项目，我们欢迎错误报告和功能请求。您可以通过我们的代码仓库为项目做出贡献或报告问题。",
+      "reportBugAnswer": "作为开源项目，我们欢迎错误报告和功能请求。您可以通过我们的代码仓库为项目做出贡献或报告问题。同时您可以通过我的bluesky账号直接联系我：@lanceliang.bsky.social",
       "commercialUse": "我可以将此用于商业目的吗？",
       "commercialUseAnswer": "Bluesky 数据分析可免费用于个人和商业目的。但是，请遵守 Bluesky 的服务条款和 API 速率限制。",
       "stillNeedHelp": "仍需要帮助？",

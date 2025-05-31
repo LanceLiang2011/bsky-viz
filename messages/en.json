@@ -206,7 +206,7 @@
       "apiAvailableAnswer": "Currently, we don't offer a public API. All analytics are available through our web interface.",
       "contactSupport": "Contact & Support",
       "reportBug": "How can I report a bug or request a feature?",
-      "reportBugAnswer": "As an open-source project, we welcome bug reports and feature requests. You can contribute to the project or report issues through our code repository.",
+      "reportBugAnswer": "As an open-source project, we welcome bug reports and feature requests. You can contribute to the project or report issues through our code repository. You can also contact me directly through my Bluesky account: @lanceliang.bsky.social",
       "commercialUse": "Can I use this for commercial purposes?",
       "commercialUseAnswer": "Bluesky Analytics is free to use for personal and commercial purposes. However, please respect Bluesky's terms of service and API rate limits.",
       "stillNeedHelp": "Still Need Help?",

@@ -84,6 +84,95 @@ The theme system uses CSS variables defined in `globals.css`:
 - `--primary`, `--primary-foreground`
 - And more...
 
+## 📖 Typography & Readability Guidelines
+
+### Enhanced Font Properties for Maximum Readability
+
+When creating text-heavy components (especially content like summaries, articles, or long descriptions), follow these typography best practices:
+
+**Responsive Font Sizing:**
+
+```tsx
+// ✅ Progressive scaling for optimal reading
+className = "text-base sm:text-lg lg:text-xl";
+
+// ✅ Responsive titles
+className = "text-xl sm:text-2xl lg:text-3xl";
+```
+
+**Line Height & Spacing:**
+
+```tsx
+// ✅ Enhanced line spacing for readability
+className = "leading-relaxed sm:leading-loose lg:leading-loose";
+
+// ✅ Letter spacing for character definition
+className = "tracking-wide";
+```
+
+**Text Color & Contrast:**
+
+```tsx
+// ✅ High contrast for body text
+className = "text-foreground/90";
+
+// ✅ Standard contrast for UI text
+className = "text-foreground";
+
+// ✅ Muted text for secondary content
+className = "text-muted-foreground";
+```
+
+**Content Spacing:**
+
+```tsx
+// ✅ Generous padding for comfortable reading
+className = "px-6 sm:px-8 pb-8";
+
+// ✅ Proper vertical rhythm
+className = "pb-6"; // for headers
+className = "pt-0"; // for content sections
+```
+
+### Global Text Rendering Enhancements
+
+The following CSS properties are applied globally for improved text rendering:
+
+```css
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+```
+
+These settings provide:
+
+- **Better kerning** and character spacing
+- **Smoother font rendering** on all devices
+- **Improved legibility** especially for smaller text sizes
+
+### Component Example: OpenAISummaryCard
+
+The `OpenAISummaryCard` serves as the gold standard for readable typography:
+
+```tsx
+// Title with progressive scaling
+<CardTitle className="text-xl sm:text-2xl lg:text-3xl font-semibold text-foreground leading-tight">
+
+// Body text optimized for reading
+<div className="text-foreground/90 whitespace-pre-line text-base sm:text-lg lg:text-xl leading-relaxed sm:leading-loose lg:leading-loose font-normal tracking-wide">
+```
+
+**Key Features:**
+
+- 📱 **Mobile-first responsive** - starts at comfortable base size
+- 💻 **Tablet optimized** - scales up for medium screens
+- 🖥️ **Desktop enhanced** - maximum size for large displays
+- 👁️ **High contrast** - 90% opacity for optimal readability
+- 📏 **Generous spacing** - loose line height prevents cramped text
+- 🔤 **Enhanced kerning** - tracking-wide for better character definition
+
 ## 📝 Component Development Checklist
 
 When creating or updating components:
@@ -112,6 +201,7 @@ The following components have been updated for proper dark mode support:
 - `ThemeToggle.tsx` - Handles theme switching with proper icons
 - `Navbar.tsx` - Includes theme toggle with proper styling
 - `[handle]/page.tsx` - Fixed `text-gray-600` instance
+- `BackgroundGradient.tsx` - **NEW** Animated gradient background component with dark mode support
 
 **Total Fixed**: 45+ hardcoded color instances across 12+ components
 
@@ -120,6 +210,77 @@ The following components have been updated for proper dark mode support:
 - `BackButton.tsx` - No hardcoded colors found
 - `WordCloud.tsx` - Uses semantic color classes
 - `ChineseWordCloud.tsx` - Uses semantic color classes
+
+## 🌈 BackgroundGradient Component
+
+### Overview
+
+The `BackgroundGradient` component provides beautiful animated gradient backgrounds that are fully compatible with dark mode. It features:
+
+- **Smooth animations** using Framer Motion
+- **Three gradient presets** - default, subtle, vibrant
+- **Dark mode compatibility** with theme-aware backgrounds
+- **Customizable animation** - can be disabled for static gradients
+- **Optimized performance** - hardware-accelerated animations
+
+### Usage
+
+```tsx
+import { BackgroundGradient } from "./ui/background-gradient";
+
+// Basic usage
+<BackgroundGradient>
+  <Card>Your content here</Card>
+</BackgroundGradient>
+
+// With gradient options
+<BackgroundGradient
+  gradientColors="subtle"
+  animate={true}
+  className="rounded-[22px]"
+>
+  <Card>Your content here</Card>
+</BackgroundGradient>
+```
+
+### Gradient Options
+
+- **`"default"`** - Balanced colors for general use
+- **`"subtle"`** - Softer colors for text-heavy content (recommended for OpenAISummaryCard)
+- **`"vibrant"`** - Bold colors for attention-grabbing elements
+
+### Implementation Example: OpenAISummaryCard
+
+```tsx
+<BackgroundGradient
+  className="rounded-[22px] bg-background dark:bg-zinc-900"
+  gradientColors="subtle"
+  animate={true}
+>
+  <Card className="bg-background/95 dark:bg-zinc-900/95 backdrop-blur-sm border-border/50 shadow-xl">
+    {/* Card content */}
+  </Card>
+</BackgroundGradient>
+```
+
+**Key Features:**
+
+- Uses `bg-background/95` for semi-transparent overlay
+- `backdrop-blur-sm` for modern glass effect
+- `dark:bg-zinc-900/95` for dark mode compatibility
+- `shadow-xl` for enhanced depth perception
+
+### Dependencies
+
+- `motion` - For smooth animations
+- `@tabler/icons-react` - For additional icons (if needed)
+
+### Best Practices
+
+1. **Choose appropriate gradients** - Use "subtle" for text content, "vibrant" for CTAs
+2. **Maintain readability** - Always test text contrast over gradients
+3. **Performance** - Set `animate={false}` for components that don't need animation
+4. **Dark mode** - Always include dark mode background overrides
 
 ## 💡 Examples
 

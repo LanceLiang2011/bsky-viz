@@ -118,5 +118,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Enhanced text rendering for better readability */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }

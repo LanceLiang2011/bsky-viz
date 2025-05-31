@@ -14,6 +14,11 @@ interface LoadingStateProps {
 const animations = [
   "https://lottie.host/b883c118-ab24-4b1a-8d0b-be5cfa787c01/UhSy2uwf6k.lottie",
   "https://lottie.host/973b4528-4617-4295-9000-fa576ba5a01d/SsXbMe1O68.lottie",
+  "https://lottie.host/9664b3bf-fca2-44e9-9f4b-380dd3d4c0c0/7bPZzOCDqS.lottie",
+  "https://lottie.host/eb0df2de-8195-48ee-aac5-82d6a663ed3a/NMt795RWcr.lottie",
+  "https://lottie.host/286b474e-5d4a-4fe7-82a4-10e67b084513/TRpPreN9PC.lottie",
+  "https://lottie.host/8a1b4ebe-10de-4741-954e-edda7b12ef5d/UPZgZtfPZg.lottie",
+  "https://lottie.host/fe1e8db3-cafd-452b-9a08-5eb75d8f9abd/MuGlhMw0bk.lottie",
 ];
 
 function getRandomAnimationString(): string {

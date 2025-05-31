@@ -33,6 +33,7 @@ interface ProcessedFeedData {
     did: string;
     handle: string;
     displayName: string;
+    avatar?: string;
     count: number;
   }>;
   commonHashtags: Array<{

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { getAvatarFallbackChar } from "@/app/utils/avatarUtils";
 import Image from "next/image";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -110,9 +111,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
-                  {(profile.displayName || profile.handle)
-                    .charAt(0)
-                    .toUpperCase()}
+                  {getAvatarFallbackChar(profile.displayName, profile.handle)}
                 </div>
               )}
             </div>

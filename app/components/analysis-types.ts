@@ -20,6 +20,7 @@ export interface InteractionData {
   did: string;
   handle: string;
   displayName: string;
+  avatar?: string;
   count: number;
 }
 

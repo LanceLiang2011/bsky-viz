@@ -1,6 +1,6 @@
 "use client";
 
-// Example usage of extracted analysis components
+// Example usage of individual analysis components
 // This file demonstrates how to use the components independently
 
 import {
@@ -32,12 +32,14 @@ const sampleInteractions: InteractionData[] = [
     did: "did:plc:example1",
     handle: "alice.bsky.social",
     displayName: "Alice Johnson",
+    avatar: "https://example.com/avatar1.jpg",
     count: 45,
   },
   {
     did: "did:plc:example2",
     handle: "bob.bsky.social",
     displayName: "Bob Smith",
+    avatar: "https://example.com/avatar2.jpg",
     count: 32,
   },
   {
@@ -49,56 +51,62 @@ const sampleInteractions: InteractionData[] = [
 ];
 
 export default function AnalysisComponentsExample() {
-  // This would be calculated based on user's timezone
-  const localizedMostActiveHour = 16; // 4 PM local time
-
   return (
-    <div className="space-y-6 p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Analysis Components Example</h1>
+    <div className="container mx-auto p-8 max-w-4xl space-y-6">
+      <h1 className="text-3xl font-bold mb-8">Analysis Components Example</h1>
 
-      {/* Key Insights Example */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3">Key Insights Component</h2>
-        <KeyInsights insights={sampleInsights} />
-      </section>
+      <div className="grid gap-6">
+        {/* Key Insights Component */}
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">Key Insights Component</h2>
+          <KeyInsights insights={sampleInsights} />
+        </div>
 
-      {/* Most Active Time Example */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3">
-          Most Active Time Component
-        </h2>
-        <MostActiveTime
-          data={sampleMostActiveTime}
-          localizedMostActiveHour={localizedMostActiveHour}
-        />
-      </section>
-
-      {/* Top Interactions Example */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3">
-          Top Interactions Component
-        </h2>
-        <TopInteractions
-          interactions={sampleInteractions}
-          maxHeight="max-h-40"
-        />
-      </section>
-
-      {/* Custom styling example */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3">Custom Styled Components</h2>
-        <div className="space-y-4">
-          <KeyInsights
-            insights={sampleInsights}
-            className="border border-blue-200 rounded-lg p-4"
-          />
-          <TopInteractions
-            interactions={sampleInteractions}
-            className="shadow-lg"
-            maxHeight="max-h-32"
+        {/* Most Active Time Component */}
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">Most Active Time Component</h2>
+          <MostActiveTime
+            data={sampleMostActiveTime}
+            localizedMostActiveHour={16} // 4 PM local time (example)
           />
         </div>
-      </section>
+
+        {/* Top Interactions Component */}
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">Top Interactions Component</h2>
+          <TopInteractions interactions={sampleInteractions} />
+        </div>
+
+        {/* Custom styling examples */}
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">With Custom Styling</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            <KeyInsights
+              insights={sampleInsights}
+              className="border-blue-200 bg-blue-50"
+            />
+            <TopInteractions
+              interactions={sampleInteractions.slice(0, 2)}
+              className="border-green-200 bg-green-50"
+              maxHeight="max-h-32"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+        <h3 className="font-semibold mb-2">Usage Notes:</h3>
+        <ul className="text-sm text-gray-600 space-y-1">
+          <li>• Each component accepts custom className props for styling</li>
+          <li>
+            • TopInteractions component accepts maxHeight prop for scroll
+            control
+          </li>
+          <li>• All components are fully typed with TypeScript</li>
+          <li>• Components handle loading states and edge cases gracefully</li>
+          <li>• Avatar images are loaded with fallback to initials</li>
+        </ul>
+      </div>
     </div>
   );
 }

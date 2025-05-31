@@ -25,6 +25,7 @@ interface InteractionAccount {
   did: string;
   handle: string;
   displayName: string;
+  avatar?: string;
   count: number;
 }
 
@@ -98,7 +99,12 @@ export async function analyzeFeed(
   const activityByHour: ActivityByHour = {};
   const activityByDay: ActivityByDay = {};
   const interactionCounts: {
-    [did: string]: { count: number; handle: string; displayName: string };
+    [did: string]: {
+      count: number;
+      handle: string;
+      displayName: string;
+      avatar?: string;
+    };
   } = {};
   const hashtagCounts: { [tag: string]: number } = {};
   const allTexts: string[] = []; // Collect all text for word cloud processing
@@ -169,6 +175,7 @@ export async function analyzeFeed(
             count: 0,
             handle: parentAuthor.handle || "",
             displayName: parentAuthor.displayName || parentAuthor.handle || "",
+            avatar: parentAuthor.avatar || undefined,
           };
         }
         interactionCounts[parentAuthor.did].count++;
@@ -184,6 +191,7 @@ export async function analyzeFeed(
             count: 0,
             handle: rootAuthor.handle || "",
             displayName: rootAuthor.displayName || rootAuthor.handle || "",
+            avatar: rootAuthor.avatar || undefined,
           };
         }
         interactionCounts[rootAuthor.did].count++;
@@ -259,10 +267,11 @@ export async function analyzeFeed(
       const isDifferentHandle = !userHandle || handle !== userHandle;
       return isDifferentDid && isDifferentHandle;
     })
-    .map(([interactionDid, { count, handle, displayName }]) => ({
+    .map(([interactionDid, { count, handle, displayName, avatar }]) => ({
       did: interactionDid,
       handle,
       displayName,
+      avatar,
       count,
     }))
     .sort((a, b) => b.count - a.count)

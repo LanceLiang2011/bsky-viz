@@ -6,6 +6,7 @@ import GradientAnimatedText from "@/components/ui/gradient-animated-text";
 import GSAPLoader from "@/components/ui/gsap-loader";
 import { useTranslations } from "next-intl";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import SplashCursor from "./SplashCursor";
 
 interface LoadingStateProps {
   message?: string;
@@ -57,6 +58,7 @@ export default function LoadingState({ message }: LoadingStateProps) {
       <div className="">
         <DotLottieReact src={randomAnimation} loop autoplay />
       </div>
+      <SplashCursor />
     </div>
   );
 }

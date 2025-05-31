@@ -122,7 +122,7 @@ export default function AnalysisResults({
           {t("analysis.activityByHour")}
         </h3>
 
-        <div className="text-xs sm:text-sm text-gray-500 mb-2">
+        <div className="text-xs sm:text-sm text-muted-foreground mb-2">
           {t("analysis.timeZoneNote", {
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           })}
@@ -131,7 +131,7 @@ export default function AnalysisResults({
         <div className="space-y-6 sm:space-y-8">
           {timeSegments.map((segment) => (
             <div key={segment.label} className="space-y-1">
-              <div className="text-sm font-medium text-gray-700">
+              <div className="text-sm font-medium text-foreground">
                 {segment.label}
               </div>
               <div className="grid grid-cols-6 gap-1 sm:gap-2">
@@ -142,12 +142,14 @@ export default function AnalysisResults({
 
                   return (
                     <div key={hour} className="flex flex-col items-center">
-                      <div className="text-xs text-gray-600 mb-1">{count}</div>
+                      <div className="text-xs text-muted-foreground mb-1">
+                        {count}
+                      </div>
                       <div
                         className="bg-blue-500 w-8 sm:w-12 rounded-t-sm"
                         style={{ height: `${heightPercentage}px` }}
                       ></div>
-                      <div className="text-xs text-gray-600 mt-1">
+                      <div className="text-xs text-muted-foreground mt-1">
                         {hour}:00
                       </div>
                     </div>
@@ -176,7 +178,7 @@ export default function AnalysisResults({
         <KeyInsights insights={processedFeed.insights} />
 
         {/* Activity by Hour chart */}
-        <div className="bg-white p-3 sm:p-4 rounded-lg border">
+        <div className="bg-card p-3 sm:p-4 rounded-lg border">
           {renderActivityByHour(localizedActivityByHour)}
         </div>
 
@@ -187,7 +189,7 @@ export default function AnalysisResults({
         />
 
         {/* Languages used */}
-        <div className="bg-white p-3 sm:p-4 rounded-lg border">
+        <div className="bg-card p-3 sm:p-4 rounded-lg border">
           <h3 className="text-base sm:text-lg font-medium mb-2">
             {t("analysis.languagesUsed")}
           </h3>
@@ -264,10 +266,10 @@ export default function AnalysisResults({
       </CardContent>
       <CardFooter className="px-4 sm:px-6">
         <details className="cursor-pointer w-full">
-          <summary className="text-sm font-medium text-gray-700 mb-2">
+          <summary className="text-sm font-medium text-foreground mb-2">
             {t("analysis.viewRawData")}
           </summary>
-          <pre className="bg-gray-100 p-3 sm:p-4 rounded-lg overflow-auto text-xs sm:text-sm mt-2 max-h-96">
+          <pre className="bg-muted p-3 sm:p-4 rounded-lg overflow-auto text-xs sm:text-sm mt-2 max-h-96">
             {JSON.stringify(processedFeed, null, 2)}
           </pre>
         </details>

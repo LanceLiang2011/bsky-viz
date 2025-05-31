@@ -40,8 +40,8 @@ export default function KeyInsights({
       className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 ${className}`}
     >
       {insightItems.map((item) => (
-        <div key={item.key} className="bg-slate-50 p-3 sm:p-4 rounded-lg">
-          <h4 className="text-xs sm:text-sm font-medium text-gray-500 truncate">
+        <div key={item.key} className="bg-muted p-3 sm:p-4 rounded-lg">
+          <h4 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
             {item.label}
           </h4>
           <p className="text-lg sm:text-2xl font-bold">

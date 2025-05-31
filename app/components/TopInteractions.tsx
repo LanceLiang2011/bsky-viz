@@ -31,7 +31,7 @@ export default function TopInteractions({
   const listInteractions = interactions.slice(0, 30);
 
   return (
-    <div className={`bg-white p-3 sm:p-4 rounded-lg border ${className}`}>
+    <div className={`bg-card p-3 sm:p-4 rounded-lg border ${className}`}>
       <h3 className="text-base sm:text-lg font-medium mb-4">
         {t("analysis.topInteractions")}
       </h3>
@@ -54,7 +54,7 @@ export default function TopInteractions({
               <div
                 key={interaction.handle}
                 onClick={() => handleUserClick(interaction.handle)}
-                className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2 border-b last:border-b-0 gap-2 sm:gap-0 cursor-pointer hover:bg-gray-50 transition-colors duration-200 rounded-sm"
+                className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2 border-b last:border-b-0 gap-2 sm:gap-0 cursor-pointer hover:bg-muted/50 transition-colors duration-200 rounded-sm"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -71,7 +71,7 @@ export default function TopInteractions({
                 }'s profile`}
               >
                 <div className="flex items-center min-w-0 flex-1 gap-3">
-                  <span className="text-gray-400 mr-2 text-sm">
+                  <span className="text-muted-foreground mr-2 text-sm">
                     #{index + 1}
                   </span>
                   <Avatar className="size-8 shrink-0">
@@ -81,7 +81,7 @@ export default function TopInteractions({
                         alt={interaction.displayName || interaction.handle}
                       />
                     )}
-                    <AvatarFallback className="bg-blue-100 text-blue-600 text-sm font-medium">
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
                       {getAvatarFallbackChar(
                         interaction.displayName,
                         interaction.handle
@@ -93,12 +93,12 @@ export default function TopInteractions({
                     <span className="font-medium truncate text-sm sm:text-base">
                       {interaction.displayName || interaction.handle}
                     </span>
-                    <span className="text-gray-500 text-xs sm:text-sm truncate">
+                    <span className="text-muted-foreground text-xs sm:text-sm truncate">
                       @{interaction.handle}
                     </span>
                   </div>
                 </div>
-                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs sm:text-sm self-start sm:self-auto whitespace-nowrap">
+                <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs sm:text-sm self-start sm:self-auto whitespace-nowrap">
                   {interaction.count} {t("analysis.interactions")}
                 </span>
               </div>

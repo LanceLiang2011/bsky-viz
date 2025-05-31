@@ -47,7 +47,7 @@ export default function LoadingState({ message }: LoadingStateProps) {
         <CardContent className="text-center">
           <FadeAnimatedText
             text={t("pleaseWait")}
-            className="text-sm text-gray-600"
+            className="text-sm text-muted-foreground"
           />
         </CardContent>
       </Card>

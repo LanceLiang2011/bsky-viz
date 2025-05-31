@@ -78,7 +78,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
   };
 
   return (
-    <Card className="max-w-2xl mx-auto overflow-auto shadow-lg border-0 bg-gradient-to-br from-white to-gray-50 overflow-hiddenß">
+    <Card className="max-w-2xl mx-auto overflow-auto shadow-lg border-0 bg-gradient-to-br from-background to-muted overflow-hiddenß">
       {/* Banner */}
       {profile.banner ? (
         <div className="h-32 bg-gradient-to-r from-blue-400 to-purple-500 relative">
@@ -99,7 +99,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
         <div className="flex items-start gap-4">
           {/* Avatar */}
           <div className="-mt-16 relative z-10">
-            <div className="w-24 h-24 rounded-full border-4 border-white bg-white shadow-lg overflow-hidden">
+            <div className="w-24 h-24 rounded-full border-4 border-background bg-background shadow-lg overflow-hidden">
               {profile.avatar ? (
                 <Image
                   src={profile.avatar}
@@ -120,14 +120,14 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
           {/* Profile Info */}
           <div className="flex-1 min-w-0 pt-2">
             <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-xl font-bold text-gray-900 truncate">
+              <h1 className="text-xl font-bold text-foreground truncate">
                 {profile.displayName || profile.handle}
               </h1>
             </div>
-            <p className="text-gray-500 text-sm">@{profile.handle}</p>
+            <p className="text-muted-foreground text-sm">@{profile.handle}</p>
 
             {/* Member since */}
-            <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
+            <div className="flex items-center gap-1 mt-2 text-sm text-muted-foreground">
               <Calendar className="w-4 h-4" />
               <span>
                 {t("memberSince")} {formatDate(profile.createdAt)}
@@ -149,7 +149,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
         {/* Description */}
         {profile.description && (
           <div className="mt-4">
-            <p className="text-gray-700 whitespace-pre-line text-sm leading-relaxed">
+            <p className="text-foreground whitespace-pre-line text-sm leading-relaxed">
               {profile.description}
             </p>
           </div>
@@ -159,38 +159,38 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
       <CardContent className="space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-200">
+          <div className="text-center p-4 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl border border-primary/20 hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-center gap-1 mb-2">
-              <MessageCircle className="w-5 h-5 text-blue-600" />
+              <MessageCircle className="w-5 h-5 text-primary" />
             </div>
-            <div className="text-2xl font-bold text-gray-900">
+            <div className="text-2xl font-bold text-foreground">
               {formatNumber(profile.postsCount)}
             </div>
-            <div className="text-sm text-gray-600 font-medium">
+            <div className="text-sm text-muted-foreground font-medium">
               {t("posts")}
             </div>
           </div>
 
-          <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:shadow-md transition-all duration-200">
+          <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-green-500/20 rounded-xl border border-green-500/20 hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-center gap-1 mb-2">
               <Users className="w-5 h-5 text-green-600" />
             </div>
-            <div className="text-2xl font-bold text-gray-900">
+            <div className="text-2xl font-bold text-foreground">
               {formatNumber(profile.followsCount)}
             </div>
-            <div className="text-sm text-gray-600 font-medium">
+            <div className="text-sm text-muted-foreground font-medium">
               {t("following")}
             </div>
           </div>
 
-          <div className="text-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200 hover:shadow-md transition-all duration-200">
+          <div className="text-center p-4 bg-gradient-to-br from-red-500/10 to-red-500/20 rounded-xl border border-red-500/20 hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-center gap-1 mb-2">
               <Heart className="w-5 h-5 text-red-600" />
             </div>
-            <div className="text-2xl font-bold text-gray-900">
+            <div className="text-2xl font-bold text-foreground">
               {formatNumber(profile.followersCount)}
             </div>
-            <div className="text-sm text-gray-600 font-medium">
+            <div className="text-sm text-muted-foreground font-medium">
               {t("followers")}
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
         {profile.pinnedPost && (
           <div className="border-t pt-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium text-gray-900">
+              <h3 className="text-sm font-medium text-foreground">
                 {t("pinnedPost")}
               </h3>
               <Button

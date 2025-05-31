@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { ThemeToggle } from "./ThemeToggle";
 
 export default function Navbar() {
   const locale = useLocale();
@@ -29,8 +30,9 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Language Switcher */}
-          <div className="flex items-center">
+          {/* Theme Toggle and Language Switcher */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
             <LanguageSwitcher />
           </div>
         </div>

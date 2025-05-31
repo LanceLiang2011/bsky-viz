@@ -4,7 +4,8 @@ import { analyzeFeed } from "../../utils/feedAnalyzer";
 import ProfileCard from "../../components/ProfileCard";
 import AnalysisResults from "../../components/AnalysisResults";
 import BackButton from "../../components/BackButton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import OpenAISummaryCard from "../../components/OpenAISummaryCard";
+import { Card, CardContent } from "@/components/ui/card";
 
 // Define interfaces for the data
 export interface BlueskyProfile {
@@ -356,7 +357,7 @@ export default async function HandlePage({
         <BackButton locale={locale} />
         <Card>
           <CardContent className="pt-6">
-            <div className="text-gray-600">{t("results.noData")}</div>
+            <div className="text-muted-foreground">{t("results.noData")}</div>
           </CardContent>
         </Card>
       </div>
@@ -370,16 +371,7 @@ export default async function HandlePage({
 
       {/* OpenAI Summary Card */}
       {result.openAISummary && (
-        <Card className="mx-auto max-w-4xl">
-          <CardHeader>
-            <CardTitle>{t("openai.summaryTitle")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-700 whitespace-pre-line text-sm leading-relaxed">
-              {result.openAISummary}
-            </p>
-          </CardContent>
-        </Card>
+        <OpenAISummaryCard summary={result.openAISummary} />
       )}
 
       {result.processedFeed && (

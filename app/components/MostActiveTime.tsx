@@ -14,13 +14,13 @@ export default function MostActiveTime({
   const t = useTranslations();
 
   return (
-    <div className={`bg-white p-3 sm:p-4 rounded-lg border ${className}`}>
+    <div className={`bg-card p-3 sm:p-4 rounded-lg border ${className}`}>
       <h3 className="text-base sm:text-lg font-medium mb-2">
         {t("analysis.mostActiveTime")}
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
-          <p className="text-xs sm:text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {t("analysis.mostActiveHour")}
           </p>
           <p className="text-lg sm:text-xl font-semibold">
@@ -29,7 +29,7 @@ export default function MostActiveTime({
           </p>
         </div>
         <div>
-          <p className="text-xs sm:text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {t("analysis.mostActiveDay")}
           </p>
           <p className="text-lg sm:text-xl font-semibold break-words">

@@ -165,7 +165,7 @@ export default function AvatarCloud({
   return (
     <TooltipProvider>
       <div
-        className={`relative w-full h-[400px] sm:h-[480px] lg:h-[520px] bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 rounded-lg border overflow-hidden shadow-inner ${className}`}
+        className={`relative w-full h-[400px] sm:h-[480px] lg:h-[520px] bg-gradient-to-br from-primary/10 via-muted to-primary/20 rounded-lg border overflow-hidden shadow-inner ${className}`}
         style={{
           backgroundImage: `
             radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
@@ -218,7 +218,7 @@ export default function AvatarCloud({
                     />
                   )}
                   <AvatarFallback
-                    className={`bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-bold ${
+                    className={`bg-gradient-to-br from-primary to-primary/80 text-primary-foreground font-bold ${
                       effectiveScreenSize === "small" ? "text-lg" : "text-xl"
                     }`}
                   >
@@ -234,12 +234,12 @@ export default function AvatarCloud({
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="bg-gray-900/95 text-white border-gray-700 shadow-xl backdrop-blur-sm z-[9999]"
+              className="bg-popover/95 text-popover-foreground border shadow-xl backdrop-blur-sm z-[9999]"
               sideOffset={8}
             >
               <p className="font-medium">
                 {currentUser.displayName || currentUser.handle}
-                <span className="text-blue-300 ml-1">(You)</span>
+                <span className="text-primary ml-1">(You)</span>
               </p>
             </TooltipContent>
           </Tooltip>
@@ -258,9 +258,9 @@ export default function AvatarCloud({
           };
 
           const fallbackClasses = {
-            1: "bg-gradient-to-br from-indigo-200 to-purple-200 text-indigo-800 font-semibold", // Inner ring
-            2: "bg-gradient-to-br from-purple-100 to-pink-100 text-purple-700 font-medium", // Middle ring
-            3: "bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 font-medium", // Outer ring
+            1: "bg-gradient-to-br from-primary/20 to-primary/30 text-primary font-semibold", // Inner ring
+            2: "bg-gradient-to-br from-primary/10 to-primary/20 text-primary font-medium", // Middle ring
+            3: "bg-gradient-to-br from-muted to-muted/80 text-muted-foreground font-medium", // Outer ring
           };
 
           return (
@@ -307,14 +307,14 @@ export default function AvatarCloud({
               </TooltipTrigger>
               <TooltipContent
                 side="top"
-                className="bg-gray-900/95 text-white border-gray-700 shadow-xl backdrop-blur-sm z-[9999]"
+                className="bg-popover/95 text-popover-foreground border shadow-xl backdrop-blur-sm z-[9999]"
                 sideOffset={8}
               >
                 <div className="text-center">
                   <p className="font-medium text-sm">
                     {interaction.displayName || interaction.handle}
                   </p>
-                  <p className="text-xs text-gray-300 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {interaction.count} interactions
                   </p>
                 </div>
@@ -324,7 +324,7 @@ export default function AvatarCloud({
         })}
 
         {/* Center label with enhanced styling */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm text-gray-700 font-medium shadow-md border border-white/50">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm text-foreground font-medium shadow-md border border-border">
           {t("analysis.friendCircle")}
         </div>
       </div>

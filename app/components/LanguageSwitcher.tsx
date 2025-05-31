@@ -32,7 +32,9 @@ export default function LanguageSwitcher() {
         className="flex items-center gap-2"
       >
         <Languages className="h-4 w-4" />
-        {languages.find((lang) => lang.code === locale)?.nativeName}
+        <span className="hidden sm:inline">
+          {languages.find((lang) => lang.code === locale)?.nativeName}
+        </span>
       </Button>
 
       {isOpen && (

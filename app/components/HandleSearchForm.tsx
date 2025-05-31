@@ -146,9 +146,9 @@ export default function HandleSearchForm() {
 
             {/* Simple dropdown without Popover complexity */}
             {showDropdown && (
-              <div className="search-dropdown absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto">
+              <div className="search-dropdown absolute top-full left-0 right-0 z-50 mt-1 bg-card border border-border rounded-md shadow-lg max-h-64 overflow-y-auto">
                 {searchResults.length === 0 ? (
-                  <div className="px-3 py-2 text-sm text-gray-500">
+                  <div className="px-3 py-2 text-sm text-muted-foreground">
                     {isSearching ? "Searching..." : "No users found"}
                   </div>
                 ) : (
@@ -157,7 +157,7 @@ export default function HandleSearchForm() {
                       key={user.did}
                       type="button"
                       onClick={() => handleUserSelect(user)}
-                      className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0"
+                      className="w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors text-left border-b border-border last:border-b-0"
                     >
                       {user.avatar ? (
                         <img
@@ -166,15 +166,15 @@ export default function HandleSearchForm() {
                           className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                         />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                          <User className="w-4 h-4 text-gray-400" />
+                        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          <User className="w-4 h-4 text-muted-foreground" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate text-gray-900">
+                        <div className="font-medium text-sm truncate text-foreground">
                           {user.displayName || user.handle}
                         </div>
-                        <div className="text-xs text-gray-500 truncate">
+                        <div className="text-xs text-muted-foreground truncate">
                           {user.handle}
                         </div>
                       </div>

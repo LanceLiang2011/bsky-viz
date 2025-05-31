@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -13,6 +12,11 @@ import {
 } from "@/components/ui/card";
 import WordCloud from "./WordCloud";
 import ChineseWordCloud from "./ChineseWordCloud";
+import {
+  KeyInsights,
+  MostActiveTime,
+  TopInteractions,
+} from "./analysis-components";
 import { useMemo } from "react";
 
 interface ProcessedFeedData {
@@ -161,43 +165,7 @@ export default function AnalysisResults({
       </CardHeader>
       <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
         {/* Key insights section */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="bg-slate-50 p-3 sm:p-4 rounded-lg">
-            <h4 className="text-xs sm:text-sm font-medium text-gray-500 truncate">
-              {t("analysis.posts")}
-            </h4>
-            <p className="text-lg sm:text-2xl font-bold">
-              {processedFeed.insights.totalPosts}
-            </p>
-          </div>
-          <div className="bg-slate-50 p-3 sm:p-4 rounded-lg">
-            <h4 className="text-xs sm:text-sm font-medium text-gray-500 truncate">
-              {t("analysis.replies")}
-            </h4>
-            <p className="text-lg sm:text-2xl font-bold">
-              {processedFeed.insights.totalReplies}
-            </p>
-          </div>
-          <div className="bg-slate-50 p-3 sm:p-4 rounded-lg">
-            <h4 className="text-xs sm:text-sm font-medium text-gray-500 truncate">
-              {t("analysis.reposts")}
-            </h4>
-            <p className="text-lg sm:text-2xl font-bold">
-              {processedFeed.insights.totalReposts}
-            </p>
-          </div>
-          <div className="bg-slate-50 p-3 sm:p-4 rounded-lg">
-            <h4 className="text-xs sm:text-sm font-medium text-gray-500 truncate">
-              {t("analysis.avgLength")}
-            </h4>
-            <p className="text-lg sm:text-2xl font-bold">
-              {processedFeed.insights.averagePostLength}{" "}
-              <span className="text-sm sm:text-base">
-                {t("analysis.chars")}
-              </span>
-            </p>
-          </div>
-        </div>
+        <KeyInsights insights={processedFeed.insights} />
 
         {/* Activity by Hour chart */}
         <div className="bg-white p-3 sm:p-4 rounded-lg border">
@@ -205,36 +173,10 @@ export default function AnalysisResults({
         </div>
 
         {/* Most active time */}
-        <div className="bg-white p-3 sm:p-4 rounded-lg border">
-          <h3 className="text-base sm:text-lg font-medium mb-2">
-            {t("analysis.mostActiveTime")}
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div>
-              <p className="text-xs sm:text-sm text-gray-600">
-                {t("analysis.mostActiveHour")}
-              </p>
-              <p className="text-lg sm:text-xl font-semibold">
-                {localizedMostActiveHour}:00 -{" "}
-                {(localizedMostActiveHour + 1) % 24}:00
-              </p>
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm text-gray-600">
-                {t("analysis.mostActiveDay")}
-              </p>
-              <p className="text-lg sm:text-xl font-semibold break-words">
-                {processedFeed.insights.mostActiveDay &&
-                !isNaN(new Date(processedFeed.insights.mostActiveDay).getTime())
-                  ? format(
-                      new Date(processedFeed.insights.mostActiveDay),
-                      "PPP"
-                    )
-                  : t("analysis.noData")}
-              </p>
-            </div>
-          </div>
-        </div>
+        <MostActiveTime
+          data={processedFeed.insights}
+          localizedMostActiveHour={localizedMostActiveHour}
+        />
 
         {/* Languages used */}
         <div className="bg-white p-3 sm:p-4 rounded-lg border">
@@ -257,34 +199,7 @@ export default function AnalysisResults({
         </div>
 
         {/* Top interactions */}
-        <div className="bg-white p-3 sm:p-4 rounded-lg border">
-          <h3 className="text-base sm:text-lg font-medium mb-2">
-            {t("analysis.topInteractions")}
-          </h3>
-          <div className="overflow-y-auto max-h-60">
-            {processedFeed.topInteractions.map((interaction, index) => (
-              <div
-                key={interaction.handle}
-                className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2 border-b last:border-b-0 gap-2 sm:gap-0"
-              >
-                <div className="flex items-center min-w-0 flex-1">
-                  <span className="text-gray-400 mr-2 text-sm">
-                    #{index + 1}
-                  </span>
-                  <span className="font-medium truncate text-sm sm:text-base">
-                    {interaction.displayName || interaction.handle}
-                  </span>
-                  <span className="text-gray-500 text-xs sm:text-sm ml-2 truncate">
-                    @{interaction.handle}
-                  </span>
-                </div>
-                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs sm:text-sm self-start sm:self-auto whitespace-nowrap">
-                  {interaction.count} {t("analysis.interactions")}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <TopInteractions interactions={processedFeed.topInteractions} />
 
         {/* Word Cloud */}
         {processedFeed.isChineseContent && processedFeed.rawText ? (

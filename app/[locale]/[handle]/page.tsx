@@ -250,20 +250,59 @@ async function fetchBlueskyData(handle: string, locale?: string) {
     );
     console.log("Feed analysis completed on server");
 
-    // Prepare text for OpenAI
-    const postsTextForOpenAI = allFeedItems
+    // Helper function to determine if a feed item represents user's own content
+    // This is critical for OpenAI analysis - we only want to analyze content the user actually wrote
+    const isUserOwnContent = (
+      item: FeedItem,
+      userDid: string,
+      userHandle: string
+    ) => {
+      // Skip reposts completely - these are just reshares of other people's content
+      if (item.reason) return false;
+
+      const postAuthor = item.post?.author;
+      if (!postAuthor) return false;
+
+      // Check both DID (decentralized identifier) and handle for accuracy
+      // Some edge cases might have one but not the other
+      const matchesDid = postAuthor.did === userDid;
+      const matchesHandle = postAuthor.handle === userHandle;
+
+      return matchesDid || matchesHandle;
+    };
+
+    // Prepare text for OpenAI - only include user's own posts and replies, not reposts
+    const userOwnedItems = allFeedItems.filter((item) =>
+      isUserOwnContent(item, profileData?.did || "", cleanHandle)
+    );
+
+    console.log(`Total feed items: ${allFeedItems.length}`);
+    console.log(`User's own content items: ${userOwnedItems.length}`);
+
+    const postsTextForOpenAI = userOwnedItems
       .map((item) => item.post?.record?.text)
       .filter((text) => typeof text === "string" && text.trim() !== "")
       .slice(0, 200)
       .join("\n\n---\n\n");
 
+    console.log(
+      `Posts text length for OpenAI: ${postsTextForOpenAI.length} characters`
+    );
+
     let openAISummary = null;
-    if (postsTextForOpenAI || process.env.USE_OPENAI !== "True") {
+    if (postsTextForOpenAI && process.env.USE_OPENAI === "True") {
       openAISummary = await getOpenAISummary(
         postsTextForOpenAI,
         t,
         profileData?.displayName || profileData?.handle
       );
+    } else if (process.env.USE_OPENAI !== "True") {
+      // If OpenAI is disabled, still show a placeholder message
+      const nameToUse =
+        profileData?.displayName ||
+        profileData?.handle ||
+        t("openai.genericUser");
+      openAISummary = t("openai.disabledSummary", { username: nameToUse });
     }
 
     return {

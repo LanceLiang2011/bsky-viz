@@ -143,7 +143,6 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
             className="flex items-center gap-2"
           >
             <ExternalLink className="w-4 h-4" />
-            {t("viewProfile")}
           </Button>
         </div>
 

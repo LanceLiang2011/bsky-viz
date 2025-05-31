@@ -99,7 +99,8 @@ interface FeedItem {
 }
 
 async function getOpenAISummary(
-  postsText: string,
+  originalPosts: string[],
+  replyPosts: string[],
   t: Awaited<ReturnType<typeof getTranslations>>,
   userDisplayName?: string
 ): Promise<string | null> {
@@ -108,7 +109,7 @@ async function getOpenAISummary(
     return t("openai.disabledSummary", { username: nameToUse });
   }
 
-  if (!postsText.trim()) {
+  if (originalPosts.length === 0 && replyPosts.length === 0) {
     return t("openai.noTextForSummary");
   }
 
@@ -118,19 +119,35 @@ async function getOpenAISummary(
       apiKey: process.env.OPENAI_API_KEY,
     });
 
+    // Construct the content with clear separation
+    let content = "Please analyze the following user content:\n\n";
+
+    if (originalPosts.length > 0) {
+      content +=
+        "=== ORIGINAL POSTS (Primary content - main interests and thoughts) ===\n";
+      content += originalPosts.join("\n\n---\n\n");
+      content += "\n\n";
+    }
+
+    if (replyPosts.length > 0) {
+      content +=
+        "=== REPLIES (Secondary content - conversational style and engagement) ===\n";
+      content += replyPosts.join("\n\n---\n\n");
+    }
+
     const completion = await openai.chat.completions.create({
-      model: "gpt-4.1-nano",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: t("openai.systemPrompt"),
+          content: t("openai.systemPromptWithSeparation"),
         },
         {
           role: "user",
-          content: `Please summarize the following posts from a user:\n\n${postsText}`,
+          content: content,
         },
       ],
-      max_tokens: 300,
+      max_tokens: 350,
       temperature: 0.7,
     });
     return completion.choices[0]?.message?.content?.trim() || null;
@@ -190,7 +207,7 @@ async function fetchBlueskyData(handle: string, locale?: string) {
     let hasMoreData = true;
     let allFeedItems: FeedItem[] = [];
     let pageCount = 0;
-    const MAX_PAGES = 10; // Limit to 10 pages to avoid excessive data
+    const MAX_PAGES = 12; // Limit to 12 pages to avoid excessive data
 
     while (hasMoreData && pageCount < MAX_PAGES) {
       pageCount++;
@@ -272,7 +289,8 @@ async function fetchBlueskyData(handle: string, locale?: string) {
       return matchesDid || matchesHandle;
     };
 
-    // Prepare text for OpenAI - only include user's own posts and replies, not reposts
+    // Enhanced algorithm for OpenAI content selection
+    // Separate user's original posts from replies for proper weighting
     const userOwnedItems = allFeedItems.filter((item) =>
       isUserOwnContent(item, profileData?.did || "", cleanHandle)
     );
@@ -280,20 +298,67 @@ async function fetchBlueskyData(handle: string, locale?: string) {
     console.log(`Total feed items: ${allFeedItems.length}`);
     console.log(`User's own content items: ${userOwnedItems.length}`);
 
-    const postsTextForOpenAI = userOwnedItems
-      .map((item) => item.post?.record?.text)
-      .filter((text) => typeof text === "string" && text.trim() !== "")
-      .slice(0, 200)
-      .join("\n\n---\n\n");
+    // Separate original posts from replies
+    const originalPosts: string[] = [];
+    const replyPosts: string[] = [];
 
+    userOwnedItems.forEach((item) => {
+      const text = item.post?.record?.text;
+      if (typeof text === "string" && text.trim() !== "") {
+        // Check if this is a reply (has reply field)
+        if (item.reply) {
+          replyPosts.push(text.trim());
+        } else {
+          originalPosts.push(text.trim());
+        }
+      }
+    });
+
+    console.log(`Original posts: ${originalPosts.length}`);
+    console.log(`Reply posts: ${replyPosts.length}`);
+
+    // Enhanced logging - show actual content samples for verification
+    console.log("\n=== ORIGINAL POSTS SAMPLE (First 3) ===");
+    originalPosts.slice(0, 3).forEach((post, index) => {
+      console.log(
+        `Original Post ${index + 1}:`,
+        post.substring(0, 150) + (post.length > 150 ? "..." : "")
+      );
+    });
+
+    console.log("\n=== REPLY POSTS SAMPLE (First 3) ===");
+    replyPosts.slice(0, 3).forEach((reply, index) => {
+      console.log(
+        `Reply Post ${index + 1}:`,
+        reply.substring(0, 150) + (reply.length > 150 ? "..." : "")
+      );
+    });
+
+    // Algorithm: ALL original posts + random 100 replies (if more than 100)
+    const finalOriginalPosts = originalPosts; // Send ALL original posts - these are most important
+    const finalReplyPosts =
+      replyPosts.length > 100
+        ? replyPosts
+            .sort(() => Math.random() - 0.5) // Shuffle for random selection
+            .slice(0, 100) // Take first 100 after shuffle
+        : replyPosts; // If ≤ 100 replies, take all
+
+    console.log(`Final original posts for AI: ${finalOriginalPosts.length}`);
+    console.log(`Final reply posts for AI: ${finalReplyPosts.length}`);
     console.log(
-      `Posts text length for OpenAI: ${postsTextForOpenAI.length} characters`
+      `Total characters for AI: ${
+        (finalOriginalPosts.join("") + finalReplyPosts.join("")).length
+      }`
     );
 
     let openAISummary = null;
-    if (postsTextForOpenAI && process.env.USE_OPENAI === "True") {
+    if (
+      (finalOriginalPosts.length > 0 || finalReplyPosts.length > 0) &&
+      process.env.USE_OPENAI === "True"
+    ) {
       openAISummary = await getOpenAISummary(
-        postsTextForOpenAI,
+        finalOriginalPosts,
+        finalReplyPosts,
         t,
         profileData?.displayName || profileData?.handle
       );

@@ -1,10 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { parseISO } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import { CategorizedContent, ProcessedFeedData } from "../types/bluesky";
 
 export interface FeedAnalysisOptions {
   locale?: string;
   userHandle?: string;
   userTimezone?: string;
+}
+
+/**
+ * Extract hour from ISO string with proper timezone support
+ */
+function extractHourWithTimezone(
+  isoString: string,
+  userTimezone?: string
+): number {
+  try {
+    const timezone =
+      userTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const date = parseISO(isoString);
+    const zonedDate = toZonedTime(date, timezone);
+    return zonedDate.getHours();
+  } catch (e) {
+    console.error("Error parsing date:", isoString, e);
+    return 0;
+  }
 }
 
 export class FeedAnalyzer {
@@ -17,7 +38,7 @@ export class FeedAnalyzer {
   ): Promise<ProcessedFeedData> {
     console.log("🔍 Starting feed analysis with preprocessed data...");
 
-    const { ownPosts, ownReplies, ownReposts, otherContent } = content;
+    const { ownPosts, ownReplies, ownReposts } = content;
 
     // Combine all user content for analysis
     const allUserContent = [
@@ -44,16 +65,20 @@ export class FeedAnalyzer {
     const activityTimeline = this.buildActivityTimeline(allUserContent);
 
     // Build hourly activity
-    const activityByHour = this.buildHourlyActivity(allUserContent);
+    const activityByHour = this.buildHourlyActivity(
+      allUserContent,
+      options.userTimezone
+    );
 
     // Build hourly activity by type
-    const activityByHourAndType =
-      this.buildHourlyActivityByType(allUserContent);
+    const activityByHourAndType = this.buildHourlyActivityByType(
+      allUserContent,
+      options.userTimezone
+    );
 
     // Analyze interactions with other users - FIXED VERSION
     const topInteractions = this.analyzeInteractions(
       ownReplies,
-      otherContent,
       options.userHandle
     );
 
@@ -65,7 +90,10 @@ export class FeedAnalyzer {
       this.prepareWordCloudData(allUserContent);
 
     // Calculate insights
-    const insights = this.calculateInsights(allUserContent);
+    const insights = this.calculateInsights(
+      allUserContent,
+      options.userTimezone
+    );
 
     // Build result
     const result: ProcessedFeedData = {
@@ -120,7 +148,10 @@ export class FeedAnalyzer {
   /**
    * Build hourly activity
    */
-  private static buildHourlyActivity(content: any[]): Record<number, number> {
+  private static buildHourlyActivity(
+    content: any[],
+    userTimezone?: string
+  ): Record<number, number> {
     const activityByHour: Record<number, number> = {};
 
     // Initialize all hours
@@ -129,7 +160,7 @@ export class FeedAnalyzer {
     }
 
     content.forEach((item) => {
-      const hour = new Date(item.createdAt).getHours();
+      const hour = extractHourWithTimezone(item.createdAt, userTimezone);
       activityByHour[hour]++;
     });
 
@@ -139,7 +170,10 @@ export class FeedAnalyzer {
   /**
    * Build hourly activity by type
    */
-  private static buildHourlyActivityByType(content: any[]): {
+  private static buildHourlyActivityByType(
+    content: any[],
+    userTimezone?: string
+  ): {
     posts: Record<number, number>;
     replies: Record<number, number>;
     reposts: Record<number, number>;
@@ -156,7 +190,7 @@ export class FeedAnalyzer {
     }
 
     content.forEach((item) => {
-      const hour = new Date(item.createdAt).getHours();
+      const hour = extractHourWithTimezone(item.createdAt, userTimezone);
       if (item.type === "post") posts[hour]++;
       else if (item.type === "reply") replies[hour]++;
       else if (item.type === "repost") reposts[hour]++;
@@ -171,7 +205,6 @@ export class FeedAnalyzer {
    */
   private static analyzeInteractions(
     userReplies: any[],
-    otherContent: any[],
     userHandle?: string
   ): ProcessedFeedData["topInteractions"] {
     const interactions = new Map<
@@ -296,7 +329,8 @@ export class FeedAnalyzer {
    * Calculate various insights
    */
   private static calculateInsights(
-    content: any[]
+    content: any[],
+    userTimezone?: string
   ): ProcessedFeedData["insights"] {
     const totalPosts = content.filter((item) => item.type === "post").length;
     const totalReplies = content.filter((item) => item.type === "reply").length;
@@ -316,10 +350,10 @@ export class FeedAnalyzer {
           )
         : 0;
 
-    // Find most active hour
+    // Find most active hour - FIXED: Use timezone-aware hour extraction
     const hourCounts: Record<number, number> = {};
     content.forEach((item) => {
-      const hour = new Date(item.createdAt).getHours();
+      const hour = extractHourWithTimezone(item.createdAt, userTimezone);
       hourCounts[hour] = (hourCounts[hour] || 0) + 1;
     });
     const mostActiveHour = Object.entries(hourCounts).sort(

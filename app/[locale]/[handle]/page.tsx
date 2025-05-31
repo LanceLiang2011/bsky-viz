@@ -95,7 +95,11 @@ async function fetchBlueskyData(handle: string) {
 
     // Analyze the categorized data using the improved analyzer
     const processedFeed = await FeedAnalyzer.analyzeCategorizedContent(
-      categorizedContent
+      categorizedContent,
+      {
+        userHandle: handle,
+        userTimezone: "UTC", // Use UTC for consistency with the old implementation
+      }
     );
     console.log("✓ Feed analysis completed");
 

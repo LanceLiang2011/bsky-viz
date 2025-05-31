@@ -1,111 +1,51 @@
-"use client";
-
-import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  getAvatarFallbackChar,
-  isValidAvatarUrl,
-} from "@/app/utils/avatarUtils";
-import AvatarCloud from "./AvatarCloud";
+import InteractionsContainer from "./InteractionsContainer";
 import type { InteractionData, TopInteractionsProps } from "./analysis-types";
 
 export type { InteractionData, TopInteractionsProps };
 
+/**
+ * TopInteractions component - Server-side data processing wrapper
+ *
+ * This component processes interaction data on the server-side and passes
+ * optimized data to the InteractionsContainer for rendering.
+ */
 export default function TopInteractions({
   interactions,
   currentUser,
   className = "",
   maxHeight = "max-h-60",
 }: TopInteractionsProps) {
-  const t = useTranslations();
-  const router = useRouter();
+  // Debug logging to see what data we receive
+  console.log("🔍 TopInteractions Debug:");
+  console.log("  Raw interactions received:", interactions?.length || 0);
+  console.log("  Sample interactions:", interactions?.slice(0, 3));
+  console.log("  Current user:", currentUser);
 
-  const handleUserClick = (handle: string) => {
-    // Navigate to the user's handle page with current locale
-    router.push(`/${encodeURIComponent(handle)}`);
-  };
+  // Process data on server-side for optimal performance
+  // Filter out any interactions without required fields
+  const validInteractions = interactions.filter(
+    (interaction) => interaction.did && interaction.handle
+  );
 
-  // Show top 30 interactions in the list
-  const listInteractions = interactions.slice(0, 30);
+  console.log(
+    "  Valid interactions after filtering:",
+    validInteractions.length
+  );
+
+  // Sort by interaction count and limit for performance
+  const processedInteractions = validInteractions
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 50); // Limit to top 50 for better performance
+
+  console.log("  Final processed interactions:", processedInteractions.length);
 
   return (
-    <div className={`bg-card p-3 sm:p-4 rounded-lg border ${className}`}>
-      <h3 className="text-base sm:text-lg font-medium mb-4">
-        {t("analysis.topInteractions")}
-      </h3>
-
-      <Tabs defaultValue="circle" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="circle">{t("analysis.friendCircle")}</TabsTrigger>
-          <TabsTrigger value="list">
-            {t("analysis.interactionsList")}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="circle" className="mt-4">
-          <AvatarCloud interactions={interactions} currentUser={currentUser} />
-        </TabsContent>
-
-        <TabsContent value="list" className="mt-4">
-          <div className={`overflow-y-auto ${maxHeight}`}>
-            {listInteractions.map((interaction, index) => (
-              <div
-                key={interaction.handle}
-                onClick={() => handleUserClick(interaction.handle)}
-                className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2 border-b last:border-b-0 gap-2 sm:gap-0 cursor-pointer hover:bg-muted/50 transition-colors duration-200 rounded-sm"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleUserClick(interaction.handle);
-                  }
-                }}
-                aria-label={`View profile of ${
-                  interaction.displayName || interaction.handle
-                }`}
-                title={`Click to view ${
-                  interaction.displayName || interaction.handle
-                }'s profile`}
-              >
-                <div className="flex items-center min-w-0 flex-1 gap-3">
-                  <span className="text-muted-foreground mr-2 text-sm">
-                    #{index + 1}
-                  </span>
-                  <Avatar className="size-8 shrink-0">
-                    {isValidAvatarUrl(interaction.avatar) && (
-                      <AvatarImage
-                        src={interaction.avatar}
-                        alt={interaction.displayName || interaction.handle}
-                      />
-                    )}
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-                      {getAvatarFallbackChar(
-                        interaction.displayName,
-                        interaction.handle
-                      )}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <span className="font-medium truncate text-sm sm:text-base">
-                      {interaction.displayName || interaction.handle}
-                    </span>
-                    <span className="text-muted-foreground text-xs sm:text-sm truncate">
-                      @{interaction.handle}
-                    </span>
-                  </div>
-                </div>
-                <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs sm:text-sm self-start sm:self-auto whitespace-nowrap">
-                  {interaction.count} {t("analysis.interactions")}
-                </span>
-              </div>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+    <InteractionsContainer
+      interactions={processedInteractions}
+      currentUser={currentUser}
+      className={className}
+      maxHeight={maxHeight}
+      maxItems={30}
+    />
   );
 }

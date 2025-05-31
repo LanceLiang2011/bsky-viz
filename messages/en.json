@@ -72,6 +72,12 @@
     "evening": "Evening (6PM-12AM)",
     "night": "Night (12AM-6AM)",
     "timeZoneNote": "All times shown in your local timezone: {timezone}",
+    "filterBy": "Filter by",
+    "allActivity": "All Activity",
+    "postsOnly": "Posts Only",
+    "repliesOnly": "Replies Only",
+    "repostsOnly": "Reposts Only",
+    "showingItems": "Showing {count} items",
     "wordCloud": "Word Cloud",
     "wordCloudSubtitle": "Most frequently used words in posts and replies",
     "noWordCloudData": "No word cloud data available"

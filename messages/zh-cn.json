@@ -72,9 +72,16 @@
     "evening": "晚上 (18时-24时)",
     "night": "凌晨 (0时-6时)",
     "timeZoneNote": "所有时间基于您的本地时区: {timezone}",
+    "filterBy": "筛选",
+    "allActivity": "全部活动",
+    "postsOnly": "仅发文",
+    "repliesOnly": "仅回复",
+    "repostsOnly": "仅转发",
+    "showingItems": "显示 {count} 项",
     "wordCloud": "词云",
     "wordCloudSubtitle": "在帖子和回复中最常使用的词汇",
-    "noWordCloudData": "无词云数据可用"
+    "noWordCloudData": "无词云数据可用",
+    "noData": "暂无数据"
   },
   "loading": {
     "analyzing": "正在分析用户数据",

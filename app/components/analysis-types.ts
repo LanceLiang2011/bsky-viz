@@ -12,8 +12,15 @@ export interface InsightsData {
 }
 
 export interface MostActiveTimeData {
+  totalPosts: number;
+  totalReplies: number;
+  totalReposts: number;
+  averagePostLength: number;
   mostActiveHour: number;
   mostActiveDay: string;
+  postsWithMedia: number;
+  postsWithLinks: number;
+  languagesUsed: Record<string, number>;
 }
 
 export interface InteractionData {

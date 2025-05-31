@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "@/i18n/routing";
 import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Globe } from "lucide-react";
+import { Languages } from "lucide-react";
 
 const languages = [
   { code: "en", name: "English", nativeName: "English" },
@@ -31,7 +31,7 @@ export default function LanguageSwitcher() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2"
       >
-        <Globe className="h-4 w-4" />
+        <Languages className="h-4 w-4" />
         {languages.find((lang) => lang.code === locale)?.nativeName}
       </Button>
 

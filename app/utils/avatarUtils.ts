@@ -5,7 +5,7 @@
 
 /**
  * Safely extracts the first character for avatar fallback
- * Normalizes the string and handles edge cases to prevent hydration mismatches
+ * Uses deterministic logic to prevent hydration mismatches
  */
 export function getAvatarFallbackChar(
   displayName?: string,
@@ -14,26 +14,47 @@ export function getAvatarFallbackChar(
   // Use displayName first, then handle as fallback
   const name = displayName || handle || "";
 
-  // Normalize the string to ensure consistent encoding
-  const normalized = name.normalize("NFC").trim();
+  // Basic trim without normalization to avoid server/client differences
+  const trimmed = name.trim();
 
-  if (!normalized) {
+  if (!trimmed) {
     return "?"; // Default fallback
   }
 
-  // Extract first character and ensure it's uppercase
-  const firstChar = normalized.charAt(0);
+  // Find first letter character without using regex to avoid potential differences
+  for (let i = 0; i < Math.min(trimmed.length, 5); i++) {
+    const char = trimmed.charAt(i);
+    const charCode = char.charCodeAt(0);
 
-  // Handle special cases - if first char is not a letter, try the next ones
-  for (let i = 0; i < Math.min(normalized.length, 5); i++) {
-    const char = normalized.charAt(i);
-    if (/[a-zA-Z\u4e00-\u9fff]/.test(char)) {
+    // Check for ASCII letters (A-Z, a-z)
+    if (
+      (charCode >= 65 && charCode <= 90) ||
+      (charCode >= 97 && charCode <= 122)
+    ) {
       return char.toUpperCase();
+    }
+
+    // Check for Chinese characters (common range)
+    if (charCode >= 0x4e00 && charCode <= 0x9fff) {
+      return char;
     }
   }
 
-  // If no letter found, return the first character uppercased, or default
-  return firstChar ? firstChar.toUpperCase() : "?";
+  // If no letter found, use first character or default
+  const firstChar = trimmed.charAt(0);
+  if (firstChar) {
+    const charCode = firstChar.charCodeAt(0);
+    // Only uppercase ASCII letters
+    if (
+      (charCode >= 65 && charCode <= 90) ||
+      (charCode >= 97 && charCode <= 122)
+    ) {
+      return firstChar.toUpperCase();
+    }
+    return firstChar;
+  }
+
+  return "?";
 }
 
 /**

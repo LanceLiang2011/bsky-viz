@@ -208,7 +208,9 @@ export default function AnalysisResults({
 
         {/* Top interactions */}
         <TopInteractions
-          interactions={processedFeed.topInteractions}
+          interactions={processedFeed.topInteractions.filter(
+            (i) => i.did && i.handle // Filter out any interactions without did or handle
+          )}
           currentUser={currentUser}
         />
 

@@ -15,7 +15,15 @@
     "rangeLabel": "分析时间范围",
     "range1m": "过去1个月",
     "range6m": "过去6个月",
-    "range1y": "过去1年"
+    "range1y": "过去1年",
+    "postLimitLabel": "要分析的帖子数量",
+    "postLimitHint": "注意：分析更多帖子可能需要更长的处理时间",
+    "selectPostLimit": "选择帖子限制",
+    "postLimit1000": "1,000条帖子 ",
+    "postLimit2000": "2,000条帖子",
+    "postLimit5000": "5,000条帖子",
+    "postLimit10000": "10,000条帖子",
+    "postLimitAll": "所有可用帖子"
   },
   "results": {
     "title": "分析结果",

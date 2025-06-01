@@ -11,7 +11,7 @@ import {
 export class BlueskyAPIClient {
   private readonly baseUrl = "https://public.api.bsky.app";
   private readonly userAgent = "bsky-viz/1.0";
-  private readonly maxPages = 100;
+  private readonly defaultMaxPages = 10; // Default max pages for feed fetch
 
   /**
    * Fetch user profile data
@@ -57,7 +57,7 @@ export class BlueskyAPIClient {
     customMaxPages?: number
   ): Promise<BlueskyFeedItem[]> {
     const cleanHandle = this.cleanHandle(handle);
-    const maxPagesToUse = customMaxPages || this.maxPages;
+    const maxPagesToUse = customMaxPages || this.defaultMaxPages;
     console.log(
       `Starting efficient feed fetch for: ${cleanHandle} (max pages: ${maxPagesToUse})`
     );

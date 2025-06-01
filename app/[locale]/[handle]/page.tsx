@@ -68,7 +68,7 @@ async function getOpenAISummary(
   }
 }
 
-async function fetchBlueskyData(handle: string) {
+async function fetchBlueskyData(handle: string, customMaxPages?: number) {
   const t = await getTranslations();
 
   try {
@@ -82,7 +82,7 @@ async function fetchBlueskyData(handle: string) {
     console.log(`✓ Profile fetched for: ${profileData.handle}`);
 
     // Fetch all feed data with pagination
-    const allFeedItems = await apiClient.fetchFeed(handle);
+    const allFeedItems = await apiClient.fetchFeed(handle, customMaxPages);
     console.log(`✓ Feed data fetched: ${allFeedItems.length} items`);
 
     // Preprocess and categorize data immediately
@@ -152,17 +152,29 @@ async function fetchBlueskyData(handle: string) {
 
 export default async function HandlePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ handle: string; locale: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const t = await getTranslations();
   const { handle, locale } = await params;
+  const resolvedSearchParams = await searchParams;
 
   if (!handle) {
     notFound();
   }
 
-  const result = await fetchBlueskyData(decodeURIComponent(handle));
+  // Extract limit parameter from search params
+  const limitParam = resolvedSearchParams.limit;
+  const customMaxPages = limitParam
+    ? parseInt(Array.isArray(limitParam) ? limitParam[0] : limitParam)
+    : undefined;
+
+  const result = await fetchBlueskyData(
+    decodeURIComponent(handle),
+    customMaxPages
+  );
 
   if (result.error) {
     if (result.error === "User not found") {

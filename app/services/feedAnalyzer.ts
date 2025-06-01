@@ -108,6 +108,11 @@ export class FeedAnalyzer {
       insights,
     };
 
+    console.log("🔍 Feed analysis complete:");
+    console.log("  Timeline items:", activityTimeline.length);
+    console.log("  Total user content:", allUserContent.length);
+    console.log("  Result timeline:", result.activityTimeline.length);
+
     // Log results for debugging
     this.logAnalysisResults(result);
 
@@ -118,6 +123,8 @@ export class FeedAnalyzer {
    * Build activity timeline
    */
   private static buildActivityTimeline(content: any[]): any[] {
+    console.log("📅 Building activity timeline from", content.length, "items");
+
     const timelineMap = new Map<string, any>();
 
     content.forEach((item) => {
@@ -140,9 +147,20 @@ export class FeedAnalyzer {
       dayData.total++;
     });
 
-    return Array.from(timelineMap.values()).sort((a, b) =>
+    const timeline = Array.from(timelineMap.values()).sort((a, b) =>
       a.date.localeCompare(b.date)
     );
+
+    console.log("📅 Timeline result:", {
+      totalDays: timeline.length,
+      dateRange: {
+        start: timeline[0]?.date,
+        end: timeline[timeline.length - 1]?.date,
+      },
+      sampleDays: timeline.slice(0, 3),
+    });
+
+    return timeline;
   }
 
   /**

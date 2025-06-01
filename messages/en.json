@@ -89,7 +89,14 @@
     "wordCloudSubtitle": "Most frequently used words in posts and replies",
     "noWordCloudData": "No word cloud data available",
     "youLabel": "(You)",
-    "interactionCount": "{count} interactions"
+    "interactionCount": "{count} interactions",
+    "activityHeatmap": "Activity Calendar",
+    "less": "Less",
+    "more": "More",
+    "activeDays": "Active Days",
+    "avgPerDay": "Avg/Day",
+    "maxDay": "Best Day",
+    "totalYear": "Total This Year"
   },
   "loading": {
     "analyzing": "Analyzing User Data",

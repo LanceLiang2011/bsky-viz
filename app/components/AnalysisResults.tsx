@@ -93,6 +93,7 @@ export default function AnalysisResults({
           data={{
             activityByHour: processedFeed.activityByHour,
             activityByHourAndType: processedFeed.activityByHourAndType,
+            activityTimeline: processedFeed.activityTimeline,
             insights: processedFeed.insights,
           }}
         />

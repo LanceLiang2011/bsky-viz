@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ActivityHeatmap from "./ActivityHeatmap";
 
 export type PostTypeFilter = "all" | "posts" | "replies" | "reposts";
 
@@ -20,6 +21,14 @@ interface ActivityData {
     replies: Record<number, number>;
     reposts: Record<number, number>;
   };
+  activityTimeline: Array<{
+    date: string;
+    posts: number;
+    replies: number;
+    reposts: number;
+    likes: number;
+    total: number;
+  }>;
   insights: {
     totalPosts: number;
     totalReplies: number;
@@ -185,83 +194,91 @@ export default function UnifiedActivity({
   }
 
   return (
-    <div
-      className={`bg-card p-3 sm:p-4 rounded-lg border space-y-4 ${className}`}
-    >
-      {/* Header with filter selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h3 className="text-base sm:text-lg font-medium">
-          {t("analysis.activityByHour")}
-        </h3>
-        <div className="flex items-center gap-2">
-          <label
-            htmlFor="post-type-filter"
-            className="text-sm text-muted-foreground"
-          >
-            {t("analysis.filterBy")}:
-          </label>
-          <Select
-            value={filter}
-            onValueChange={(value) => setFilter(value as PostTypeFilter)}
-          >
-            <SelectTrigger id="post-type-filter" className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("analysis.allActivity")}</SelectItem>
-              <SelectItem value="posts">{t("analysis.postsOnly")}</SelectItem>
-              <SelectItem value="replies">
-                {t("analysis.repliesOnly")}
-              </SelectItem>
-              <SelectItem value="reposts">
-                {t("analysis.repostsOnly")}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+    <div className="space-y-6">
+      {/* Activity Heatmap */}
+      <ActivityHeatmap activityTimeline={data.activityTimeline} className="" />
 
-      {/* Activity summary */}
-      <div className="text-xs sm:text-sm text-muted-foreground">
-        {t("analysis.showingItems", { count: filteredActivityData.totalItems })}{" "}
-        •{" "}
-        {t("analysis.timeZoneNote", {
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        })}
-      </div>
-
-      {/* Activity by Hour chart */}
-      {renderActivityByHour(localizedActivityByHour)}
-
-      {/* Most active time for filtered data */}
-      <div className="border-t pt-4">
-        <h4 className="text-sm sm:text-base font-medium mb-2">
-          {t("analysis.mostActiveTime")} (
-          {filter === "all"
-            ? t("analysis.allActivity")
-            : t(`analysis.${filter}Only`)}
-          )
-        </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <div>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              {t("analysis.mostActiveHour")}
-            </p>
-            <p className="text-lg sm:text-xl font-semibold">
-              {localizedMostActiveHour}:00 -{" "}
-              {(localizedMostActiveHour + 1) % 24}:00
-            </p>
+      {/* Hourly Activity Chart */}
+      <div
+        className={`bg-card p-3 sm:p-4 rounded-lg border space-y-4 ${className}`}
+      >
+        {/* Header with filter selector */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h3 className="text-base sm:text-lg font-medium">
+            {t("analysis.activityByHour")}
+          </h3>
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor="post-type-filter"
+              className="text-sm text-muted-foreground"
+            >
+              {t("analysis.filterBy")}:
+            </label>
+            <Select
+              value={filter}
+              onValueChange={(value) => setFilter(value as PostTypeFilter)}
+            >
+              <SelectTrigger id="post-type-filter" className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("analysis.allActivity")}</SelectItem>
+                <SelectItem value="posts">{t("analysis.postsOnly")}</SelectItem>
+                <SelectItem value="replies">
+                  {t("analysis.repliesOnly")}
+                </SelectItem>
+                <SelectItem value="reposts">
+                  {t("analysis.repostsOnly")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <div>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              {t("analysis.mostActiveDay")}
-            </p>
-            <p className="text-lg sm:text-xl font-semibold break-words">
-              {data.insights.mostActiveDay &&
-              !isNaN(new Date(data.insights.mostActiveDay).getTime())
-                ? format(new Date(data.insights.mostActiveDay), "PPP")
-                : t("analysis.noData")}
-            </p>
+        </div>
+
+        {/* Activity summary */}
+        <div className="text-xs sm:text-sm text-muted-foreground">
+          {t("analysis.showingItems", {
+            count: filteredActivityData.totalItems,
+          })}{" "}
+          •{" "}
+          {t("analysis.timeZoneNote", {
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          })}
+        </div>
+
+        {/* Activity by Hour chart */}
+        {renderActivityByHour(localizedActivityByHour)}
+
+        {/* Most active time for filtered data */}
+        <div className="border-t pt-4">
+          <h4 className="text-sm sm:text-base font-medium mb-2">
+            {t("analysis.mostActiveTime")} (
+            {filter === "all"
+              ? t("analysis.allActivity")
+              : t(`analysis.${filter}Only`)}
+            )
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                {t("analysis.mostActiveHour")}
+              </p>
+              <p className="text-lg sm:text-xl font-semibold">
+                {localizedMostActiveHour}:00 -{" "}
+                {(localizedMostActiveHour + 1) % 24}:00
+              </p>
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                {t("analysis.mostActiveDay")}
+              </p>
+              <p className="text-lg sm:text-xl font-semibold break-words">
+                {data.insights.mostActiveDay &&
+                !isNaN(new Date(data.insights.mostActiveDay).getTime())
+                  ? format(new Date(data.insights.mostActiveDay), "PPP")
+                  : t("analysis.noData")}
+              </p>
+            </div>
           </div>
         </div>
       </div>

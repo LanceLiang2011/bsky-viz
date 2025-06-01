@@ -90,7 +90,14 @@
     "noWordCloudData": "无词云数据可用",
     "noData": "暂无数据",
     "youLabel": "(你)",
-    "interactionCount": "{count} 次互动"
+    "interactionCount": "{count} 次互动",
+    "activityHeatmap": "活动日历",
+    "less": "少",
+    "more": "多",
+    "activeDays": "活跃天数",
+    "avgPerDay": "日均",
+    "maxDay": "最佳天",
+    "totalYear": "今年总计"
   },
   "loading": {
     "analyzing": "正在分析用户数据",

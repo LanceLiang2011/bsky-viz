@@ -58,6 +58,7 @@
   "analysis": {
     "title": "活动分析",
     "description": "用户活动模式和互动分析",
+    "activityAnalysis": "活动分析",
     "activityByHour": "每小时活动",
     "hourOfDay": "一天中的小时 (本地时间)",
     "mostActiveTime": "最活跃的时间",
@@ -97,7 +98,8 @@
     "activeDays": "活跃天数",
     "avgPerDay": "日均",
     "maxDay": "最佳天",
-    "totalYear": "今年总计"
+    "totalYear": "今年总计",
+    "total": "总计"
   },
   "loading": {
     "analyzing": "正在分析用户数据",

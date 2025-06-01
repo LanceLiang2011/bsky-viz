@@ -58,6 +58,7 @@
   "analysis": {
     "title": "Activity Analysis",
     "description": "Analysis of user activity patterns and interactions",
+    "activityAnalysis": "Activity Analysis",
     "activityByHour": "Activity by Hour",
     "hourOfDay": "Hour of day (local time)",
     "mostActiveTime": "Most Active Times",
@@ -96,7 +97,8 @@
     "activeDays": "Active Days",
     "avgPerDay": "Avg/Day",
     "maxDay": "Best Day",
-    "totalYear": "Total This Year"
+    "totalYear": "Total This Year",
+    "total": "Total"
   },
   "loading": {
     "analyzing": "Analyzing User Data",

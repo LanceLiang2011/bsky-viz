@@ -195,21 +195,15 @@ export default function UnifiedActivity({
 
   return (
     <div className="space-y-6">
-      {/* Activity Heatmap */}
-      <ActivityHeatmap activityTimeline={data.activityTimeline} className="" />
-
-      {/* Hourly Activity Chart */}
-      <div
-        className={`bg-card p-3 sm:p-4 rounded-lg border space-y-4 ${className}`}
-      >
-        {/* Header with filter selector */}
+      {/* Global Activity Filter */}
+      <div className="bg-card p-3 sm:p-4 rounded-lg border">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h3 className="text-base sm:text-lg font-medium">
-            {t("analysis.activityByHour")}
-          </h3>
+          <h2 className="text-lg sm:text-xl font-semibold">
+            {t("analysis.activityAnalysis")}
+          </h2>
           <div className="flex items-center gap-2">
             <label
-              htmlFor="post-type-filter"
+              htmlFor="activity-type-filter"
               className="text-sm text-muted-foreground"
             >
               {t("analysis.filterBy")}:
@@ -218,7 +212,7 @@ export default function UnifiedActivity({
               value={filter}
               onValueChange={(value) => setFilter(value as PostTypeFilter)}
             >
-              <SelectTrigger id="post-type-filter" className="w-32">
+              <SelectTrigger id="activity-type-filter" className="w-32">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -233,6 +227,25 @@ export default function UnifiedActivity({
               </SelectContent>
             </Select>
           </div>
+        </div>
+      </div>
+
+      {/* Activity Heatmap */}
+      <ActivityHeatmap
+        activityTimeline={data.activityTimeline}
+        filter={filter}
+        className=""
+      />
+
+      {/* Hourly Activity Chart */}
+      <div
+        className={`bg-card p-3 sm:p-4 rounded-lg border space-y-4 ${className}`}
+      >
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h3 className="text-base sm:text-lg font-medium">
+            {t("analysis.activityByHour")}
+          </h3>
         </div>
 
         {/* Activity summary */}

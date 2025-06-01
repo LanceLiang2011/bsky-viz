@@ -4,6 +4,8 @@ import { useMemo, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { format, eachDayOfInterval, getDay, subDays } from "date-fns";
 
+export type PostTypeFilter = "all" | "posts" | "replies" | "reposts";
+
 interface ActivityDay {
   date: string;
   posts: number;
@@ -15,11 +17,13 @@ interface ActivityDay {
 
 interface ActivityHeatmapProps {
   activityTimeline: ActivityDay[];
+  filter: PostTypeFilter;
   className?: string;
 }
 
 export default function ActivityHeatmap({
   activityTimeline,
+  filter,
   className = "",
 }: ActivityHeatmapProps) {
   const t = useTranslations();
@@ -33,12 +37,28 @@ export default function ActivityHeatmap({
     first: activityTimeline?.[0]?.date,
     last: activityTimeline?.[activityTimeline.length - 1]?.date,
   });
+  console.log("  Current filter:", filter);
 
   // Use real data directly - test data generator removed since we have working data
   const effectiveActivityTimeline = activityTimeline;
 
   // Process the activity data into a heatmap-friendly format
   const heatmapData = useMemo(() => {
+    // Function to get activity count based on filter
+    const getFilteredActivityCount = (day: ActivityDay): number => {
+      switch (filter) {
+        case "posts":
+          return day.posts;
+        case "replies":
+          return day.replies;
+        case "reposts":
+          return day.reposts;
+        case "all":
+        default:
+          return day.total;
+      }
+    };
+
     // Create a map for quick lookup of activity by date
     const activityMap = new Map<string, ActivityDay>();
     effectiveActivityTimeline.forEach((day) => {
@@ -82,13 +102,17 @@ export default function ActivityHeatmap({
       const activity = activityMap.get(dateString);
       const isWithinDataRange = date <= endDate && date >= startDate;
 
+      // Get filtered activity count
+      const filteredCount = activity ? getFilteredActivityCount(activity) : 0;
+
       return {
         date: dateString,
         displayDate: date,
-        total: (activity?.total || 0) * (isWithinDataRange ? 1 : 0), // Zero out data outside range
+        total: (activity?.total || 0) * (isWithinDataRange ? 1 : 0), // Keep total for reference
         posts: (activity?.posts || 0) * (isWithinDataRange ? 1 : 0),
         replies: (activity?.replies || 0) * (isWithinDataRange ? 1 : 0),
         reposts: (activity?.reposts || 0) * (isWithinDataRange ? 1 : 0),
+        filteredCount: filteredCount * (isWithinDataRange ? 1 : 0), // Add filtered count
         dayOfWeek: getDay(date), // 0 = Sunday, 1 = Monday, etc.
         weekIndex: Math.floor(
           (date.getTime() - startSunday.getTime()) / (7 * 24 * 60 * 60 * 1000)
@@ -99,7 +123,9 @@ export default function ActivityHeatmap({
 
     // Calculate max activity for color intensity (only from actual data range)
     const maxActivity = Math.max(
-      ...heatmapDays.filter((d) => d.isWithinDataRange).map((d) => d.total),
+      ...heatmapDays
+        .filter((d) => d.isWithinDataRange)
+        .map((d) => d.filteredCount),
       1
     );
 
@@ -126,7 +152,7 @@ export default function ActivityHeatmap({
       endDate: endSaturday,
       actualDataEnd: endDate,
     };
-  }, [effectiveActivityTimeline]);
+  }, [effectiveActivityTimeline, filter]);
 
   // Get color intensity based on activity count
   const getColorIntensity = (
@@ -194,7 +220,13 @@ export default function ActivityHeatmap({
   return (
     <div className={`bg-card p-4 rounded-lg border space-y-4 ${className}`}>
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">{t("analysis.activityHeatmap")}</h3>
+        <h3 className="text-lg font-medium">
+          {filter === "all"
+            ? t("analysis.activityHeatmap")
+            : `${t("analysis.activityHeatmap")} - ${t(
+                `analysis.${filter}Only`
+              )}`}
+        </h3>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>{t("analysis.less")}</span>
           <div className="flex gap-1">
@@ -282,7 +314,7 @@ export default function ActivityHeatmap({
                       }
 
                       const colorClass = getColorIntensity(
-                        day.total,
+                        day.filteredCount,
                         heatmapData.maxActivity,
                         day.isWithinDataRange
                       );
@@ -294,8 +326,12 @@ export default function ActivityHeatmap({
                           title={`${format(day.displayDate, "MMM d, yyyy")}${
                             !day.isWithinDataRange
                               ? " (outside data range)"
-                              : day.total > 0
-                              ? `: ${day.total} activities (${day.posts} posts, ${day.replies} replies, ${day.reposts} reposts)`
+                              : day.filteredCount > 0
+                              ? filter === "all"
+                                ? `: ${day.total} activities (${day.posts} posts, ${day.replies} replies, ${day.reposts} reposts)`
+                                : `: ${day.filteredCount} ${filter}${
+                                    day.filteredCount !== 1 ? "s" : ""
+                                  }`
                               : ": No activity"
                           }`}
                         />
@@ -317,7 +353,8 @@ export default function ActivityHeatmap({
               {
                 heatmapData.weeks
                   .flat()
-                  .filter((d) => d.isWithinDataRange && d.total > 0).length
+                  .filter((d) => d.isWithinDataRange && d.filteredCount > 0)
+                  .length
               }
             </div>
             <div className="text-muted-foreground text-xs">
@@ -330,7 +367,7 @@ export default function ActivityHeatmap({
                 (heatmapData.weeks
                   .flat()
                   .filter((d) => d.isWithinDataRange)
-                  .reduce((sum, d) => sum + d.total, 0) /
+                  .reduce((sum, d) => sum + d.filteredCount, 0) /
                   365) *
                   10
               ) / 10}
@@ -345,7 +382,7 @@ export default function ActivityHeatmap({
                 ...heatmapData.weeks
                   .flat()
                   .filter((d) => d.isWithinDataRange)
-                  .map((d) => d.total),
+                  .map((d) => d.filteredCount),
                 0
               )}
             </div>
@@ -358,10 +395,12 @@ export default function ActivityHeatmap({
               {heatmapData.weeks
                 .flat()
                 .filter((d) => d.isWithinDataRange)
-                .reduce((sum, d) => sum + d.total, 0)}
+                .reduce((sum, d) => sum + d.filteredCount, 0)}
             </div>
             <div className="text-muted-foreground text-xs">
-              {t("analysis.totalYear")}
+              {filter === "all"
+                ? t("analysis.totalYear")
+                : `${t("analysis.total")} ${filter}`}
             </div>
           </div>
         </div>

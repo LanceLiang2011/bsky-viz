@@ -513,8 +513,8 @@ export class BlueskyDataProcessor {
     const allOriginalPosts = content.ownPosts.map((post) => post.text);
     const allReplies = content.ownReplies.map((reply) => reply.text);
 
-    const maxOriginalPosts = 200;
-    const maxReplies = 200;
+    const maxOriginalPosts = 150; // Limit original posts to 150 for OpenAI
+    const maxReplies = 150; // Limit replies to 150 for OpenAI
 
     const selectedOriginalPosts =
       allOriginalPosts.length > maxOriginalPosts

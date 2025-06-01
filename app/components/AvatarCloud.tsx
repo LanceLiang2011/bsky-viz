@@ -332,11 +332,6 @@ export default function AvatarCloud({
             </Tooltip>
           );
         })}
-
-        {/* Center label with enhanced styling */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm text-foreground font-medium shadow-md border border-border">
-          {t("analysis.friendCircle")}
-        </div>
       </div>
     </TooltipProvider>
   );

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   BlueskyProfile,
-  BlueskyFeedResponse,
   BlueskyFeedItem,
   CategorizedContent,
   PreprocessedPost,
@@ -12,8 +11,6 @@ import {
 export class BlueskyAPIClient {
   private readonly baseUrl = "https://public.api.bsky.app";
   private readonly userAgent = "bsky-viz/1.0";
-  // Increase concurrency significantly
-  private readonly maxConcurrency = 15; // Increased from 5 to 15
   private readonly maxPages = 100;
 
   /**
@@ -52,187 +49,138 @@ export class BlueskyAPIClient {
   }
 
   /**
-   * Fetch all feed data with high-performance parallel processing
+   * Fetch all feed data using efficient sequential pagination
+   * Based on expert-recommended Bluesky API best practices
    */
-  async fetchFullFeed(handle: string): Promise<BlueskyFeedItem[]> {
+  async fetchFeed(
+    handle: string,
+    customMaxPages?: number
+  ): Promise<BlueskyFeedItem[]> {
     const cleanHandle = this.cleanHandle(handle);
+    const maxPagesToUse = customMaxPages || this.maxPages;
     console.log(
-      `Starting high-performance parallel feed fetch for: ${cleanHandle}`
+      `Starting efficient feed fetch for: ${cleanHandle} (max pages: ${maxPagesToUse})`
     );
 
-    // Initial fetch to get first page
-    const firstPageData = await this.fetchFeedPage(cleanHandle);
-    let allFeedItems = firstPageData.feed || [];
+    const allFeedItems: BlueskyFeedItem[] = [];
+    const seenPostIds = new Set<string>(); // Belt-and-suspenders duplicate detection
+    let cursor: string | undefined = undefined;
+    let pageCount = 0;
 
-    // Track both seen cursors and post IDs
-    const seenCursors = new Set<string>();
-    const seenPostIds = new Set<string>(allFeedItems.map((item) => item.post.uri));
-
-    if (!firstPageData.cursor) {
-      console.log("Only one page of results available");
-      return allFeedItems;
-    }
-
-    seenCursors.add(firstPageData.cursor);
-    const cursors = [firstPageData.cursor];
-    let pageCount = 1;
-    let hasMorePages = true;
-
-    // Get initial cursors for parallel fetching - get more initially
-    while (
-      hasMorePages &&
-      cursors.length < this.maxConcurrency &&
-      pageCount < this.maxPages
-    ) {
-      const lastCursor = cursors[cursors.length - 1];
+    do {
       try {
-        const nextPage = await this.fetchFeedPage(cleanHandle, lastCursor);
+        // Build URL with proper parameters following expert recommendations
+        let feedUrl = `${
+          this.baseUrl
+        }/xrpc/app.bsky.feed.getAuthorFeed?actor=${encodeURIComponent(
+          cleanHandle
+        )}&limit=100&filter=posts_with_replies`;
+
+        if (cursor) {
+          feedUrl += `&cursor=${encodeURIComponent(cursor)}`;
+        } else {
+          // Include pinned posts on first request to ensure completeness
+          feedUrl += `&includePins=true`;
+        }
+
+        console.log(`Fetching page ${pageCount + 1}...`);
+
+        const response = await fetch(feedUrl, {
+          headers: {
+            Accept: "application/json",
+            "User-Agent": this.userAgent,
+          },
+        });
+
+        if (!response.ok) {
+          // Handle rate limiting with exponential backoff
+          if (response.status === 429) {
+            const retryAfter = response.headers.get("Retry-After") || "2";
+            const waitTime = (parseInt(retryAfter) + Math.random()) * 1000; // Add jitter
+            console.log(
+              `Rate limited. Waiting ${Math.round(
+                waitTime / 1000
+              )}s before retry...`
+            );
+            await new Promise((resolve) => setTimeout(resolve, waitTime));
+            continue; // Retry the same request
+          }
+
+          const errorText = await response.text();
+          throw new Error(
+            `Feed fetch failed: ${response.status} ${response.statusText} - ${errorText}`
+          );
+        }
+
+        const pageData = await response.json();
+        const feedItems = pageData.feed || [];
+
+        // Filter out any duplicates (should not happen with proper cursor usage, but safety check)
+        const newItems = feedItems.filter((item: BlueskyFeedItem) => {
+          const postId = item.post.uri;
+          if (seenPostIds.has(postId)) {
+            console.warn(`Duplicate post detected: ${postId}`);
+            return false;
+          }
+          seenPostIds.add(postId);
+          return true;
+        });
+
+        // Add new items to our collection
+        allFeedItems.push(...newItems);
         pageCount++;
 
-        if (nextPage.feed) {
-          if (nextPage.cursor) {
-            cursors.push(nextPage.cursor);
-          } else {
-            hasMorePages = false;
-          }
-        } else {
-          hasMorePages = false;
-        }
-      } catch (error) {
-        console.error("Error during cursor discovery:", error);
-        break;
-      }
-    }
+        // Update cursor for next iteration
+        cursor = pageData.cursor;
 
-    // Process in larger parallel batches without arbitrary delays
-    while (cursors.length > 0 && pageCount < this.maxPages) {
-      // Take a full batch to maximize parallel processing
-      const batchCursors = cursors.splice(0, this.maxConcurrency);
-      console.log(
-        `Processing batch of ${batchCursors.length} pages in parallel`
-      );
-
-      try {
-        // Fetch pages in parallel
-        const results = await Promise.all(
-          batchCursors.map((cursor) => this.fetchFeedPage(cleanHandle, cursor))
-        );
-
-        // Process results with duplicate checking
-        for (const result of results) {
-          if (result.feed) {
-            // Filter out duplicates
-            const newItems = result.feed.filter(
-              (item) => !seenPostIds.has(item.post.uri)
-            );
-
-            // Add new post IDs to tracking
-            newItems.forEach((item) => seenPostIds.add(item.post.uri));
-
-            // Only add new items
-            allFeedItems = allFeedItems.concat(newItems);
-            pageCount++;
-
-            if (
-              result.cursor &&
-              !seenCursors.has(result.cursor) &&
-              pageCount < this.maxPages
-            ) {
-              seenCursors.add(result.cursor);
-              cursors.push(result.cursor);
-            }
-          }
-        }
-
+        // Progress logging
         console.log(
-          `Progress: ${pageCount} pages, ${allFeedItems.length} items collected`
+          `Page ${pageCount}: +${newItems.length} items (${allFeedItems.length} total)`
         );
 
-        // No arbitrary delay between batches - rely on rate limiting headers
-      } catch (error) {
-        console.error("Error during parallel fetching:", error);
-        // Fall back to sequential processing
-        break;
-      }
-
-      if (pageCount >= this.maxPages) {
-        console.log(`Hit maximum page limit of ${this.maxPages}`);
-        break;
-      }
-    }
-
-    // Keep the fallback sequential processing for error cases
-    if (cursors.length > 0 && pageCount < this.maxPages) {
-      console.log("Falling back to sequential processing for remaining pages");
-      for (const cursor of cursors) {
-        if (pageCount >= this.maxPages) break;
-
-        try {
-          const result = await this.fetchFeedPage(cleanHandle, cursor);
-          if (result.feed) {
-            allFeedItems = allFeedItems.concat(result.feed);
-            pageCount++;
-          }
-        } catch (error) {
-          console.error("Error during sequential fallback:", error);
+        // Check if we've hit our page limit
+        if (pageCount >= maxPagesToUse) {
+          console.log(`Reached maximum page limit of ${maxPagesToUse}`);
+          break;
         }
+
+        // Small delay to be respectful to the API
+        if (cursor) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+      } catch (error) {
+        console.error(`Error fetching page ${pageCount + 1}:`, error);
+
+        // For network errors, try a few retries with exponential backoff
+        const isNetworkError =
+          error instanceof Error &&
+          (error.message.includes("fetch") ||
+            error.message.includes("network") ||
+            error.message.includes("timeout"));
+
+        if (isNetworkError && pageCount > 0) {
+          console.log("Network error, retrying in 2 seconds...");
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          continue; // Retry the same request
+        }
+
+        // For other errors, stop the fetch to avoid infinite loops
+        throw error;
       }
-    }
+    } while (cursor); // Continue until no more pages
 
     console.log(
-      `✓ Fetched ${pageCount} pages with ${allFeedItems.length} unique feed items`
+      `✓ Successfully fetched ${pageCount} pages with ${allFeedItems.length} unique feed items`
     );
-    return allFeedItems;
-  }
 
-  /**
-   * Helper method to fetch a single page of feed data
-   */
-  private async fetchFeedPage(
-    handle: string,
-    cursor?: string
-  ): Promise<BlueskyFeedResponse> {
-    let feedUrl = `${
-      this.baseUrl
-    }/xrpc/app.bsky.feed.getAuthorFeed?actor=${encodeURIComponent(
-      handle
-    )}&limit=100`;
-
-    if (cursor) {
-      feedUrl += `&cursor=${encodeURIComponent(cursor)}`;
-    }
-
-    const response = await fetch(feedUrl, {
-      headers: {
-        Accept: "application/json",
-        "User-Agent": this.userAgent,
-      },
-    });
-
-    if (!response.ok) {
-      // Handle rate limiting
-      if (response.status === 429) {
-        const retryAfter = response.headers.get("Retry-After") || "2";
-        console.log(
-          `Rate limited. Waiting ${retryAfter} seconds before retry.`
-        );
-
-        // Wait the suggested time plus a small buffer
-        const waitTime = (parseInt(retryAfter) + 1) * 1000;
-        await new Promise((resolve) => setTimeout(resolve, waitTime));
-
-        // Retry the request
-        return this.fetchFeedPage(handle, cursor);
-      }
-
-      // Handle other errors
-      const errorText = await response.text();
-      throw new Error(
-        `Feed fetch failed: ${response.status} ${response.statusText} - ${errorText}`
+    // Verify data integrity
+    if (allFeedItems.length !== seenPostIds.size) {
+      console.warn(
+        `Data integrity warning: ${allFeedItems.length} items vs ${seenPostIds.size} unique IDs`
       );
     }
 
-    return response.json();
+    return allFeedItems;
   }
 
   /**

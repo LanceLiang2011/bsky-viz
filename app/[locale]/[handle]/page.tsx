@@ -82,7 +82,7 @@ async function fetchBlueskyData(handle: string) {
     console.log(`✓ Profile fetched for: ${profileData.handle}`);
 
     // Fetch all feed data with pagination
-    const allFeedItems = await apiClient.fetchFullFeed(handle);
+    const allFeedItems = await apiClient.fetchFeed(handle);
     console.log(`✓ Feed data fetched: ${allFeedItems.length} items`);
 
     // Preprocess and categorize data immediately

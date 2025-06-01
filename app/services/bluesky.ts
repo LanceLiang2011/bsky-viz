@@ -547,8 +547,8 @@ export class BlueskyDataProcessor {
     const allOriginalPosts = content.ownPosts.map((post) => post.text);
     const allReplies = content.ownReplies.map((reply) => reply.text);
 
-    const maxOriginalPosts = 100;
-    const maxReplies = 100;
+    const maxOriginalPosts = 200;
+    const maxReplies = 200;
 
     const selectedOriginalPosts =
       allOriginalPosts.length > maxOriginalPosts

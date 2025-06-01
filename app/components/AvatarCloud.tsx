@@ -245,7 +245,9 @@ export default function AvatarCloud({
             >
               <p className="font-medium">
                 {currentUser.displayName || currentUser.handle}
-                <span className="text-primary ml-1">(You)</span>
+                <span className="text-primary ml-1">
+                  {t("analysis.youLabel")}
+                </span>
               </p>
             </TooltipContent>
           </Tooltip>
@@ -321,7 +323,9 @@ export default function AvatarCloud({
                     {interaction.displayName || interaction.handle}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {interaction.count} interactions
+                    {t("analysis.interactionCount", {
+                      count: interaction.count,
+                    })}
                   </p>
                 </div>
               </TooltipContent>

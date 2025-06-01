@@ -55,7 +55,6 @@
     "mostActiveTime": "最活跃的时间",
     "mostActiveHour": "最活跃的时间",
     "mostActiveDay": "最活跃的日期",
-    "languagesUsed": "使用的语言",
     "topInteractions": "主要互动",
     "viewRawData": "查看原始数据",
     "viewRawFeedData": "查看原始动态数据",
@@ -81,7 +80,9 @@
     "wordCloud": "词云",
     "wordCloudSubtitle": "在帖子和回复中最常使用的词汇",
     "noWordCloudData": "无词云数据可用",
-    "noData": "暂无数据"
+    "noData": "暂无数据",
+    "youLabel": "(你)",
+    "interactionCount": "{count} 次互动"
   },
   "loading": {
     "analyzing": "正在分析用户数据",

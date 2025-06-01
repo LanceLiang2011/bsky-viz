@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -56,7 +55,6 @@ interface ProcessedFeedData {
     mostActiveDay: string;
     postsWithMedia: number;
     postsWithLinks: number;
-    languagesUsed: Record<string, number>;
   };
 }
 
@@ -98,26 +96,6 @@ export default function AnalysisResults({
             insights: processedFeed.insights,
           }}
         />
-
-        {/* Languages used */}
-        <div className="bg-card p-3 sm:p-4 rounded-lg border">
-          <h3 className="text-base sm:text-lg font-medium mb-2">
-            {t("analysis.languagesUsed")}
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(processedFeed.insights.languagesUsed).map(
-              ([lang, count]) => (
-                <Badge
-                  key={lang}
-                  variant="secondary"
-                  className="text-xs sm:text-sm"
-                >
-                  {lang} ({count})
-                </Badge>
-              )
-            )}
-          </div>
-        </div>
 
         {/* Top interactions */}
         {(() => {

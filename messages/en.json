@@ -55,7 +55,6 @@
     "mostActiveTime": "Most Active Times",
     "mostActiveHour": "Most active hour",
     "mostActiveDay": "Most active day",
-    "languagesUsed": "Languages Used",
     "topInteractions": "Top Interactions",
     "viewRawData": "View Raw Data",
     "viewRawFeedData": "View Raw Feed Data",
@@ -80,7 +79,9 @@
     "showingItems": "Showing {count} items",
     "wordCloud": "Word Cloud",
     "wordCloudSubtitle": "Most frequently used words in posts and replies",
-    "noWordCloudData": "No word cloud data available"
+    "noWordCloudData": "No word cloud data available",
+    "youLabel": "(You)",
+    "interactionCount": "{count} interactions"
   },
   "loading": {
     "analyzing": "Analyzing User Data",

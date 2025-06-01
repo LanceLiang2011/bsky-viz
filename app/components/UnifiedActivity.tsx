@@ -29,7 +29,6 @@ interface ActivityData {
     mostActiveDay: string;
     postsWithMedia: number;
     postsWithLinks: number;
-    languagesUsed: Record<string, number>;
   };
 }
 

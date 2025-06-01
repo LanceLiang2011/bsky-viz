@@ -379,8 +379,6 @@ export class FeedAnalyzer {
       (item) => item.metadata?.hasLinks
     ).length;
 
-    const languagesUsed: Record<string, number> = { en: content.length };
-
     return {
       totalPosts,
       totalReplies,
@@ -390,7 +388,6 @@ export class FeedAnalyzer {
       mostActiveDay,
       postsWithMedia,
       postsWithLinks,
-      languagesUsed,
     };
   }
 

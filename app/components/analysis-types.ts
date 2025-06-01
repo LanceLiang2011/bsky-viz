@@ -20,7 +20,6 @@ export interface MostActiveTimeData {
   mostActiveDay: string;
   postsWithMedia: number;
   postsWithLinks: number;
-  languagesUsed: Record<string, number>;
 }
 
 export interface InteractionData {

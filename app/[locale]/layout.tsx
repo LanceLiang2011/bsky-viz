@@ -35,6 +35,8 @@ export const metadata: Metadata = {
     "social media analytics",
     "activity visualization",
     "engagement metrics",
+    "bluesky user analysis",
+    "social media insights",
   ],
   authors: [{ name: "Bluesky Analytics" }],
   openGraph: {
@@ -46,9 +48,10 @@ export const metadata: Metadata = {
       "Free analytics tool to analyze Bluesky user activity patterns and engagement metrics.",
     images: [
       {
-        url: "https://www.bsky-viz.com/og-image.png",
-        width: 1200,
-        height: 630,
+        url: "https://www.bsky-viz.com/logo.png",
+        width: 446,
+        height: 446,
+        alt: "Bluesky Analytics Logo",
       },
     ],
   },
@@ -57,9 +60,20 @@ export const metadata: Metadata = {
     title: "Bluesky Analytics - Visualize Social Media Activity",
     description:
       "Free analytics tool to analyze Bluesky user activity patterns.",
+    images: ["/logo.png"],
   },
   metadataBase: new URL("https://www.bsky-viz.com"),
-  robots: { index: true, follow: true },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: [
       { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
@@ -78,15 +92,21 @@ export const metadata: Metadata = {
         url: "/favicon/android-chrome-192x192.png",
         sizes: "192x192",
         type: "image/png",
+        rel: "icon",
       },
       {
         url: "/favicon/android-chrome-512x512.png",
         sizes: "512x512",
         type: "image/png",
+        rel: "icon",
       },
     ],
   },
   manifest: "/favicon/site.webmanifest",
+  other: {
+    "msapplication-TileColor": "#3b82f6",
+    "theme-color": "#3b82f6",
+  },
 };
 
 export default async function LocaleLayout({

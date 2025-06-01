@@ -445,30 +445,40 @@ export class BlueskyDataProcessor {
       totalCharacters: number;
     };
   } {
-    const originalPosts = content.ownPosts.map((post) => post.text);
+    const allOriginalPosts = content.ownPosts.map((post) => post.text);
     const allReplies = content.ownReplies.map((reply) => reply.text);
+
+    const maxOriginalPosts = 100;
+    const maxReplies = 100;
+
+    const selectedOriginalPosts =
+      allOriginalPosts.length > maxOriginalPosts
+        ? allOriginalPosts
+            .sort(() => Math.random() - 0.5)
+            .slice(0, maxOriginalPosts)
+        : allOriginalPosts;
 
     // Apply the same selection logic as before: all original posts + max 100 random replies
     const selectedReplies =
-      allReplies.length > 100
-        ? allReplies.sort(() => Math.random() - 0.5).slice(0, 100)
+      allReplies.length > maxReplies
+        ? allReplies.sort(() => Math.random() - 0.5).slice(0, maxReplies)
         : allReplies;
 
     const totalCharacters =
-      originalPosts.join("").length + selectedReplies.join("").length;
+      selectedOriginalPosts.join("").length + selectedReplies.join("").length;
 
     console.log("\n🤖 OpenAI Content Selection:");
-    console.log(`  • Original posts: ${originalPosts.length}`);
+    console.log(`  • Original posts: ${selectedOriginalPosts.length}`);
     console.log(
       `  • Selected replies: ${selectedReplies.length} (out of ${allReplies.length})`
     );
     console.log(`  • Total characters: ${totalCharacters.toLocaleString()}`);
 
     return {
-      originalPosts,
+      originalPosts: selectedOriginalPosts,
       replies: selectedReplies,
       metadata: {
-        totalOriginal: originalPosts.length,
+        totalOriginal: selectedOriginalPosts.length,
         totalReplies: allReplies.length,
         selectedReplies: selectedReplies.length,
         totalCharacters,

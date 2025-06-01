@@ -1,8 +1,10 @@
 "use client";
 
+import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackgroundGradient } from "./ui/background-gradient";
+import ShareButton from "./ShareButton";
 
 interface OpenAISummaryCardProps {
   summary: string;
@@ -38,6 +40,7 @@ interface OpenAISummaryCardProps {
  */
 export default function OpenAISummaryCard({ summary }: OpenAISummaryCardProps) {
   const t = useTranslations();
+  const cardRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -46,11 +49,23 @@ export default function OpenAISummaryCard({ summary }: OpenAISummaryCardProps) {
         gradientColors="subtle"
         animate={true}
       >
-        <Card className="bg-background/95 dark:bg-zinc-900/95 backdrop-blur-sm border-border/50 shadow-xl">
-          <CardHeader className="pb-6 px-6 sm:px-8">
+        <Card
+          ref={cardRef}
+          className="bg-background/95 dark:bg-zinc-900/95 backdrop-blur-sm border-border/50 shadow-xl"
+        >
+          <CardHeader className="pb-6 px-6 sm:px-8 flex flex-row items-center justify-between">
             <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-semibold text-foreground leading-tight">
               {t("openai.summaryTitle")}
             </CardTitle>
+            <ShareButton
+              targetRef={cardRef}
+              filename="bsky-viz-summary"
+              // variant="ghost"
+              size="sm"
+              // imageOptions={{
+              //   pixelRatio: 2,
+              // }}
+            />
           </CardHeader>
           <CardContent className="pt-0 px-6 sm:px-8 pb-8">
             <div className="max-w-none">

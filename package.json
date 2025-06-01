@@ -28,6 +28,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
+    "html-to-image": "^1.11.13",
     "jieba-wasm": "^2.2.0",
     "lucide-react": "^0.511.0",
     "motion": "^12.15.0",

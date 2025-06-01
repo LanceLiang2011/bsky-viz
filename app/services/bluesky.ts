@@ -64,12 +64,16 @@ export class BlueskyAPIClient {
     const firstPageData = await this.fetchFeedPage(cleanHandle);
     let allFeedItems = firstPageData.feed || [];
 
+    // Track both seen cursors and post IDs
+    const seenCursors = new Set<string>();
+    const seenPostIds = new Set<string>(allFeedItems.map((item) => item.post.uri));
+
     if (!firstPageData.cursor) {
       console.log("Only one page of results available");
       return allFeedItems;
     }
 
-    // Prepare for parallel fetching
+    seenCursors.add(firstPageData.cursor);
     const cursors = [firstPageData.cursor];
     let pageCount = 1;
     let hasMorePages = true;
@@ -114,13 +118,27 @@ export class BlueskyAPIClient {
           batchCursors.map((cursor) => this.fetchFeedPage(cleanHandle, cursor))
         );
 
-        // Process results and collect new cursors
+        // Process results with duplicate checking
         for (const result of results) {
           if (result.feed) {
-            allFeedItems = allFeedItems.concat(result.feed);
+            // Filter out duplicates
+            const newItems = result.feed.filter(
+              (item) => !seenPostIds.has(item.post.uri)
+            );
+
+            // Add new post IDs to tracking
+            newItems.forEach((item) => seenPostIds.add(item.post.uri));
+
+            // Only add new items
+            allFeedItems = allFeedItems.concat(newItems);
             pageCount++;
 
-            if (result.cursor && pageCount < this.maxPages) {
+            if (
+              result.cursor &&
+              !seenCursors.has(result.cursor) &&
+              pageCount < this.maxPages
+            ) {
+              seenCursors.add(result.cursor);
               cursors.push(result.cursor);
             }
           }
@@ -162,7 +180,7 @@ export class BlueskyAPIClient {
     }
 
     console.log(
-      `✓ Fetched ${pageCount} pages with ${allFeedItems.length} total feed items`
+      `✓ Fetched ${pageCount} pages with ${allFeedItems.length} unique feed items`
     );
     return allFeedItems;
   }

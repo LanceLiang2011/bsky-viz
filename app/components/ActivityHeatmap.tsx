@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useEffect } from "react";
+import { useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { format, eachDayOfInterval, getDay, subDays } from "date-fns";
 import ShareButton from "./ShareButton";
@@ -207,22 +207,69 @@ export default function ActivityHeatmap({
     return labels;
   }, [heatmapData]);
 
-  // Scroll to the right-most position after the component mounts and data changes
-  useEffect(() => {
-    if (scrollRef.current && heatmapData.weeks.length > 0) {
-      const scrollElement = scrollRef.current;
-      // Use setTimeout to ensure DOM is fully rendered
-      setTimeout(() => {
-        scrollElement.scrollLeft =
-          scrollElement.scrollWidth - scrollElement.clientWidth;
-      }, 100);
-    }
-  }, [heatmapData.weeks.length]);
+  // Generate months data for responsive grid layout
+  const monthsData = useMemo(() => {
+    const months: Array<{
+      month: number;
+      year: number;
+      days: Array<(typeof heatmapData.heatmapDays)[0]>;
+      monthKey: string;
+    }> = [];
+
+    // Get all days within data range
+    const allDays = heatmapData.heatmapDays.filter((d) => d.isWithinDataRange);
+
+    // Group days by month
+    const monthMap = new Map<
+      string,
+      Array<(typeof heatmapData.heatmapDays)[0]>
+    >();
+    allDays.forEach((day) => {
+      const month = day.displayDate.getMonth();
+      const year = day.displayDate.getFullYear();
+      // Use padded month for proper string sorting (01, 02, ..., 10, 11, 12)
+      const monthKey = `${year}-${month.toString().padStart(2, "0")}`;
+
+      if (!monthMap.has(monthKey)) {
+        monthMap.set(monthKey, []);
+      }
+      monthMap.get(monthKey)!.push(day);
+    });
+
+    // Convert to sorted array - now proper chronological order
+    Array.from(monthMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .forEach(([monthKey, days]) => {
+        const [year, month] = monthKey.split("-").map(Number);
+        months.push({
+          month,
+          year,
+          days,
+          monthKey,
+        });
+      });
+
+    return months;
+  }, [heatmapData]);
+
+  // Helper function to get month name and activity summary
+  const getMonthDisplayInfo = (monthData: (typeof monthsData)[0]) => {
+    const monthName = format(
+      new Date(monthData.year, monthData.month),
+      "MMM yyyy"
+    );
+    const totalActivity = monthData.days.reduce(
+      (sum: number, day) => sum + (day?.filteredCount || 0),
+      0
+    );
+    return { monthName, totalActivity };
+  };
 
   return (
     <div
       ref={heatmapRef}
       className={`bg-card p-4 rounded-lg border space-y-4 ${className}`}
+      data-heatmap-container
     >
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">
@@ -253,16 +300,17 @@ export default function ActivityHeatmap({
         </div>
       </div>
 
-      <div className="relative">
+      {/* Extra Large Layout - Traditional Horizontal heatmap */}
+      <div className="relative hidden xl:block" data-heatmap-container>
         <div
           ref={scrollRef}
           className="overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
           style={{
             maxWidth: "100%",
             scrollbarWidth: "thin",
-            scrollbarColor: "rgb(156 163 175) transparent", // Gray scrollbar
-            WebkitOverflowScrolling: "touch", // Enable momentum scrolling on iOS
-            scrollBehavior: "smooth", // Smooth scrolling
+            scrollbarColor: "rgb(156 163 175) transparent",
+            WebkitOverflowScrolling: "touch",
+            scrollBehavior: "smooth",
           }}
         >
           <div
@@ -271,18 +319,19 @@ export default function ActivityHeatmap({
               width: `${heatmapData.weeks.length * 14 + 24}px`,
               height: "auto",
             }}
+            data-heatmap-content
           >
-            {/* Month labels - moved higher up */}
+            {/* Month labels */}
             <div className="flex mb-4">
-              <div className="w-6"></div> {/* Space for day labels */}
+              <div className="w-6"></div>
               <div className="flex-1 relative">
                 {monthLabels.map((monthData) => (
                   <span
                     key={`${monthData.label}-${monthData.weekIndex}`}
                     className="absolute text-xs text-muted-foreground font-medium"
                     style={{
-                      left: `${monthData.weekIndex * 14 + 2}px`, // 14px per week (12px square + 2px gap)
-                      top: "-4px", // Move labels higher
+                      left: `${monthData.weekIndex * 14 + 2}px`,
+                      top: "-4px",
                     }}
                   >
                     {monthData.label}
@@ -300,7 +349,7 @@ export default function ActivityHeatmap({
                     key={`day-label-${index}`}
                     className="h-3 flex items-center mb-0.5"
                   >
-                    {index % 2 === 1 && ( // Only show alternate days to save space
+                    {index % 2 === 1 && (
                       <span className="text-xs text-muted-foreground text-right w-full pr-1">
                         {label}
                       </span>
@@ -317,7 +366,6 @@ export default function ActivityHeatmap({
                       const day = week.find((d) => d.dayOfWeek === dayIndex);
 
                       if (!day) {
-                        // Empty cell for days not in this week
                         return (
                           <div
                             key={`empty-${weekIndex}-${dayIndex}`}
@@ -354,6 +402,74 @@ export default function ActivityHeatmap({
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Responsive Grid Layout for smaller screens */}
+      <div className="relative xl:hidden" data-heatmap-content>
+        <div className="space-y-6">
+          {/* Simple flexible grid without forced empty slots */}
+          <div
+            className={`
+              grid gap-4 auto-rows-max
+              grid-cols-2
+              sm:grid-cols-3
+              md:grid-cols-4
+              lg:grid-cols-6
+            `}
+          >
+            {monthsData.map((monthData) => {
+              const { monthName, totalActivity } =
+                getMonthDisplayInfo(monthData);
+
+              return (
+                <div key={monthData.monthKey} className="space-y-2">
+                  {/* Month name and activity count */}
+                  <div className="text-center">
+                    <div className="text-xs font-medium text-muted-foreground">
+                      {monthName}
+                    </div>
+                    <div className="text-xs text-muted-foreground/70">
+                      {totalActivity > 0
+                        ? `${totalActivity} ${
+                            filter === "all" ? "activities" : filter
+                          }`
+                        : "No activity"}
+                    </div>
+                  </div>
+
+                  {/* Month mini heatmap */}
+                  <div className="flex flex-wrap gap-0.5 justify-center max-w-[84px] mx-auto">
+                    {monthData.days.map((day) => {
+                      const colorClass = getColorIntensity(
+                        day.filteredCount,
+                        heatmapData.maxActivity,
+                        day.isWithinDataRange
+                      );
+
+                      return (
+                        <div
+                          key={day.date}
+                          className={`w-2 h-2 rounded-sm border cursor-pointer transition-all hover:ring-1 hover:ring-blue-400 hover:ring-opacity-50 ${colorClass}`}
+                          title={`${format(day.displayDate, "MMM d, yyyy")}${
+                            !day.isWithinDataRange
+                              ? " (outside data range)"
+                              : day.filteredCount > 0
+                              ? filter === "all"
+                                ? `: ${day.total} activities (${day.posts} posts, ${day.replies} replies, ${day.reposts} reposts)`
+                                : `: ${day.filteredCount} ${filter}${
+                                    day.filteredCount !== 1 ? "s" : ""
+                                  }`
+                              : ": No activity"
+                          }`}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

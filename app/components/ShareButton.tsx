@@ -57,6 +57,29 @@ const hideShareButtonDuringCapture = (element: HTMLElement): (() => void) => {
   };
 };
 
+// Function to temporarily modify element background for better capture
+const addTemporaryBackground = (element: HTMLElement, isDark: boolean): (() => void) => {
+  // Store original styles
+  const originalBackground = element.style.background;
+  const originalBackgroundColor = element.style.backgroundColor;
+  
+  // Set theme-appropriate background
+  const backgroundColor = isDark ? "#0a0a0a" : "#ffffff";
+  
+  // Apply temporary background - this will work with the existing styling
+  element.style.backgroundColor = backgroundColor;
+  
+  console.log(`Applied temporary background: ${backgroundColor}`);
+  
+  // Return cleanup function
+  return () => {
+    // Restore original background styles
+    element.style.background = originalBackground;
+    element.style.backgroundColor = originalBackgroundColor;
+    console.log("Restored original background styles");
+  };
+};
+
 // Function to add website URL watermark to element before capture
 const addWatermark = (element: HTMLElement, isDark: boolean): (() => void) => {
   const watermark = document.createElement("div");
@@ -141,6 +164,7 @@ export default function ShareButton({
 
     let cleanupShareButton: (() => void) | null = null;
     let cleanupWatermark: (() => void) | null = null;
+    let cleanupThemeBackground: (() => void) | null = null;
 
     try {
       console.log("ShareButton: Starting image capture...");
@@ -150,17 +174,22 @@ export default function ShareButton({
       const isDarkTheme = theme === "dark";
 
       // Set background color based on current theme
-      const themeBackgroundColor = isDarkTheme ? "#0a0a0a" : "#ffffff";
+      // Instead of overriding with backgroundColor, we'll ensure the element has proper background
       const themeAwareOptions = {
         ...mergedOptions,
-        backgroundColor: themeBackgroundColor,
+        backgroundColor: "transparent", // Keep transparent to preserve existing styling
       };
 
-      console.log("ShareButton: Using background color:", themeBackgroundColor);
+      console.log("ShareButton: Using transparent background to preserve styling");
+      console.log("ShareButton: Current theme:", isDarkTheme ? "dark" : "light");
 
       // Hide ShareButton during capture
       cleanupShareButton = hideShareButtonDuringCapture(targetRef.current);
       console.log("ShareButton: Hidden ShareButton during capture");
+
+      // Add theme background for proper contrast
+      cleanupThemeBackground = addTemporaryBackground(targetRef.current, isDarkTheme);
+      console.log("ShareButton: Added temporary background");
 
       // Add watermark before capture
       cleanupWatermark = addWatermark(targetRef.current, isDarkTheme);
@@ -195,6 +224,10 @@ export default function ShareButton({
       alert("Failed to download image. Please try again.");
     } finally {
       // Clean up modifications
+      if (cleanupThemeBackground) {
+        cleanupThemeBackground();
+        console.log("ShareButton: Theme background cleanup completed");
+      }
       if (cleanupWatermark) {
         cleanupWatermark();
         console.log("ShareButton: Watermark cleanup completed");

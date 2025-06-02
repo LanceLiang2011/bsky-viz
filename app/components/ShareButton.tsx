@@ -244,19 +244,23 @@ export default function ShareButton({
   };
 
   return (
-    <Button
-      variant={variant}
-      size={size}
-      className={`flex items-center gap-2 ${className}`}
-      onClick={handleDownload}
-      disabled={isLoading}
-      data-share-button="true"
-    >
-      <Camera className="w-4 h-4" />
-      <span className="hidden sm:inline">
-        {buttonText || (isLoading ? t("capturing") : t("capture"))}
-      </span>
-    </Button>
+    <div className="relative group" data-share-button="true">
+      {/* Gradient border wrapper */}
+      <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-400/60 via-purple-400/60 to-pink-400/60 dark:from-blue-400/40 dark:via-purple-400/40 dark:to-pink-400/40 rounded-md opacity-75 group-hover:opacity-100 transition-opacity duration-300 blur-[0.5px]" />
+
+      <Button
+        variant={variant}
+        size={size}
+        className={`relative flex items-center gap-2 bg-background/95 dark:bg-background/95 border-0 hover:bg-background/90 dark:hover:bg-background/90 ${className}`}
+        onClick={handleDownload}
+        disabled={isLoading}
+      >
+        <Camera className="w-4 h-4" />
+        <span className="hidden sm:inline">
+          {buttonText || (isLoading ? t("capturing") : t("capture"))}
+        </span>
+      </Button>
+    </div>
   );
 }
 

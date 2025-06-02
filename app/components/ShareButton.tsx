@@ -34,6 +34,77 @@ export interface ShareButtonProps {
   className?: string;
 }
 
+// Function to hide ShareButton during capture
+const hideShareButtonDuringCapture = (element: HTMLElement): (() => void) => {
+  // Find all ShareButton elements within the target
+  const shareButtons = element.querySelectorAll("[data-share-button]");
+  const originalDisplays: string[] = [];
+
+  shareButtons.forEach((button, index) => {
+    const htmlButton = button as HTMLElement;
+    originalDisplays[index] = htmlButton.style.display;
+    htmlButton.style.display = "none";
+  });
+
+  // Return cleanup function
+  return () => {
+    shareButtons.forEach((button, index) => {
+      const htmlButton = button as HTMLElement;
+      htmlButton.style.display = originalDisplays[index] || "";
+    });
+  };
+};
+
+// Function to apply aesthetically pleasing gradient background
+const applyGradientBackground = (
+  element: HTMLElement,
+  isDark: boolean
+): (() => void) => {
+  const originalBackground = element.style.background;
+  const originalBackgroundColor = element.style.backgroundColor;
+  const originalBackgroundImage = element.style.backgroundImage;
+
+  // Define gradient backgrounds based on theme
+  const gradients = {
+    light: {
+      // Balanced subtle gradients - noticeable but gentle
+      primary: "linear-gradient(135deg, #f9fafc 0%, #f4f6f8 100%)",
+      secondary: "linear-gradient(135deg, #faf9fb 0%, #f6f4f6 100%)",
+      tertiary: "linear-gradient(135deg, #f8fbfc 0%, #f3f8fa 100%)",
+      quaternary: "linear-gradient(135deg, #fbfbfc 0%, #f7f9fa 100%)",
+      elegant:
+        "linear-gradient(135deg, #fafbfc 0%, #f6f8fa 25%, #f9f7f9 50%, #f5f6f8 75%, #f8fafb 100%)",
+    },
+    dark: {
+      primary: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+      secondary:
+        "linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%)",
+      tertiary:
+        "linear-gradient(135deg, #0f0f23 0%, #16213e 50%, #1a1a2e 100%)",
+      quaternary:
+        "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 75%, #0f3460 100%)",
+      elegant:
+        "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 20%, #16213e 40%, #0f3460 60%, #1a1a2e 80%, #0a0a0a 100%)",
+    },
+  };
+
+  // Choose a gradient (you can randomize this or make it configurable)
+  const selectedGradient = isDark
+    ? gradients.dark.elegant
+    : gradients.light.elegant;
+
+  // Apply the gradient
+  element.style.background = selectedGradient;
+  element.style.backgroundImage = selectedGradient;
+
+  // Return cleanup function
+  return () => {
+    element.style.background = originalBackground;
+    element.style.backgroundColor = originalBackgroundColor;
+    element.style.backgroundImage = originalBackgroundImage;
+  };
+};
+
 // Function to add website URL watermark to element before capture
 const addWatermark = (element: HTMLElement, isDark: boolean): (() => void) => {
   const watermark = document.createElement("div");
@@ -94,17 +165,9 @@ export default function ShareButton({
   const { theme } = useTheme();
   const t = useTranslations("openai");
 
-  // Get theme-appropriate background color
-  const getThemeBackgroundColor = () => {
-    if (theme === "dark") {
-      return "#09090b"; // zinc-950 - dark mode background
-    }
-    return "#ffffff"; // white - light mode background
-  };
-
-  // Merge default options with provided ones, using theme-based background
+  // Merge default options with provided ones, with special handling for gradients
   const defaultImageOptions: ElementToImageOptions = {
-    backgroundColor: getThemeBackgroundColor(),
+    // Don't set backgroundColor when using gradients - let the applied gradient show
     pixelRatio: 2,
     quality: 0.95,
     cacheBust: true,
@@ -128,12 +191,25 @@ export default function ShareButton({
 
       const isDarkTheme = theme === "dark";
 
+      // Hide ShareButton during capture
+      const cleanupShareButton = hideShareButtonDuringCapture(
+        targetRef.current
+      );
+      console.log("ShareButton: Hidden ShareButton during capture");
+
+      // Apply gradient background
+      const cleanupGradient = applyGradientBackground(
+        targetRef.current,
+        isDarkTheme
+      );
+      console.log("ShareButton: Applied gradient background");
+
       // Add watermark before capture with theme-aware styling
       const cleanupWatermark = addWatermark(targetRef.current, isDarkTheme);
       console.log("ShareButton: Added theme-aware watermark");
 
       // Wait a moment for the DOM to update
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       // Capture the image with detailed logging
       console.log(
@@ -143,9 +219,11 @@ export default function ShareButton({
       const result = await convertToImage(targetRef.current);
       console.log("ShareButton: Image conversion successful");
 
-      // Clean up watermark
+      // Clean up all modifications
       cleanupWatermark();
-      console.log("ShareButton: Cleanup completed");
+      cleanupGradient();
+      cleanupShareButton();
+      console.log("ShareButton: All cleanup completed");
 
       // Download the image
       result.download(filename);
@@ -165,6 +243,7 @@ export default function ShareButton({
       className={`flex items-center gap-2 ${className}`}
       onClick={handleDownload}
       disabled={isLoading}
+      data-share-button="true"
     >
       <Camera className="w-4 h-4" />
       <span className="hidden sm:inline">

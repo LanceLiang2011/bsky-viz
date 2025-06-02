@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useMemo, useEffect, useState } from "react";
-import { WordData } from "../utils/wordProcessor";
-import WordCloudBase, { WordCloudConfig } from "./WordCloudBase";
+import WordCloudBase, { WordCloudConfig, WordData } from "./WordCloudBase";
 
 // Props interface for the ChineseWordCloud component
 interface ChineseWordCloudProps {
-  // Either pre-processed words OR raw text for client-side processing
-  words?: WordData[];
+  // Raw text for client-side processing
   rawText?: string;
   config?: Partial<WordCloudConfig>;
   className?: string;
@@ -28,7 +26,6 @@ const mapToWordData = (wordMap: Map<string, number>): WordData[] => {
 // Enhanced WordCloud component with Chinese processing
 export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
   ({
-    words: providedWords,
     rawText,
     config = {},
     className = "",
@@ -44,9 +41,9 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
     const [processingError, setProcessingError] = useState<string | null>(null);
     const [isChineseContent, setIsChineseContent] = useState<boolean>(false);
 
-    // Process raw text client-side if provided and no processed words
+    // Process raw text client-side if provided
     useEffect(() => {
-      if (!rawText || providedWords) return;
+      if (!rawText) return;
 
       const processText = async () => {
         try {
@@ -81,12 +78,12 @@ export const ChineseWordCloud: React.FC<ChineseWordCloudProps> = React.memo(
       };
 
       processText();
-    }, [rawText, providedWords]);
+    }, [rawText]);
 
-    // Use provided words or processed words
+    // Use processed words
     const words = useMemo(() => {
-      return providedWords || processedWords;
-    }, [providedWords, processedWords]);
+      return processedWords;
+    }, [processedWords]);
 
     // Determine loading state
     const isLoading = externalLoading || isProcessing;

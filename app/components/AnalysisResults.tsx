@@ -40,11 +40,7 @@ interface ProcessedFeedData {
     tag: string;
     count: number;
   }>;
-  wordCloudData: Array<{
-    text: string;
-    value: number;
-  }>;
-  rawText?: string; // Raw text for client-side Chinese processing
+  rawText?: string; // Raw text for client-side processing
   isChineseContent?: boolean; // Flag to indicate Chinese content
   insights: {
     totalPosts: number;
@@ -155,8 +151,7 @@ export default function AnalysisResults({
           />
         ) : (
           <WordCloud
-            words={processedFeed.wordCloudData}
-            rawText={processedFeed.rawText} // Provide raw text for enhanced English processing
+            rawText={processedFeed.rawText}
             title={t("analysis.wordCloud")}
             subtitle={t("analysis.wordCloudSubtitle")}
             config={{

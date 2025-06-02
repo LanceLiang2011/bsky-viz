@@ -102,7 +102,6 @@ export class FeedAnalyzer {
       activityTimeline,
       topInteractions,
       commonHashtags,
-      wordCloudData: [], // Placeholder for server-side
       rawText,
       isChineseContent,
       insights,

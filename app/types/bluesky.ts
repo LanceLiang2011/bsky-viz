@@ -213,11 +213,7 @@ export interface ProcessedFeedData {
     tag: string;
     count: number;
   }>;
-  wordCloudData: Array<{
-    text: string;
-    value: number;
-  }>;
-  rawText?: string; // Raw text for client-side Chinese processing
+  rawText?: string; // Raw text for client-side processing
   isChineseContent?: boolean; // Flag to indicate Chinese content
   insights: {
     totalPosts: number;

@@ -18,8 +18,13 @@ import {
   Word,
   FinalWordData,
 } from "@isoterik/react-word-cloud";
-import { WordData } from "../utils/wordProcessor";
 import ShareButton from "./ShareButton";
+
+// Word cloud data interface
+export interface WordData {
+  text: string;
+  value: number;
+}
 
 // Word cloud configuration interface
 export interface WordCloudConfig {

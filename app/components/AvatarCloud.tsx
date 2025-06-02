@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Tooltip,
@@ -36,10 +37,10 @@ const TitleComponent = ({
   avatar: string;
 }) => (
   <div className="flex items-center space-x-2">
-    <img
+    <Image
       src={avatar}
-      height="20"
-      width="20"
+      height={20}
+      width={20}
       alt="thumbnail"
       className="rounded-full border-2 border-white"
     />

@@ -36,7 +36,11 @@
     "noHandle": "未提供用户名",
     "fetchFailed": "从 Bluesky 获取数据失败",
     "unexpected": "发生意外错误",
-    "openaiError": "未能从 AI 助手获取摘要。AI 可能不可用或发生错误。"
+    "openaiError": "未能从 AI 助手获取摘要。AI 可能不可用或发生错误。",
+    "title": "错误",
+    "userNotFound": "未找到用户",
+    "userNotFoundDescription": "您要查找的用户不存在或其个人资料无法访问。",
+    "unexpectedError": "发生意外错误。请重试。"
   },
   "language": {
     "switch": "语言",
@@ -103,6 +107,7 @@
   },
   "loading": {
     "analyzing": "正在分析用户数据",
+    "generatingSummary": "正在生成 AI 摘要...",
     "pleaseWait": "正在获取并分析用户的 Bluesky 活动数据，请稍候..."
   },
   "navigation": {

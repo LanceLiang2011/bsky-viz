@@ -1,165 +1,33 @@
+"use client";
+
+import { use, useState, useEffect } from "react";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { useTranslations, useLocale } from "next-intl";
 import ProfileCard from "../../components/ProfileCard";
 import AnalysisResults from "../../components/AnalysisResults";
 import BackButton from "../../components/BackButton";
 import OpenAISummaryCard from "../../components/OpenAISummaryCard";
+import LoadingState from "../../components/LoadingState";
 import { Card, CardContent } from "@/components/ui/card";
+import { useBlueskyData, analyzeWithOpenAI } from "../../hooks/useBlueskyData";
 
-// Import new services and types
-import { BlueskyAPIClient, BlueskyDataProcessor } from "../../services/bluesky";
-import { FeedAnalyzer } from "../../services/feedAnalyzer";
-
-async function getOpenAISummary(
-  originalPosts: string[],
-  replyPosts: string[],
-  t: Awaited<ReturnType<typeof getTranslations>>,
-  userDisplayName?: string
-): Promise<string | null> {
-  if (process.env.USE_OPENAI !== "True") {
-    const nameToUse = userDisplayName || t("openai.genericUser");
-    return t("openai.disabledSummary", { username: nameToUse });
-  }
-
-  if (originalPosts.length === 0 && replyPosts.length === 0) {
-    return t("openai.noTextForSummary");
-  }
-
-  try {
-    const { default: OpenAI } = await import("openai");
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
-    // Construct the content with clear separation
-    let content = "Please analyze the following user content:\n\n";
-
-    if (originalPosts.length > 0) {
-      content +=
-        "=== ORIGINAL POSTS (Primary content - main interests and thoughts) ===\n";
-      content += originalPosts.join("\n\n---\n\n");
-      content += "\n\n";
-    }
-
-    if (replyPosts.length > 0) {
-      content +=
-        "=== REPLIES (Secondary content - conversational style and engagement) ===\n";
-      content += replyPosts.join("\n\n---\n\n");
-    }
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4.1-nano", // !Important: Don't change this
-      messages: [
-        {
-          role: "system",
-          content: t("openai.systemPromptWithSeparation"),
-        },
-        {
-          role: "user",
-          content: content,
-        },
-      ],
-      temperature: 0.7,
-    });
-    return completion.choices[0]?.message?.content?.trim() || null;
-  } catch (error) {
-    console.error("Error calling OpenAI API:", error);
-    return t("errors.openaiError");
-  }
-}
-
-async function fetchBlueskyData(handle: string, customMaxPages?: number) {
-  const t = await getTranslations();
-
-  try {
-    console.log("🚀 Starting new integrated data fetching system...");
-
-    // Initialize API client and data processor
-    const apiClient = new BlueskyAPIClient();
-
-    // Fetch profile data
-    const profileData = await apiClient.fetchProfile(handle);
-    console.log(`✓ Profile fetched for: ${profileData.handle}`);
-
-    // Fetch all feed data with pagination
-    const allFeedItems = await apiClient.fetchFeed(handle, customMaxPages);
-    console.log(`✓ Feed data fetched: ${allFeedItems.length} items`);
-
-    // Preprocess and categorize data immediately
-    const categorizedContent = BlueskyDataProcessor.preprocessFeedData(
-      allFeedItems,
-      profileData
-    );
-    console.log("✓ Data preprocessing and categorization completed");
-
-    // Analyze the categorized data using the improved analyzer
-    const processedFeed = await FeedAnalyzer.analyzeCategorizedContent(
-      categorizedContent,
-      {
-        userHandle: handle,
-        userTimezone: "UTC", // Use UTC for consistency with the old implementation
-      }
-    );
-    console.log("✓ Feed analysis completed");
-
-    // Get OpenAI content and summary
-    let openAISummary = null;
-    if (process.env.USE_OPENAI === "True") {
-      const aiContent =
-        BlueskyDataProcessor.getContentForAI(categorizedContent);
-
-      if (aiContent.originalPosts.length > 0 || aiContent.replies.length > 0) {
-        openAISummary = await getOpenAISummary(
-          aiContent.originalPosts,
-          aiContent.replies,
-          t,
-          profileData?.displayName || profileData?.handle
-        );
-        console.log("✓ OpenAI summary generated");
-      }
-    } else {
-      // If OpenAI is disabled, show placeholder message
-      const nameToUse =
-        profileData?.displayName ||
-        profileData?.handle ||
-        t("openai.genericUser");
-      openAISummary = t("openai.disabledSummary", { username: nameToUse });
-    }
-
-    console.log("🎉 All data processing completed successfully!");
-
-    return {
-      success: true,
-      profile: profileData,
-      processedFeed,
-      categorizedContent, // Add the categorized data
-      openAISummary,
-    };
-  } catch (err) {
-    console.error("❌ Error in new data fetching system:", err);
-
-    // Handle specific error types
-    if (err instanceof Error) {
-      if (err.message === "USER_NOT_FOUND") {
-        return { error: "User not found" };
-      }
-      return { error: err.message };
-    }
-
-    return { error: t("errors.fetchFailed") };
-  }
-}
-
-export default async function HandlePage({
-  params,
-  searchParams,
-}: {
+interface HandlePageProps {
   params: Promise<{ handle: string; locale: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const t = await getTranslations();
-  const { handle, locale } = await params;
-  const resolvedSearchParams = await searchParams;
+}
+
+export default function HandlePage({ params, searchParams }: HandlePageProps) {
+  const t = useTranslations();
+  const locale = useLocale();
+
+  // Unwrap the promises
+  const { handle } = use(params);
+  const resolvedSearchParams = use(searchParams);
+
+  // State for OpenAI analysis
+  const [openAISummary, setOpenAISummary] = useState<string | null>(null);
+  const [openAILoading, setOpenAILoading] = useState(false);
+  const [openAIError, setOpenAIError] = useState<string | null>(null);
 
   if (!handle) {
     notFound();
@@ -171,37 +39,90 @@ export default async function HandlePage({
     ? parseInt(Array.isArray(limitParam) ? limitParam[0] : limitParam)
     : undefined;
 
-  const result = await fetchBlueskyData(
+  // Use the custom hook for data fetching
+  const { data, error, isLoading } = useBlueskyData(
     decodeURIComponent(handle),
     customMaxPages
   );
 
-  if (result.error) {
-    if (result.error === "User not found") {
-      notFound();
+  // Effect to trigger OpenAI analysis when data is ready
+  useEffect(() => {
+    if (data && data.categorizedContent && !openAISummary && !openAILoading) {
+      const performOpenAIAnalysis = async () => {
+        setOpenAILoading(true);
+        setOpenAIError(null);
+
+        try {
+          const summary = await analyzeWithOpenAI(
+            data.categorizedContent,
+            data.profile.displayName || data.profile.handle,
+            locale
+          );
+          setOpenAISummary(summary);
+          console.log("✓ OpenAI summary generated");
+        } catch (err) {
+          console.error("Error generating OpenAI summary:", err);
+          setOpenAIError(
+            err instanceof Error ? err.message : "Failed to generate summary"
+          );
+        } finally {
+          setOpenAILoading(false);
+        }
+      };
+
+      performOpenAIAnalysis();
+    }
+  }, [data, locale, openAISummary, openAILoading]);
+
+  // Loading state
+  if (isLoading) {
+    return <LoadingState message={t("loading.analyzing")} />;
+  }
+
+  // Error states
+  if (error) {
+    if (error === "User not found") {
+      return (
+        <div className="container mx-auto px-4 py-8 space-y-6">
+          <BackButton locale={locale} />
+          <Card className="mx-auto max-w-md">
+            <CardContent className="pt-6 text-center">
+              <h2 className="text-lg font-semibold mb-2">
+                {t("errors.userNotFound")}
+              </h2>
+              <p className="text-muted-foreground">
+                {t("errors.userNotFoundDescription")}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      );
     }
 
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 space-y-6">
         <BackButton locale={locale} />
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-red-600 p-4 bg-red-50 rounded-lg">
-              <strong>{t("results.error")}:</strong> {result.error}
-            </div>
+        <Card className="mx-auto max-w-md">
+          <CardContent className="pt-6 text-center">
+            <h2 className="text-lg font-semibold mb-2">{t("errors.title")}</h2>
+            <p className="text-muted-foreground">{error}</p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  if (!result.success || !result.profile) {
+  // No data state
+  if (!data || !data.profile) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 space-y-6">
         <BackButton locale={locale} />
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-muted-foreground">{t("results.noData")}</div>
+        <Card className="mx-auto max-w-md">
+          <CardContent className="pt-6 text-center">
+            <h2 className="text-lg font-semibold mb-2">{t("errors.title")}</h2>
+            <p className="text-muted-foreground">
+              {t("errors.unexpectedError")}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -211,25 +132,54 @@ export default async function HandlePage({
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       <BackButton locale={locale} />
-      <ProfileCard profile={result.profile} />
+      <ProfileCard profile={data.profile} />
 
-      {/* OpenAI Summary Card */}
-      {result.openAISummary && (
-        <OpenAISummaryCard
-          summary={result.openAISummary}
-          username={result.profile.displayName}
-          handle={result.profile.handle}
-        />
+      {/* OpenAI Summary with loading state */}
+      {(openAISummary || openAILoading) && (
+        <>
+          {openAILoading && (
+            <Card className="mx-auto max-w-4xl">
+              <CardContent className="pt-6 text-center">
+                <div className="animate-pulse">
+                  <div className="h-4 bg-muted rounded w-3/4 mx-auto mb-2"></div>
+                  <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-4">
+                  {t("loading.generatingSummary")}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {openAISummary && !openAILoading && (
+            <OpenAISummaryCard
+              summary={openAISummary}
+              username={data.profile.displayName}
+              handle={data.profile.handle}
+            />
+          )}
+
+          {openAIError && !openAILoading && (
+            <Card className="mx-auto max-w-4xl">
+              <CardContent className="pt-6 text-center">
+                <h3 className="text-lg font-semibold mb-2 text-destructive">
+                  {t("errors.openaiError")}
+                </h3>
+                <p className="text-muted-foreground">{openAIError}</p>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
 
-      {result.processedFeed && (
+      {data.processedFeed && (
         <AnalysisResults
-          processedFeed={result.processedFeed}
+          processedFeed={data.processedFeed}
           currentUser={{
-            did: result.profile.did,
-            handle: result.profile.handle,
-            displayName: result.profile.displayName,
-            avatar: result.profile.avatar,
+            did: data.profile.did,
+            handle: data.profile.handle,
+            displayName: data.profile.displayName,
+            avatar: data.profile.avatar,
           }}
         />
       )}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -170,9 +171,11 @@ export default function HandleSearchForm() {
                       className="w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors text-left border-b border-border last:border-b-0"
                     >
                       {user.avatar ? (
-                        <img
+                        <Image
                           src={user.avatar}
                           alt={user.displayName || user.handle}
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                         />
                       ) : (

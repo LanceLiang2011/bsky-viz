@@ -17,8 +17,8 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Match all paths except static files that should bypass middleware entirely
+  // Match all paths except API routes, static files, and other files that should bypass middleware entirely
   matcher: [
-    "/((?!_next/static|_next/image|favicon|.*\\.svg|.*\\.webp|.*\\.png|.*\\.ico|.*\\.txt|.*\\.xml).*)",
+    "/((?!api|_next/static|_next/image|favicon|.*\\.svg|.*\\.webp|.*\\.png|.*\\.ico|.*\\.txt|.*\\.xml).*)",
   ],
 };

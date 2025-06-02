@@ -1,14 +1,16 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 interface BackButtonProps {
   locale: string;
 }
 
-export default async function BackButton({ locale }: BackButtonProps) {
-  const t = await getTranslations("navigation");
+export default function BackButton({ locale }: BackButtonProps) {
+  const t = useTranslations("navigation");
 
   return (
     <Link href={`/${locale}`}>

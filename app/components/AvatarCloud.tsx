@@ -15,6 +15,7 @@ import {
   isValidAvatarUrl,
 } from "@/app/utils/avatarUtils";
 import type { InteractionData } from "./analysis-types";
+import { FollowerPointerCard } from "@/components/ui/following-pointer";
 
 interface AvatarCloudProps {
   interactions: InteractionData[];
@@ -26,6 +27,25 @@ interface AvatarCloudProps {
   };
   className?: string;
 }
+
+const TitleComponent = ({
+  title,
+  avatar,
+}: {
+  title: string;
+  avatar: string;
+}) => (
+  <div className="flex items-center space-x-2">
+    <img
+      src={avatar}
+      height="20"
+      width="20"
+      alt="thumbnail"
+      className="rounded-full border-2 border-white"
+    />
+    <p>{title}</p>
+  </div>
+);
 
 export default function AvatarCloud({
   interactions,
@@ -170,143 +190,76 @@ export default function AvatarCloud({
 
   return (
     <TooltipProvider>
-      <div
-        className={`relative w-full h-[400px] sm:h-[480px] lg:h-[520px] bg-gradient-to-br from-primary/10 via-muted to-primary/20 rounded-lg border overflow-hidden shadow-inner ${className}`}
-        style={{
-          backgroundImage: `
+      <FollowerPointerCard
+        title={
+          <TitleComponent
+            title={currentUser?.displayName || "@" + currentUser?.handle}
+            avatar={currentUser?.avatar || "https://i.pravatar.cc/300"}
+          />
+        }
+      >
+        <div
+          className={`relative w-full h-[400px] sm:h-[480px] lg:h-[520px] bg-gradient-to-br from-primary/10 via-muted to-primary/20 rounded-lg border overflow-hidden shadow-inner ${className}`}
+          style={{
+            backgroundImage: `
             radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
             radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
             radial-gradient(circle at 40% 40%, rgba(14, 165, 233, 0.15) 0%, transparent 50%)
           `,
-        }}
-      >
-        {/* Center user avatar - largest and most prominent */}
-        {currentUser && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className="absolute cursor-pointer hover:scale-110 transition-transform duration-200 drop-shadow-lg"
-                style={{
-                  width: `${
-                    effectiveScreenSize === "small"
-                      ? "64px"
-                      : effectiveScreenSize === "medium"
-                      ? "72px"
-                      : "80px"
-                  }`,
-                  height: `${
-                    effectiveScreenSize === "small"
-                      ? "64px"
-                      : effectiveScreenSize === "medium"
-                      ? "72px"
-                      : "80px"
-                  }`,
-                  left: "50%",
-                  top: "50%",
-                  transform: "translate(-50%, -50%)",
-                  zIndex: 1000,
-                }}
-                onClick={() => handleUserClick(currentUser.handle)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleUserClick(currentUser.handle);
-                  }
-                }}
-              >
-                <Avatar className="w-full h-full border-4 border-white shadow-xl ring-2 ring-indigo-200">
-                  {isValidAvatarUrl(currentUser.avatar) && (
-                    <AvatarImage
-                      src={currentUser.avatar}
-                      alt={currentUser.displayName || currentUser.handle}
-                    />
-                  )}
-                  <AvatarFallback
-                    className={`bg-gradient-to-br from-primary to-primary/80 text-primary-foreground font-bold ${
-                      effectiveScreenSize === "small" ? "text-lg" : "text-xl"
-                    }`}
-                  >
-                    {mounted
-                      ? getAvatarFallbackChar(
-                          currentUser.displayName,
-                          currentUser.handle
-                        )
-                      : "?"}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="bg-popover/95 text-popover-foreground border shadow-xl backdrop-blur-sm z-[9999]"
-              sideOffset={8}
-            >
-              <p className="font-medium">
-                {currentUser.displayName || currentUser.handle}
-                <span className="text-primary ml-1">
-                  {t("analysis.youLabel")}
-                </span>
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        )}
-
-        {/* Interaction avatars in concentric rings */}
-        {cloudInteractions.map((interaction, index) => {
-          const style = getAvatarStyle(interaction, index);
-          const ring = index < 5 ? 1 : index < 15 ? 2 : 3;
-
-          // Different border styles for different rings
-          const borderClasses = {
-            1: "border-3 border-white shadow-lg ring-2 ring-indigo-100/70", // Inner ring
-            2: "border-2 border-white shadow-md ring-1 ring-purple-100/50", // Middle ring
-            3: "border-2 border-white shadow-md ring-1 ring-gray-100/40", // Outer ring
-          };
-
-          const fallbackClasses = {
-            1: "bg-gradient-to-br from-primary/20 to-primary/30 text-primary font-semibold", // Inner ring
-            2: "bg-gradient-to-br from-primary/10 to-primary/20 text-primary font-medium", // Middle ring
-            3: "bg-gradient-to-br from-muted to-muted/80 text-muted-foreground font-medium", // Outer ring
-          };
-
-          return (
-            <Tooltip key={interaction.handle}>
+          }}
+        >
+          {/* Center user avatar - largest and most prominent */}
+          {currentUser && (
+            <Tooltip>
               <TooltipTrigger asChild>
                 <div
-                  className="cursor-pointer hover:scale-110 transition-transform duration-200 drop-shadow-md"
-                  style={style}
-                  onClick={() => handleUserClick(interaction.handle)}
+                  className="absolute cursor-pointer hover:scale-110 transition-transform duration-200 drop-shadow-lg"
+                  style={{
+                    width: `${
+                      effectiveScreenSize === "small"
+                        ? "64px"
+                        : effectiveScreenSize === "medium"
+                        ? "72px"
+                        : "80px"
+                    }`,
+                    height: `${
+                      effectiveScreenSize === "small"
+                        ? "64px"
+                        : effectiveScreenSize === "medium"
+                        ? "72px"
+                        : "80px"
+                    }`,
+                    left: "50%",
+                    top: "50%",
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 1000,
+                  }}
+                  onClick={() => handleUserClick(currentUser.handle)}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      handleUserClick(interaction.handle);
+                      handleUserClick(currentUser.handle);
                     }
                   }}
                 >
-                  <Avatar
-                    className={`w-full h-full ${
-                      borderClasses[ring as keyof typeof borderClasses]
-                    }`}
-                  >
-                    {isValidAvatarUrl(interaction.avatar) && (
+                  <Avatar className="w-full h-full border-4 border-white shadow-xl ring-2 ring-indigo-200">
+                    {isValidAvatarUrl(currentUser.avatar) && (
                       <AvatarImage
-                        src={interaction.avatar}
-                        alt={interaction.displayName || interaction.handle}
+                        src={currentUser.avatar}
+                        alt={currentUser.displayName || currentUser.handle}
                       />
                     )}
                     <AvatarFallback
-                      className={`${
-                        fallbackClasses[ring as keyof typeof fallbackClasses]
-                      } text-xs`}
+                      className={`bg-gradient-to-br from-primary to-primary/80 text-primary-foreground font-bold ${
+                        effectiveScreenSize === "small" ? "text-lg" : "text-xl"
+                      }`}
                     >
                       {mounted
                         ? getAvatarFallbackChar(
-                            interaction.displayName,
-                            interaction.handle
+                            currentUser.displayName,
+                            currentUser.handle
                           )
                         : "?"}
                     </AvatarFallback>
@@ -318,21 +271,97 @@ export default function AvatarCloud({
                 className="bg-popover/95 text-popover-foreground border shadow-xl backdrop-blur-sm z-[9999]"
                 sideOffset={8}
               >
-                <div className="text-center">
-                  <p className="font-medium text-sm">
-                    {interaction.displayName || interaction.handle}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {t("analysis.interactionCount", {
-                      count: interaction.count,
-                    })}
-                  </p>
-                </div>
+                <p className="font-medium">
+                  {currentUser.displayName || currentUser.handle}
+                  <span className="text-primary ml-1">
+                    {t("analysis.youLabel")}
+                  </span>
+                </p>
               </TooltipContent>
             </Tooltip>
-          );
-        })}
-      </div>
+          )}
+
+          {/* Interaction avatars in concentric rings */}
+          {cloudInteractions.map((interaction, index) => {
+            const style = getAvatarStyle(interaction, index);
+            const ring = index < 5 ? 1 : index < 15 ? 2 : 3;
+
+            // Different border styles for different rings
+            const borderClasses = {
+              1: "border-3 border-white shadow-lg ring-2 ring-indigo-100/70", // Inner ring
+              2: "border-2 border-white shadow-md ring-1 ring-purple-100/50", // Middle ring
+              3: "border-2 border-white shadow-md ring-1 ring-gray-100/40", // Outer ring
+            };
+
+            const fallbackClasses = {
+              1: "bg-gradient-to-br from-primary/20 to-primary/30 text-primary font-semibold", // Inner ring
+              2: "bg-gradient-to-br from-primary/10 to-primary/20 text-primary font-medium", // Middle ring
+              3: "bg-gradient-to-br from-muted to-muted/80 text-muted-foreground font-medium", // Outer ring
+            };
+
+            return (
+              <Tooltip key={interaction.handle}>
+                <TooltipTrigger asChild>
+                  <div
+                    className="cursor-pointer hover:scale-110 transition-transform duration-200 drop-shadow-md"
+                    style={style}
+                    onClick={() => handleUserClick(interaction.handle)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleUserClick(interaction.handle);
+                      }
+                    }}
+                  >
+                    <Avatar
+                      className={`w-full h-full ${
+                        borderClasses[ring as keyof typeof borderClasses]
+                      }`}
+                    >
+                      {isValidAvatarUrl(interaction.avatar) && (
+                        <AvatarImage
+                          src={interaction.avatar}
+                          alt={interaction.displayName || interaction.handle}
+                        />
+                      )}
+                      <AvatarFallback
+                        className={`${
+                          fallbackClasses[ring as keyof typeof fallbackClasses]
+                        } text-xs`}
+                      >
+                        {mounted
+                          ? getAvatarFallbackChar(
+                              interaction.displayName,
+                              interaction.handle
+                            )
+                          : "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-popover/95 text-popover-foreground border shadow-xl backdrop-blur-sm z-[9999]"
+                  sideOffset={8}
+                >
+                  <div className="text-center">
+                    <p className="font-medium text-sm">
+                      {interaction.displayName || interaction.handle}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t("analysis.interactionCount", {
+                        count: interaction.count,
+                      })}
+                    </p>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </div>
+      </FollowerPointerCard>
     </TooltipProvider>
   );
 }

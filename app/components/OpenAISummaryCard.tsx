@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackgroundGradient } from "./ui/background-gradient";
@@ -8,6 +8,8 @@ import ShareButton from "./ShareButton";
 
 interface OpenAISummaryCardProps {
   summary: string;
+  handle: string;
+  username?: string;
 }
 
 /**
@@ -38,9 +40,25 @@ interface OpenAISummaryCardProps {
  * - Testing in both light and dark themes
  * - Avoiding hardcoded colors like text-gray-700
  */
-export default function OpenAISummaryCard({ summary }: OpenAISummaryCardProps) {
+export default function OpenAISummaryCard({
+  summary,
+  username,
+  handle,
+}: OpenAISummaryCardProps) {
   const t = useTranslations();
   const cardRef = useRef<HTMLDivElement>(null);
+  const [showUserInfo, setShowUserInfo] = useState(false);
+
+  const handleBeforeCapture = () => {
+    setShowUserInfo(true);
+  };
+
+  const handleAfterCapture = () => {
+    // Reset after a delay to allow capture to complete
+    setTimeout(() => {
+      setShowUserInfo(false);
+    }, 500);
+  };
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -55,13 +73,28 @@ export default function OpenAISummaryCard({ summary }: OpenAISummaryCardProps) {
         >
           <CardHeader className="pb-6 px-6 sm:px-8 flex flex-row items-center justify-between">
             <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-semibold text-foreground leading-tight">
-              {t("openai.summaryTitle")}
+              {showUserInfo ? (
+                <div className="flex flex-col gap-1">
+                  {username && (
+                    <span className="text-xl sm:text-2xl lg:text-3xl">
+                      {username}
+                    </span>
+                  )}
+                  <span className="text-sm sm:text-base lg:text-lg text-muted-foreground font-normal">
+                    @{handle}
+                  </span>
+                </div>
+              ) : (
+                t("openai.summaryTitle")
+              )}
             </CardTitle>
             <ShareButton
               targetRef={cardRef}
               filename="bsky-viz-summary"
               variant="ghost"
               size="sm"
+              beforeCapture={handleBeforeCapture}
+              afterCapture={handleAfterCapture}
             />
           </CardHeader>
           <CardContent className="pt-0 px-6 sm:px-8 pb-8">

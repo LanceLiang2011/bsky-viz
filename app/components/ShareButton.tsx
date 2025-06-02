@@ -32,6 +32,8 @@ export interface ShareButtonProps {
   size?: "default" | "sm" | "lg" | "icon";
   /** Custom class name */
   className?: string;
+  beforeCapture?: () => void;
+  afterCapture?: () => void;
 }
 
 // Function to hide ShareButton during capture
@@ -160,6 +162,8 @@ export default function ShareButton({
   variant = "outline",
   size = "default",
   className = "",
+  beforeCapture,
+  afterCapture,
 }: ShareButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { theme } = useTheme();
@@ -182,6 +186,8 @@ export default function ShareButton({
       console.error("ShareButton: Target ref is null");
       return;
     }
+
+    beforeCapture?.();
 
     setIsLoading(true);
 
@@ -233,6 +239,7 @@ export default function ShareButton({
       alert("Failed to download image. Please try again.");
     } finally {
       setIsLoading(false);
+      afterCapture?.();
     }
   };
 

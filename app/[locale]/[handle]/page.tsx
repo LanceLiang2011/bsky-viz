@@ -215,7 +215,11 @@ export default async function HandlePage({
 
       {/* OpenAI Summary Card */}
       {result.openAISummary && (
-        <OpenAISummaryCard summary={result.openAISummary} />
+        <OpenAISummaryCard
+          summary={result.openAISummary}
+          username={result.profile.displayName}
+          handle={result.profile.handle}
+        />
       )}
 
       {result.processedFeed && (

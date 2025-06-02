@@ -3,12 +3,13 @@
 import React, { useState } from "react";
 import { RefObject } from "react";
 import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   useElementToImage,
   ElementToImageOptions,
 } from "@/app/utils/elementToImage";
-import { Download } from "lucide-react";
+import { Camera } from "lucide-react";
 
 export interface ShareButtonProps {
   /** Ref to the element to be converted to image */
@@ -91,6 +92,7 @@ export default function ShareButton({
 }: ShareButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { theme } = useTheme();
+  const t = useTranslations("openai");
 
   // Get theme-appropriate background color
   const getThemeBackgroundColor = () => {
@@ -160,12 +162,14 @@ export default function ShareButton({
     <Button
       variant={variant}
       size={size}
-      className={className}
+      className={`flex items-center gap-2 ${className}`}
       onClick={handleDownload}
       disabled={isLoading}
     >
-      <Download className="w-4 h-4 mr-2" />
-      {buttonText || (isLoading ? "Downloading..." : "Download")}
+      <Camera className="w-4 h-4" />
+      <span className="hidden sm:inline">
+        {buttonText || (isLoading ? t("capturing") : t("capture"))}
+      </span>
     </Button>
   );
 }

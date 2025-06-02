@@ -66,17 +66,17 @@ export default function ActivityByHourChart({
 
   return (
     <div
-      className={`bg-card p-3 sm:p-4 rounded-lg border space-y-4 ${className}`}
+      className={`bg-card p-4 rounded-lg border space-y-4 ${className}`}
       ref={activityByHourRef}
     >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h3 className="text-base sm:text-lg font-medium">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">
           {t("analysis.activityByHour")}
         </h3>
         <ShareButton
           targetRef={activityByHourRef}
-          filename={"activity-by-hour"}
+          filename="activity-by-hour"
           variant="ghost"
           size="sm"
         />

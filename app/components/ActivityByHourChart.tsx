@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import ShareButton from "./ShareButton";
 
 interface ActivityByHourChartProps {
   activityByHour: Record<number, number>;
@@ -13,6 +14,7 @@ export default function ActivityByHourChart({
   className = "",
 }: ActivityByHourChartProps) {
   const t = useTranslations();
+  const activityByHourRef = useRef<HTMLDivElement>(null);
 
   // Render function for activity by hour visualization
   const renderActivityByHour = useMemo(() => {
@@ -65,12 +67,19 @@ export default function ActivityByHourChart({
   return (
     <div
       className={`bg-card p-3 sm:p-4 rounded-lg border space-y-4 ${className}`}
+      ref={activityByHourRef}
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h3 className="text-base sm:text-lg font-medium">
           {t("analysis.activityByHour")}
         </h3>
+        <ShareButton
+          targetRef={activityByHourRef}
+          filename={"activity-by-hour"}
+          variant="ghost"
+          size="sm"
+        />
       </div>
 
       {/* Activity by Hour chart */}

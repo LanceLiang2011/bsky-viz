@@ -3,6 +3,7 @@
 import { useMemo, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { format, eachDayOfInterval, getDay, subDays } from "date-fns";
+import ShareButton from "./ShareButton";
 
 export type PostTypeFilter = "all" | "posts" | "replies" | "reposts";
 
@@ -28,6 +29,7 @@ export default function ActivityHeatmap({
 }: ActivityHeatmapProps) {
   const t = useTranslations();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const heatmapRef = useRef<HTMLDivElement>(null);
 
   // Debug logging for activityTimeline
   console.log("🔥 ActivityHeatmap Debug:");
@@ -218,7 +220,10 @@ export default function ActivityHeatmap({
   }, [heatmapData.weeks.length]);
 
   return (
-    <div className={`bg-card p-4 rounded-lg border space-y-4 ${className}`}>
+    <div
+      ref={heatmapRef}
+      className={`bg-card p-4 rounded-lg border space-y-4 ${className}`}
+    >
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">
           {filter === "all"
@@ -227,16 +232,24 @@ export default function ActivityHeatmap({
                 `analysis.${filter}Only`
               )}`}
         </h3>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{t("analysis.less")}</span>
-          <div className="flex gap-1">
-            <div className="w-2.5 h-2.5 rounded-sm bg-muted border border-border"></div>
-            <div className="w-2.5 h-2.5 rounded-sm bg-blue-200 dark:bg-blue-900/40 border border-blue-300 dark:border-blue-700"></div>
-            <div className="w-2.5 h-2.5 rounded-sm bg-blue-300 dark:bg-blue-800/60 border border-blue-400 dark:border-blue-600"></div>
-            <div className="w-2.5 h-2.5 rounded-sm bg-blue-400 dark:bg-blue-700/80 border border-blue-500 dark:border-blue-500"></div>
-            <div className="w-2.5 h-2.5 rounded-sm bg-blue-500 dark:bg-blue-600 border border-blue-600 dark:border-blue-400"></div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>{t("analysis.less")}</span>
+            <div className="flex gap-1">
+              <div className="w-2.5 h-2.5 rounded-sm bg-muted border border-border"></div>
+              <div className="w-2.5 h-2.5 rounded-sm bg-blue-200 dark:bg-blue-900/40 border border-blue-300 dark:border-blue-700"></div>
+              <div className="w-2.5 h-2.5 rounded-sm bg-blue-300 dark:bg-blue-800/60 border border-blue-400 dark:border-blue-600"></div>
+              <div className="w-2.5 h-2.5 rounded-sm bg-blue-400 dark:bg-blue-700/80 border border-blue-500 dark:border-blue-500"></div>
+              <div className="w-2.5 h-2.5 rounded-sm bg-blue-500 dark:bg-blue-600 border border-blue-600 dark:border-blue-400"></div>
+            </div>
+            <span>{t("analysis.more")}</span>
           </div>
-          <span>{t("analysis.more")}</span>
+          <ShareButton
+            targetRef={heatmapRef}
+            filename={`activity-heatmap-${filter}`}
+            variant="ghost"
+            size="sm"
+          />
         </div>
       </div>
 

@@ -35,7 +35,7 @@ export async function elementToImage(
   const {
     format = "png",
     quality = 0.95,
-    backgroundColor = "#ffffff",
+    backgroundColor = "transparent",
     pixelRatio = 2,
     skipFonts = false,
     cacheBust = true,
@@ -53,6 +53,11 @@ export async function elementToImage(
     filter,
     width,
     height,
+    // Include additional options for better rendering
+    useCORS: true,
+    allowTaint: true,
+    // Try to capture CSS animations and transforms
+    includeQueryParams: true,
   };
 
   let dataUrl: string;

@@ -50,14 +50,19 @@ export default function OpenAISummaryCard({
   const [showUserInfo, setShowUserInfo] = useState(false);
 
   const handleBeforeCapture = () => {
+    console.log("OpenAISummaryCard: Before capture - showing user info");
     setShowUserInfo(true);
   };
 
   const handleAfterCapture = () => {
-    // Reset after a delay to allow capture to complete
+    console.log(
+      "OpenAISummaryCard: After capture - will hide user info after delay"
+    );
+    // Reset after a longer delay to ensure capture is completely finished
     setTimeout(() => {
+      console.log("OpenAISummaryCard: Hiding user info now");
       setShowUserInfo(false);
-    }, 500);
+    }, 1000);
   };
 
   return (

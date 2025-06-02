@@ -57,64 +57,14 @@ const hideShareButtonDuringCapture = (element: HTMLElement): (() => void) => {
   };
 };
 
-// Function to apply aesthetically pleasing gradient background
-const applyGradientBackground = (
-  element: HTMLElement,
-  isDark: boolean
-): (() => void) => {
-  const originalBackground = element.style.background;
-  const originalBackgroundColor = element.style.backgroundColor;
-  const originalBackgroundImage = element.style.backgroundImage;
-
-  // Define gradient backgrounds based on theme
-  const gradients = {
-    light: {
-      // Balanced subtle gradients - noticeable but gentle
-      primary: "linear-gradient(135deg, #f9fafc 0%, #f4f6f8 100%)",
-      secondary: "linear-gradient(135deg, #faf9fb 0%, #f6f4f6 100%)",
-      tertiary: "linear-gradient(135deg, #f8fbfc 0%, #f3f8fa 100%)",
-      quaternary: "linear-gradient(135deg, #fbfbfc 0%, #f7f9fa 100%)",
-      elegant:
-        "linear-gradient(135deg, #fafbfc 0%, #f6f8fa 25%, #f9f7f9 50%, #f5f6f8 75%, #f8fafb 100%)",
-    },
-    dark: {
-      primary: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-      secondary:
-        "linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%)",
-      tertiary:
-        "linear-gradient(135deg, #0f0f23 0%, #16213e 50%, #1a1a2e 100%)",
-      quaternary:
-        "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 75%, #0f3460 100%)",
-      elegant:
-        "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 20%, #16213e 40%, #0f3460 60%, #1a1a2e 80%, #0a0a0a 100%)",
-    },
-  };
-
-  // Choose a gradient (you can randomize this or make it configurable)
-  const selectedGradient = isDark
-    ? gradients.dark.elegant
-    : gradients.light.elegant;
-
-  // Apply the gradient
-  element.style.background = selectedGradient;
-  element.style.backgroundImage = selectedGradient;
-
-  // Return cleanup function
-  return () => {
-    element.style.background = originalBackground;
-    element.style.backgroundColor = originalBackgroundColor;
-    element.style.backgroundImage = originalBackgroundImage;
-  };
-};
-
 // Function to add website URL watermark to element before capture
 const addWatermark = (element: HTMLElement, isDark: boolean): (() => void) => {
   const watermark = document.createElement("div");
 
   // Theme-aware watermark styling
-  const watermarkColor = isDark ? "#ffffff" : "#666666";
+  const watermarkColor = isDark ? "#ffffff" : "#000000";
   const watermarkBg = isDark
-    ? "rgba(0, 0, 0, 0.7)"
+    ? "rgba(0, 0, 0, 0.8)"
     : "rgba(255, 255, 255, 0.9)";
 
   watermark.style.cssText = `
@@ -169,9 +119,8 @@ export default function ShareButton({
   const { theme } = useTheme();
   const t = useTranslations("openai");
 
-  // Merge default options with provided ones, with special handling for gradients
+  // Merge default options with provided ones - we'll set backgroundColor dynamically based on theme
   const defaultImageOptions: ElementToImageOptions = {
-    // Don't set backgroundColor when using gradients - let the applied gradient show
     pixelRatio: 2,
     quality: 0.95,
     cacheBust: true,
@@ -188,56 +137,73 @@ export default function ShareButton({
     }
 
     beforeCapture?.();
-
     setIsLoading(true);
+
+    let cleanupShareButton: (() => void) | null = null;
+    let cleanupWatermark: (() => void) | null = null;
 
     try {
       console.log("ShareButton: Starting image capture...");
       console.log("ShareButton: Current theme:", theme);
+      console.log("ShareButton: Target element:", targetRef.current);
 
       const isDarkTheme = theme === "dark";
 
+      // Set background color based on current theme
+      const themeBackgroundColor = isDarkTheme ? "#0a0a0a" : "#ffffff";
+      const themeAwareOptions = {
+        ...mergedOptions,
+        backgroundColor: themeBackgroundColor,
+      };
+
+      console.log("ShareButton: Using background color:", themeBackgroundColor);
+
       // Hide ShareButton during capture
-      const cleanupShareButton = hideShareButtonDuringCapture(
-        targetRef.current
-      );
+      cleanupShareButton = hideShareButtonDuringCapture(targetRef.current);
       console.log("ShareButton: Hidden ShareButton during capture");
 
-      // Apply gradient background
-      const cleanupGradient = applyGradientBackground(
-        targetRef.current,
-        isDarkTheme
-      );
-      console.log("ShareButton: Applied gradient background");
+      // Add watermark before capture
+      cleanupWatermark = addWatermark(targetRef.current, isDarkTheme);
+      console.log("ShareButton: Added watermark");
 
-      // Add watermark before capture with theme-aware styling
-      const cleanupWatermark = addWatermark(targetRef.current, isDarkTheme);
-      console.log("ShareButton: Added theme-aware watermark");
+      // Wait for DOM updates to complete
+      console.log("ShareButton: Waiting for DOM updates...");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Wait a moment for the DOM to update
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      // Force a repaint to ensure all styles are applied
+      targetRef.current.scrollTop = targetRef.current.scrollTop;
 
-      // Capture the image with detailed logging
-      console.log(
-        "ShareButton: Converting element to image with options:",
-        mergedOptions
-      );
-      const result = await convertToImage(targetRef.current);
+      // Log element styles for debugging
+      const computedStyle = window.getComputedStyle(targetRef.current);
+      console.log("ShareButton: Element background:", computedStyle.background);
+      console.log("ShareButton: Element dimensions:", {
+        width: targetRef.current.offsetWidth,
+        height: targetRef.current.offsetHeight,
+      });
+
+      // Capture the image with theme-aware background
+      console.log("ShareButton: Converting element to image...");
+      const result = await convertToImage(targetRef.current, themeAwareOptions);
       console.log("ShareButton: Image conversion successful");
-
-      // Clean up all modifications
-      cleanupWatermark();
-      cleanupGradient();
-      cleanupShareButton();
-      console.log("ShareButton: All cleanup completed");
 
       // Download the image
       result.download(filename);
       console.log("ShareButton: Download initiated");
     } catch (error) {
       console.error("ShareButton: Failed to download image:", error);
+      console.error("ShareButton: Error details:", error);
       alert("Failed to download image. Please try again.");
     } finally {
+      // Clean up modifications
+      if (cleanupWatermark) {
+        cleanupWatermark();
+        console.log("ShareButton: Watermark cleanup completed");
+      }
+      if (cleanupShareButton) {
+        cleanupShareButton();
+        console.log("ShareButton: ShareButton cleanup completed");
+      }
+
       setIsLoading(false);
       afterCapture?.();
     }

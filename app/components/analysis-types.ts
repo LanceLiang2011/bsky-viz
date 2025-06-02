@@ -1,7 +1,8 @@
 // Re-export all component types for easier imports
 export type { default as KeyInsights } from "./KeyInsights";
-export type { default as MostActiveTime } from "./MostActiveTime";
 export type { default as TopInteractions } from "./TopInteractions";
+export type { default as ActivityByHourChart } from "./ActivityByHourChart";
+export type { default as MostActiveTimeSection } from "./MostActiveTimeSection";
 
 // Type exports for external use
 export interface InsightsData {
@@ -11,14 +12,7 @@ export interface InsightsData {
   averagePostLength: number;
 }
 
-export interface MostActiveTimeData {
-  totalPosts: number;
-  totalReplies: number;
-  totalReposts: number;
-  averagePostLength: number;
-  mostActiveHour: number;
-  mostActiveDay: string;
-  postsWithMedia: number;
+export interface TopInteractionData {
   postsWithLinks: number;
 }
 
@@ -32,12 +26,6 @@ export interface InteractionData {
 
 export interface KeyInsightsProps {
   insights: InsightsData;
-  className?: string;
-}
-
-export interface MostActiveTimeProps {
-  data: MostActiveTimeData;
-  localizedMostActiveHour: number;
   className?: string;
 }
 

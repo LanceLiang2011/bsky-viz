@@ -2,22 +2,32 @@
 
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
-import type { MostActiveTimeData, MostActiveTimeProps } from "./analysis-types";
+import { PostTypeFilter } from "./UnifiedActivity";
 
-export type { MostActiveTimeData, MostActiveTimeProps };
+interface MostActiveTimeSectionProps {
+  localizedMostActiveHour: number;
+  mostActiveDay: string;
+  filter: PostTypeFilter;
+  className?: string;
+}
 
-export default function MostActiveTime({
-  data,
+export default function MostActiveTimeSection({
   localizedMostActiveHour,
+  mostActiveDay,
+  filter,
   className = "",
-}: MostActiveTimeProps) {
+}: MostActiveTimeSectionProps) {
   const t = useTranslations();
 
   return (
-    <div className={`bg-card p-3 sm:p-4 rounded-lg border ${className}`}>
-      <h3 className="text-base sm:text-lg font-medium mb-2">
-        {t("analysis.mostActiveTime")}
-      </h3>
+    <div className={`border-t pt-4 ${className}`}>
+      <h4 className="text-sm sm:text-base font-medium mb-2">
+        {t("analysis.mostActiveTime")} (
+        {filter === "all"
+          ? t("analysis.allActivity")
+          : t(`analysis.${filter}Only`)}
+        )
+      </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
           <p className="text-xs sm:text-sm text-muted-foreground">
@@ -33,9 +43,8 @@ export default function MostActiveTime({
             {t("analysis.mostActiveDay")}
           </p>
           <p className="text-lg sm:text-xl font-semibold break-words">
-            {data.mostActiveDay &&
-            !isNaN(new Date(data.mostActiveDay).getTime())
-              ? format(new Date(data.mostActiveDay), "PPP")
+            {mostActiveDay && !isNaN(new Date(mostActiveDay).getTime())
+              ? format(new Date(mostActiveDay), "PPP")
               : t("analysis.noData")}
           </p>
         </div>
@@ -43,3 +52,5 @@ export default function MostActiveTime({
     </div>
   );
 }
+
+export { MostActiveTimeSection };

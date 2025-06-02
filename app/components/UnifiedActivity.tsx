@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { format } from "date-fns";
 import { useState, useMemo } from "react";
 import {
   Select,
@@ -11,6 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ActivityHeatmap from "./ActivityHeatmap";
+import ActivityByHourChart from "./ActivityByHourChart";
+import MostActiveTimeSection from "./MostActiveTimeSection";
 
 export type PostTypeFilter = "all" | "posts" | "replies" | "reposts";
 
@@ -43,13 +44,9 @@ interface ActivityData {
 
 interface UnifiedActivityProps {
   data: ActivityData;
-  className?: string;
 }
 
-export default function UnifiedActivity({
-  data,
-  className = "",
-}: UnifiedActivityProps) {
+export default function UnifiedActivity({ data }: UnifiedActivityProps) {
   const t = useTranslations();
   const [filter, setFilter] = useState<PostTypeFilter>("all");
 
@@ -145,54 +142,6 @@ export default function UnifiedActivity({
     return (filteredActivityData.mostActiveHour - utcOffset + 24) % 24;
   }, [filteredActivityData.mostActiveHour]);
 
-  // Render function for activity by hour visualization
-  function renderActivityByHour(activityByHour: Record<number, number>) {
-    const maxActivity = Math.max(...Object.values(activityByHour), 1);
-
-    const timeSegments = [
-      { label: t("analysis.morning"), hours: [6, 7, 8, 9, 10, 11] },
-      { label: t("analysis.afternoon"), hours: [12, 13, 14, 15, 16, 17] },
-      { label: t("analysis.evening"), hours: [18, 19, 20, 21, 22, 23] },
-      { label: t("analysis.night"), hours: [0, 1, 2, 3, 4, 5] },
-    ];
-
-    return (
-      <div className="space-y-4">
-        <div className="space-y-6 sm:space-y-8">
-          {timeSegments.map((segment) => (
-            <div key={segment.label} className="space-y-1">
-              <div className="text-sm font-medium text-foreground">
-                {segment.label}
-              </div>
-              <div className="grid grid-cols-6 gap-1 sm:gap-2">
-                {segment.hours.map((hour) => {
-                  const count = activityByHour[hour] || 0;
-                  const heightPercentage =
-                    count > 0 ? Math.max(10, (count / maxActivity) * 100) : 3;
-
-                  return (
-                    <div key={hour} className="flex flex-col items-center">
-                      <div className="text-xs text-muted-foreground mb-1">
-                        {count}
-                      </div>
-                      <div
-                        className="bg-blue-500 w-8 sm:w-12 rounded-t-sm"
-                        style={{ height: `${heightPercentage}px` }}
-                      ></div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {hour}:00
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Global Activity Filter */}
@@ -238,18 +187,9 @@ export default function UnifiedActivity({
       />
 
       {/* Hourly Activity Chart */}
-      <div
-        className={`bg-card p-3 sm:p-4 rounded-lg border space-y-4 ${className}`}
-      >
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h3 className="text-base sm:text-lg font-medium">
-            {t("analysis.activityByHour")}
-          </h3>
-        </div>
-
+      <div className="space-y-4">
         {/* Activity summary */}
-        <div className="text-xs sm:text-sm text-muted-foreground">
+        <div className="text-xs sm:text-sm text-muted-foreground bg-card p-3 sm:p-4 rounded-lg border">
           {t("analysis.showingItems", {
             count: filteredActivityData.totalItems,
           })}{" "}
@@ -259,40 +199,19 @@ export default function UnifiedActivity({
           })}
         </div>
 
-        {/* Activity by Hour chart */}
-        {renderActivityByHour(localizedActivityByHour)}
+        <ActivityByHourChart
+          activityByHour={localizedActivityByHour}
+          className=""
+        />
 
-        {/* Most active time for filtered data */}
-        <div className="border-t pt-4">
-          <h4 className="text-sm sm:text-base font-medium mb-2">
-            {t("analysis.mostActiveTime")} (
-            {filter === "all"
-              ? t("analysis.allActivity")
-              : t(`analysis.${filter}Only`)}
-            )
-          </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                {t("analysis.mostActiveHour")}
-              </p>
-              <p className="text-lg sm:text-xl font-semibold">
-                {localizedMostActiveHour}:00 -{" "}
-                {(localizedMostActiveHour + 1) % 24}:00
-              </p>
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                {t("analysis.mostActiveDay")}
-              </p>
-              <p className="text-lg sm:text-xl font-semibold break-words">
-                {data.insights.mostActiveDay &&
-                !isNaN(new Date(data.insights.mostActiveDay).getTime())
-                  ? format(new Date(data.insights.mostActiveDay), "PPP")
-                  : t("analysis.noData")}
-              </p>
-            </div>
-          </div>
+        {/* Most active time section */}
+        <div className="bg-card p-3 sm:p-4 rounded-lg border">
+          <MostActiveTimeSection
+            localizedMostActiveHour={localizedMostActiveHour}
+            mostActiveDay={data.insights.mostActiveDay}
+            filter={filter}
+            className=""
+          />
         </div>
       </div>
     </div>

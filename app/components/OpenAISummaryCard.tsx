@@ -60,11 +60,8 @@ export default function OpenAISummaryCard({ summary }: OpenAISummaryCardProps) {
             <ShareButton
               targetRef={cardRef}
               filename="bsky-viz-summary"
-              // variant="ghost"
+              variant="ghost"
               size="sm"
-              // imageOptions={{
-              //   pixelRatio: 2,
-              // }}
             />
           </CardHeader>
           <CardContent className="pt-0 px-6 sm:px-8 pb-8">

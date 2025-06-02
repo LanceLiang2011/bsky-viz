@@ -149,14 +149,20 @@ export default function ShareButton({
 
       const isDarkTheme = theme === "dark";
 
-      // Set background color directly based on current theme
-      const themeBackgroundColor = isDarkTheme ? "#0a0a0a" : "#ffffff";
+      // Set subtle gradient backgrounds based on current theme
+      const themeBackgroundColor = isDarkTheme
+        ? "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%)"
+        : "linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #f1f3f4 100%)";
+
       const themeAwareOptions = {
         ...mergedOptions,
         backgroundColor: themeBackgroundColor,
       };
 
-      console.log("ShareButton: Using background color:", themeBackgroundColor);
+      console.log(
+        "ShareButton: Using background gradient:",
+        themeBackgroundColor
+      );
       console.log(
         "ShareButton: Current theme:",
         isDarkTheme ? "dark" : "light"

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ChatModel } from "openai/resources/chat/chat.mjs";
 
 interface AnalyzeRequest {
   originalPosts: string[];
@@ -35,6 +36,8 @@ const PROMPTS = {
     errorMessage: "未能从 AI 助手获取摘要。AI 可能不可用或发生错误。",
   },
 };
+
+const MODEL: ChatModel = "gpt-4.1-nano"; // "gpt-4.1-nano" for lower costs, or "gpt-4o-mini" for better performance
 
 export async function POST(request: NextRequest) {
   let locale = "en"; // Default locale for error handling
@@ -91,7 +94,7 @@ export async function POST(request: NextRequest) {
     }
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: MODEL,
       messages: [
         {
           role: "system",

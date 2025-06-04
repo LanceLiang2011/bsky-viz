@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import {
   Tabs,
   TabsContent,
@@ -39,16 +39,28 @@ export default function ActivityByHourChart({
   const t = useTranslations();
   const activityByHourRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState("bar");
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640); // sm breakpoint
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Transform minute data for histogram with memoization for performance
   const histogramData = useMemo(() => {
     if (!activityByMinute || activityByMinute.length === 0) return [];
 
-    // Create time bins for histogram (15-minute intervals throughout the day)
-    const bins = Array.from({ length: 96 }, (_, i) => {
-      const totalMinutes = i * 15;
-      const hour = Math.floor(totalMinutes / 60);
-      const minute = totalMinutes % 60;
+    // Create time bins for histogram (1-minute intervals throughout the day)
+    const bins = Array.from({ length: 1440 }, (_, i) => {
+      const hour = Math.floor(i / 60);
+      const minute = i % 60;
       return {
         binIndex: i,
         hour,
@@ -64,8 +76,7 @@ export default function ActivityByHourChart({
 
     // Fill bins with activity data
     activityByMinute.forEach((item) => {
-      const itemTotalMinutes = item.hour * 60 + item.minute;
-      const binIndex = Math.floor(itemTotalMinutes / 15);
+      const binIndex = item.hour * 60 + item.minute;
       if (binIndex >= 0 && binIndex < bins.length) {
         bins[binIndex].count++;
         bins[binIndex].types[item.type]++;
@@ -163,7 +174,12 @@ export default function ActivityByHourChart({
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={histogramData}
-                    margin={{ top: 20, right: 20, bottom: 60, left: 60 }}
+                    margin={{
+                      top: 20,
+                      right: 20,
+                      bottom: 60,
+                      left: isMobile ? 8 : 48,
+                    }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
@@ -184,11 +200,15 @@ export default function ActivityByHourChart({
                     />
                     <YAxis
                       name={t("analysis.postCount")}
-                      label={{
-                        value: t("analysis.postCount"),
-                        angle: -90,
-                        position: "insideLeft",
-                      }}
+                      label={
+                        !isMobile
+                          ? {
+                              value: t("analysis.postCount"),
+                              angle: -90,
+                              position: "insideLeft",
+                            }
+                          : undefined
+                      }
                     />
                     <Tooltip
                       content={({ active, payload }) => {

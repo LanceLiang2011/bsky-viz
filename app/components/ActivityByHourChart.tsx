@@ -174,6 +174,7 @@ export default function ActivityByHourChart({
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={histogramData}
+                    layout="vertical"
                     margin={{
                       top: 20,
                       right: 20,
@@ -183,31 +184,36 @@ export default function ActivityByHourChart({
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
-                      dataKey="timeDecimal"
                       type="number"
-                      domain={[0, 24]}
-                      name={t("analysis.time")}
-                      label={{
-                        value: t("analysis.time24h"),
-                        position: "insideBottom",
-                        offset: -10,
-                      }}
-                      tickFormatter={(value) =>
-                        `${Math.floor(value)}:${String(
-                          Math.floor((value % 1) * 60)
-                        ).padStart(2, "0")}`
-                      }
-                    />
-                    <YAxis
                       name={t("analysis.postCount")}
                       label={
                         !isMobile
                           ? {
                               value: t("analysis.postCount"),
+                              position: "insideBottom",
+                              offset: -10,
+                            }
+                          : undefined
+                      }
+                    />
+                    <YAxis
+                      dataKey="timeDecimal"
+                      type="number"
+                      domain={[0, 24]}
+                      name={t("analysis.time")}
+                      label={
+                        !isMobile
+                          ? {
+                              value: t("analysis.time24h"),
                               angle: -90,
                               position: "insideLeft",
                             }
                           : undefined
+                      }
+                      tickFormatter={(value) =>
+                        `${Math.floor(value)}:${String(
+                          Math.floor((value % 1) * 60)
+                        ).padStart(2, "0")}`
                       }
                     />
                     <Tooltip

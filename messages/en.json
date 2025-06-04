@@ -34,6 +34,7 @@
   },
   "loading": {
     "analyzing": "Analyzing user data...",
+    "preparingAnalysis": "Preparing AI analysis...",
     "generatingSummary": "Generating AI summary...",
     "pleaseWait": "Please wait while we fetch and analyze the user's Bluesky activity..."
   },

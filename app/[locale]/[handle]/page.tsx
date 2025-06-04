@@ -125,23 +125,29 @@ export default function HandlePage({ params, searchParams }: HandlePageProps) {
       <BackButton locale={locale} />
       <ProfileCard profile={data.profile} />
 
-      {/* OpenAI Summary with loading state */}
-      {(openAISummary || openAILoading) && (
+      {/* OpenAI Summary - show as soon as we have data */}
+      {data && (
         <>
-          {openAILoading && (
-            <Card className="mx-auto max-w-4xl">
-              <CardContent className="pt-6 text-center">
-                <div className="animate-pulse">
-                  <div className="h-4 bg-muted rounded w-3/4 mx-auto mb-2"></div>
-                  <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
-                </div>
-                <p className="text-sm text-muted-foreground mt-4">
-                  {t("loading.generatingSummary")}
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          {/* Show loading state while data is incomplete or OpenAI is analyzing */}
+          {(!isDataComplete || openAILoading) &&
+            !openAISummary &&
+            !openAIError && (
+              <Card className="mx-auto max-w-4xl">
+                <CardContent className="pt-6 text-center">
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-muted rounded w-3/4 mx-auto mb-2"></div>
+                    <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    {!isDataComplete
+                      ? t("loading.preparingAnalysis")
+                      : t("loading.generatingSummary")}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
+          {/* Show actual summary when ready */}
           {openAISummary && !openAILoading && (
             <OpenAISummaryCard
               summary={openAISummary}
@@ -150,6 +156,7 @@ export default function HandlePage({ params, searchParams }: HandlePageProps) {
             />
           )}
 
+          {/* Show error state if OpenAI fails */}
           {openAIError && !openAILoading && (
             <Card className="mx-auto max-w-4xl">
               <CardContent className="pt-6 text-center">

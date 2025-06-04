@@ -107,6 +107,7 @@
   },
   "loading": {
     "analyzing": "正在分析用户数据",
+    "preparingAnalysis": "准备 AI 分析中...",
     "generatingSummary": "正在生成 AI 摘要...",
     "pleaseWait": "正在获取并分析用户的 Bluesky 活动数据，请稍候..."
   },

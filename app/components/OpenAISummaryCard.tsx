@@ -97,7 +97,7 @@ export default function OpenAISummaryCard({
               afterCapture={handleAfterCapture}
             />
           </CardHeader>
-          
+
           {/* Bias Warning - Very Apparent */}
           <div className="px-6 sm:px-8 pb-4">
             <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3 sm:p-4">
@@ -106,7 +106,7 @@ export default function OpenAISummaryCard({
               </p>
             </div>
           </div>
-          
+
           <CardContent className="pt-0 px-6 sm:px-8 pb-8">
             <div className="max-w-none">
               <div className="text-foreground/90 whitespace-pre-line text-base sm:text-lg lg:text-xl leading-relaxed sm:leading-loose lg:leading-loose font-normal tracking-wide">

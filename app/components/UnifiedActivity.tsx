@@ -187,6 +187,26 @@ export default function UnifiedActivity({ data }: UnifiedActivityProps) {
     return filtered;
   }, [data.activityByMinute, filter]);
 
+  // Convert UTC-based minute data to user's local timezone
+  const localizedMinuteData = useMemo(() => {
+    if (!filteredMinuteData) return undefined;
+
+    const utcOffset = new Date().getTimezoneOffset() / 60; // Offset in hours from UTC
+
+    return filteredMinuteData.map((item) => {
+      // Convert UTC hour to local hour
+      const localHour = (item.hour - utcOffset + 24) % 24;
+      // Recalculate timestamp for the new local hour
+      const localTimestamp = localHour * 60 + item.minute;
+
+      return {
+        ...item,
+        hour: localHour,
+        timestamp: localTimestamp,
+      };
+    });
+  }, [filteredMinuteData]);
+
   // Convert UTC-based activity to user's local timezone
   const localizedActivityByHour = useMemo(() => {
     const now = new Date();
@@ -278,7 +298,7 @@ export default function UnifiedActivity({ data }: UnifiedActivityProps) {
 
         <ActivityByHourChart
           activityByHour={localizedActivityByHour}
-          activityByMinute={filteredMinuteData}
+          activityByMinute={localizedMinuteData}
           className=""
         />
 

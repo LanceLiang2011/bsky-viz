@@ -11,19 +11,7 @@
     "placeholder": "username.bsky.social",
     "button": "Analyze User",
     "loading": "Analyzing...",
-    "analyzingData": "Processing data, please wait...",
-    "rangeLabel": "Analyze time range",
-    "range1m": "Past 1 month",
-    "range6m": "Past 6 months",
-    "range1y": "Past 1 year",
-    "postLimitLabel": "Number of posts to analyze",
-    "postLimitHint": "Note: Analyzing more posts may take longer to process",
-    "selectPostLimit": "Select post limit",
-    "postLimit1000": "1,000 posts",
-    "postLimit2000": "2,000 posts",
-    "postLimit5000": "5,000 posts",
-    "postLimit10000": "10,000 posts",
-    "postLimitAll": "All available posts"
+    "analyzingData": "Processing data, please wait..."
   },
   "results": {
     "title": "Analysis Result",

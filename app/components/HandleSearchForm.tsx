@@ -85,7 +85,7 @@ export default function HandleSearchForm() {
     setIsFocused(false); // This will hide the dropdown
   }
 
-    function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (!inputValue.trim()) {

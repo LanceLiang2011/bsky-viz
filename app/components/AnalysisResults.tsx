@@ -110,9 +110,6 @@ export default function AnalysisResults({
             }}
           />
         )}
-
-        {/* Debug panel - Uncomment to use */}
-        {/* <DebugPanel data={processedFeed} /> */}
       </CardContent>
       <CardFooter className="px-4 sm:px-6">
         <details className="cursor-pointer w-full">

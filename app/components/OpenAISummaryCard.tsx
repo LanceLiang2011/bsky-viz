@@ -50,17 +50,12 @@ export default function OpenAISummaryCard({
   const [showUserInfo, setShowUserInfo] = useState(false);
 
   const handleBeforeCapture = () => {
-    console.log("OpenAISummaryCard: Before capture - showing user info");
     setShowUserInfo(true);
   };
 
   const handleAfterCapture = () => {
-    console.log(
-      "OpenAISummaryCard: After capture - will hide user info after delay"
-    );
     // Reset after a longer delay to ensure capture is completely finished
     setTimeout(() => {
-      console.log("OpenAISummaryCard: Hiding user info now");
       setShowUserInfo(false);
     }, 1000);
   };
@@ -102,6 +97,16 @@ export default function OpenAISummaryCard({
               afterCapture={handleAfterCapture}
             />
           </CardHeader>
+          
+          {/* Bias Warning - Very Apparent */}
+          <div className="px-6 sm:px-8 pb-4">
+            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3 sm:p-4">
+              <p className="text-amber-800 dark:text-amber-200 text-sm sm:text-base font-medium text-center">
+                {t("openai.biasWarning")}
+              </p>
+            </div>
+          </div>
+          
           <CardContent className="pt-0 px-6 sm:px-8 pb-8">
             <div className="max-w-none">
               <div className="text-foreground/90 whitespace-pre-line text-base sm:text-lg lg:text-xl leading-relaxed sm:leading-loose lg:leading-loose font-normal tracking-wide">

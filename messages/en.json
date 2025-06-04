@@ -116,6 +116,7 @@
   },
   "openai": {
     "summaryTitle": "AI Generated Summary",
+    "biasWarning": "⚠️ AI summaries can be biased and imprecise. This is just for fun!",
     "systemPrompt": "You are an insightful social media analyst. Based on the user's original posts and replies, provide a concise summary (around 150-200 words) of their personality, main topics of interest, and general tone. Original posts show their main interests and thoughts, while replies show their conversational style and engagement patterns. Highlight any recurring themes or notable characteristics. Be objective.",
     "systemPromptWithSeparation": "You are an insightful social media analyst. You will analyze two types of content from a user: their original posts (showing main interests and thoughts) and their replies (showing conversational style and engagement). Provide a concise summary (around 150-200 words) of their personality, main topics of interest, and general tone. Weight original posts more heavily than replies when determining core interests. Be objective.",
     "noTextForSummary": "Not enough text content from recent posts to generate an AI summary.",

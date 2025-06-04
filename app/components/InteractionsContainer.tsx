@@ -28,12 +28,6 @@ export default function InteractionsContainer({
 }: InteractionsContainerProps) {
   const t = useTranslations();
 
-  // Debug logging for client-side rendering
-  console.log("🎨 InteractionsContainer Debug:");
-  console.log("  Interactions received:", interactions?.length || 0);
-  console.log("  Sample interactions:", interactions?.slice(0, 2));
-  console.log("  Current user:", currentUser);
-
   return (
     <div className={`bg-card p-3 sm:p-4 rounded-lg border ${className}`}>
       <h3 className="text-base sm:text-lg font-medium mb-4">

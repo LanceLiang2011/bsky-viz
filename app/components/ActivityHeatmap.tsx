@@ -31,16 +31,6 @@ export default function ActivityHeatmap({
   const scrollRef = useRef<HTMLDivElement>(null);
   const heatmapRef = useRef<HTMLDivElement>(null);
 
-  // Debug logging for activityTimeline
-  console.log("🔥 ActivityHeatmap Debug:");
-  console.log("  activityTimeline length:", activityTimeline?.length || 0);
-  console.log("  Sample timeline data:", activityTimeline?.slice(0, 3));
-  console.log("  Timeline date range:", {
-    first: activityTimeline?.[0]?.date,
-    last: activityTimeline?.[activityTimeline.length - 1]?.date,
-  });
-  console.log("  Current filter:", filter);
-
   // Use real data directly - test data generator removed since we have working data
   const effectiveActivityTimeline = activityTimeline;
 
@@ -88,14 +78,6 @@ export default function ActivityHeatmap({
     const allDays = eachDayOfInterval({
       start: startSunday,
       end: endSaturday,
-    });
-
-    console.log("📅 Heatmap date range:", {
-      startSunday: format(startSunday, "yyyy-MM-dd"),
-      endSaturday: format(endSaturday, "yyyy-MM-dd"),
-      actualDataEnd: format(endDate, "yyyy-MM-dd"),
-      totalDays: allDays.length,
-      totalWeeks: Math.ceil(allDays.length / 7),
     });
 
     // Create the heatmap data with activity counts

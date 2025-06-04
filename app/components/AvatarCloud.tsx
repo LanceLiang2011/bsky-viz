@@ -39,12 +39,6 @@ export default function AvatarCloud({
     "large"
   );
 
-  // Debug logging
-  console.log("☁️ AvatarCloud Debug:");
-  console.log("  Interactions for cloud:", interactions?.length || 0);
-  console.log("  Current user:", currentUser);
-  console.log("  Sample interactions:", interactions?.slice(0, 2));
-
   useEffect(() => {
     setMounted(true);
 

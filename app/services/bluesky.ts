@@ -11,7 +11,7 @@ import {
 export class BlueskyAPIClient {
   private readonly baseUrl = "https://public.api.bsky.app";
   private readonly userAgent = "bsky-viz/1.0";
-  private readonly defaultMaxPages = 10; // Default max pages for feed fetch
+  private readonly defaultMaxPages = 500; // Fixed 500 pages for progressive loading
 
   /**
    * Fetch user profile data

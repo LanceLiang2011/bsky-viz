@@ -13,16 +13,14 @@ import LoadingState from "@/app/components/LoadingState";
 
 interface HandlePageProps {
   params: Promise<{ handle: string; locale: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default function HandlePage({ params, searchParams }: HandlePageProps) {
+export default function HandlePage({ params }: HandlePageProps) {
   const t = useTranslations();
   const locale = useLocale();
 
   // Unwrap the promises
   const { handle } = use(params);
-  const resolvedSearchParams = use(searchParams);
 
   // State for OpenAI analysis
   const [openAISummary, setOpenAISummary] = useState<string | null>(null);
@@ -33,16 +31,9 @@ export default function HandlePage({ params, searchParams }: HandlePageProps) {
     notFound();
   }
 
-  // Extract limit parameter from search params
-  const limitParam = resolvedSearchParams.limit;
-  const customMaxPages = limitParam
-    ? parseInt(Array.isArray(limitParam) ? limitParam[0] : limitParam)
-    : undefined;
-
-  // Use the custom hook for data fetching
+  // Use the custom hook for data fetching with fixed 500 pages
   const { data, error, isDataComplete } = useBlueskyData(
-    decodeURIComponent(handle),
-    customMaxPages
+    decodeURIComponent(handle)
   );
 
   // Effect to trigger OpenAI analysis when data is complete

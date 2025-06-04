@@ -7,13 +7,6 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Card,
   CardContent,
   CardDescription,
@@ -30,7 +23,6 @@ export default function HandleSearchForm() {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [postLimit, setPostLimit] = useState("1000"); // Default to ~1000 posts (10 pages)
   const [searchResults, setSearchResults] = useState<BlueskyUser[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -58,12 +50,6 @@ export default function HandleSearchForm() {
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const cleanedValue = cleanInput(e.target.value);
     setInputValue(cleanedValue);
-  }
-
-  // Convert post limit to page count (approximately 100 posts per page)
-  function convertPostLimitToPages(postLimit: string): number {
-    const postCount = parseInt(postLimit);
-    return Math.ceil(postCount / 100);
   }
 
   // Search for users when debounced input changes
@@ -99,7 +85,7 @@ export default function HandleSearchForm() {
     setIsFocused(false); // This will hide the dropdown
   }
 
-  function handleSubmit(e: React.FormEvent) {
+    function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (!inputValue.trim()) {
@@ -115,10 +101,9 @@ export default function HandleSearchForm() {
       : inputValue;
     cleanHandle = cleanHandle.replace(/\s+/g, "").toLowerCase();
 
-    // Navigate to the dynamic route with locale and post limit
+    // Navigate to the dynamic route with locale (no limit parameter needed)
     const locale = params.locale || "en";
-    const pages = convertPostLimitToPages(postLimit);
-    router.push(`/${locale}/${cleanHandle}?limit=${pages}`);
+    router.push(`/${locale}/${cleanHandle}`);
   }
 
   return (
@@ -196,34 +181,6 @@ export default function HandleSearchForm() {
                 )}
               </div>
             )}
-          </div>
-
-          {/* Post Limit Selector */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">
-              {t("form.postLimitLabel")}
-            </label>
-            <p className="text-xs text-muted-foreground">
-              {t("form.postLimitHint")}
-            </p>
-            <Select
-              value={postLimit}
-              onValueChange={setPostLimit}
-              disabled={isLoading}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={t("form.selectPostLimit")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1000">{t("form.postLimit1000")}</SelectItem>
-                <SelectItem value="2000">{t("form.postLimit2000")}</SelectItem>
-                <SelectItem value="5000">{t("form.postLimit5000")}</SelectItem>
-                <SelectItem value="10000">
-                  {t("form.postLimit10000")}
-                </SelectItem>
-                <SelectItem value="500000">{t("form.postLimitAll")}</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>

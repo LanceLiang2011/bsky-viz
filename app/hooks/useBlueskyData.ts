@@ -50,7 +50,7 @@ export function useBlueskyData(
     currentStep: "Initializing...",
     percentage: 0,
     pagesLoaded: 0,
-    totalPages: customMaxPages || 10,
+    totalPages: customMaxPages || 500,
   });
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export function useBlueskyData(
         console.log(`✓ Profile fetched for: ${profileData.handle}`);
 
         // Set up progressive feed fetching with callback
-        const maxPagesToUse = customMaxPages || 10;
+        const maxPagesToUse = customMaxPages || 500;
 
         setProgress((prev) => ({
           ...prev,

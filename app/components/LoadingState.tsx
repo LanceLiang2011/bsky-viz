@@ -31,10 +31,10 @@ function getRandomAnimationString(): string {
   return animations[Math.floor(Math.random() * animations.length)];
 }
 
+const randomAnimation = getRandomAnimationString();
+
 export default function LoadingState({ message }: LoadingStateProps) {
   const t = useTranslations("loading");
-
-  const randomAnimation = getRandomAnimationString();
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">

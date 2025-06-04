@@ -184,6 +184,153 @@ export class BlueskyAPIClient {
   }
 
   /**
+   * Fetch feed data with progressive updates - calls the provided callback as data is fetched
+   */
+  async fetchFeedProgressive(
+    handle: string,
+    customMaxPages?: number,
+    progressCallback?: (
+      currentItems: BlueskyFeedItem[],
+      pagesLoaded: number,
+      isComplete: boolean
+    ) => void
+  ): Promise<BlueskyFeedItem[]> {
+    const cleanHandle = this.cleanHandle(handle);
+    const maxPagesToUse = customMaxPages || this.defaultMaxPages;
+    console.log(
+      `Starting progressive feed fetch for: ${cleanHandle} (max pages: ${maxPagesToUse})`
+    );
+
+    const allFeedItems: BlueskyFeedItem[] = [];
+    const seenPostIds = new Set<string>();
+    let cursor: string | undefined = undefined;
+    let pageCount = 0;
+
+    do {
+      try {
+        // Build URL with proper parameters
+        let feedUrl = `${
+          this.baseUrl
+        }/xrpc/app.bsky.feed.getAuthorFeed?actor=${encodeURIComponent(
+          cleanHandle
+        )}&limit=100&filter=posts_with_replies`;
+
+        if (cursor) {
+          feedUrl += `&cursor=${encodeURIComponent(cursor)}`;
+        } else {
+          feedUrl += `&includePins=true`;
+        }
+
+        console.log(`Fetching page ${pageCount + 1}...`);
+
+        const response = await fetch(feedUrl, {
+          headers: {
+            Accept: "application/json",
+            "User-Agent": this.userAgent,
+          },
+        });
+
+        if (!response.ok) {
+          // Handle rate limiting with exponential backoff
+          if (response.status === 429) {
+            const retryAfter = response.headers.get("Retry-After") || "2";
+            const waitTime = (parseInt(retryAfter) + Math.random()) * 1000;
+            console.log(
+              `Rate limited. Waiting ${Math.round(
+                waitTime / 1000
+              )}s before retry...`
+            );
+            await new Promise((resolve) => setTimeout(resolve, waitTime));
+            continue;
+          }
+
+          const errorText = await response.text();
+          throw new Error(
+            `Feed fetch failed: ${response.status} ${response.statusText} - ${errorText}`
+          );
+        }
+
+        const pageData = await response.json();
+        const feedItems = pageData.feed || [];
+
+        // Filter out duplicates
+        const newItems = feedItems.filter((item: BlueskyFeedItem) => {
+          const postId = item.post.uri;
+          if (seenPostIds.has(postId)) {
+            console.warn(`Duplicate post detected: ${postId}`);
+            return false;
+          }
+          seenPostIds.add(postId);
+          return true;
+        });
+
+        // Add new items to collection
+        allFeedItems.push(...newItems);
+        pageCount++;
+
+        // Update cursor for next iteration
+        cursor = pageData.cursor;
+
+        // Progress logging
+        console.log(
+          `Page ${pageCount}: +${newItems.length} items (${allFeedItems.length} total)`
+        );
+
+        // Call progress callback for progressive updates
+        if (progressCallback) {
+          progressCallback([...allFeedItems], pageCount, false);
+        }
+
+        // Check if we've hit page limit
+        if (pageCount >= maxPagesToUse) {
+          console.log(`Reached maximum page limit of ${maxPagesToUse}`);
+          break;
+        }
+
+        // Small delay to be respectful to the API
+        if (cursor) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+      } catch (error) {
+        console.error(`Error fetching page ${pageCount + 1}:`, error);
+
+        // For network errors, try a few retries with exponential backoff
+        const isNetworkError =
+          error instanceof Error &&
+          (error.message.includes("fetch") ||
+            error.message.includes("network") ||
+            error.message.includes("timeout"));
+
+        if (isNetworkError && pageCount > 0) {
+          console.log("Network error, retrying in 2 seconds...");
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          continue;
+        }
+
+        throw error;
+      }
+    } while (cursor);
+
+    console.log(
+      `✓ Progressive fetch completed: ${pageCount} pages with ${allFeedItems.length} unique feed items`
+    );
+
+    // Final callback to indicate completion
+    if (progressCallback) {
+      progressCallback([...allFeedItems], pageCount, true);
+    }
+
+    // Verify data integrity
+    if (allFeedItems.length !== seenPostIds.size) {
+      console.warn(
+        `Data integrity warning: ${allFeedItems.length} items vs ${seenPostIds.size} unique IDs`
+      );
+    }
+
+    return allFeedItems;
+  }
+
+  /**
    * Clean and format handle
    */
   private cleanHandle(handle: string): string {

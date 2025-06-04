@@ -1,5 +1,4 @@
-import { useState } from "react";
-import useSWR from "swr";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { BlueskyAPIClient, BlueskyDataProcessor } from "../services/bluesky";
 import { FeedAnalyzer } from "../services/feedAnalyzer";
@@ -7,6 +6,7 @@ import type {
   BlueskyProfile,
   CategorizedContent,
   ProcessedFeedData,
+  BlueskyFeedItem,
 } from "../types/bluesky";
 
 interface BlueskyDataResult {
@@ -19,9 +19,12 @@ interface UseBlueskyDataReturn {
   data: BlueskyDataResult | null;
   error: string | null;
   isLoading: boolean;
+  isDataComplete: boolean;
   progress: {
     currentStep: string;
     percentage: number;
+    pagesLoaded: number;
+    totalPages: number;
   };
 }
 
@@ -35,93 +38,181 @@ const apiClient = axios.create({
   timeout: 120000, // 2 minutes timeout for OpenAI analysis
 });
 
-// SWR fetcher function for Bluesky data
-const fetchBlueskyData = async (key: string): Promise<BlueskyDataResult> => {
-  const [, handle, maxPages] = key.split("|");
-  const customMaxPages = maxPages ? parseInt(maxPages) : undefined;
-
-  console.log("🚀 Starting client-side data fetching system...");
-
-  // Initialize API client and data processor
-  const apiClient = new BlueskyAPIClient();
-
-  // Fetch profile data
-  const profileData = await apiClient.fetchProfile(handle);
-  console.log(`✓ Profile fetched for: ${profileData.handle}`);
-
-  // Fetch all feed data with pagination
-  const allFeedItems = await apiClient.fetchFeed(handle, customMaxPages);
-  console.log(`✓ Feed data fetched: ${allFeedItems.length} items`);
-
-  // Preprocess and categorize data immediately
-  const categorizedContent = BlueskyDataProcessor.preprocessFeedData(
-    allFeedItems,
-    profileData
-  );
-  console.log("✓ Data preprocessing and categorization completed");
-
-  // Analyze the categorized data using the improved analyzer
-  const processedFeed = await FeedAnalyzer.analyzeCategorizedContent(
-    categorizedContent,
-    {
-      userHandle: handle,
-      userTimezone: "UTC", // Use UTC for consistency
-    }
-  );
-  console.log("✓ Feed analysis completed");
-
-  console.log("🎉 All data processing completed successfully!");
-
-  return {
-    profile: profileData,
-    processedFeed,
-    categorizedContent,
-  };
-};
-
 export function useBlueskyData(
   handle: string,
   customMaxPages?: number
 ): UseBlueskyDataReturn {
+  const [data, setData] = useState<BlueskyDataResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDataComplete, setIsDataComplete] = useState(false);
   const [progress, setProgress] = useState({
     currentStep: "Initializing...",
     percentage: 0,
+    pagesLoaded: 0,
+    totalPages: customMaxPages || 10,
   });
 
-  // Create a unique SWR key
-  const swrKey = handle
-    ? `bluesky-data|${handle}|${customMaxPages || ""}`
-    : null;
+  useEffect(() => {
+    if (!handle) return;
 
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR(swrKey, fetchBlueskyData, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    shouldRetryOnError: false,
-    onLoadingSlow: () => {
-      setProgress({
-        currentStep: "Fetching large amount of data...",
-        percentage: 50,
-      });
-    },
-  });
+    const fetchDataProgressively = async () => {
+      setIsLoading(true);
+      setError(null);
+      setIsDataComplete(false);
+      setData(null);
 
-  // Handle error formatting
-  const error = swrError
-    ? swrError instanceof Error
-      ? swrError.message === "USER_NOT_FOUND"
-        ? "User not found"
-        : swrError.message
-      : "Failed to fetch data"
-    : null;
+      try {
+        // Initialize API client
+        const apiClient = new BlueskyAPIClient();
+
+        // Fetch profile data first
+        setProgress((prev) => ({
+          ...prev,
+          currentStep: "Fetching profile...",
+          percentage: 5,
+        }));
+
+        const profileData = await apiClient.fetchProfile(handle);
+        console.log(`✓ Profile fetched for: ${profileData.handle}`);
+
+        // Set up progressive feed fetching with callback
+        const maxPagesToUse = customMaxPages || 10;
+
+        setProgress((prev) => ({
+          ...prev,
+          currentStep: "Fetching posts...",
+          percentage: 10,
+          totalPages: maxPagesToUse,
+        }));
+
+        // Progressive callback that updates state every few pages
+        const progressCallback = (
+          currentItems: BlueskyFeedItem[],
+          pagesLoaded: number,
+          isComplete: boolean
+        ) => {
+          // Update progress
+          const percentage = Math.min(
+            10 + (pagesLoaded / maxPagesToUse) * 80,
+            90
+          );
+          setProgress((prev) => ({
+            ...prev,
+            currentStep: isComplete
+              ? "Processing data..."
+              : "Fetching posts...",
+            percentage,
+            pagesLoaded,
+          }));
+
+          // Update data every 10 pages or when complete
+          if (pagesLoaded % 10 === 0 || isComplete) {
+            console.log(
+              `📊 Progressive update: ${currentItems.length} items, ${pagesLoaded} pages`
+            );
+
+            // Process data in background without blocking the callback
+            (async () => {
+              try {
+                // Preprocess and categorize data
+                const categorizedContent =
+                  BlueskyDataProcessor.preprocessFeedData(
+                    currentItems,
+                    profileData
+                  );
+
+                // Analyze the categorized data
+                const processedFeed =
+                  await FeedAnalyzer.analyzeCategorizedContent(
+                    categorizedContent,
+                    {
+                      userHandle: handle,
+                      userTimezone: "UTC",
+                    }
+                  );
+
+                // Update the data state
+                setData({
+                  profile: profileData,
+                  processedFeed,
+                  categorizedContent,
+                });
+              } catch (err) {
+                console.error("Error in progressive data processing:", err);
+              }
+            })();
+          }
+        };
+
+        // Fetch feed data with progressive updates
+        const finalFeedItems = await apiClient.fetchFeedProgressive(
+          handle,
+          customMaxPages,
+          progressCallback
+        );
+
+        // Final processing
+        setProgress((prev) => ({
+          ...prev,
+          currentStep: "Finalizing...",
+          percentage: 95,
+        }));
+
+        console.log(`✓ Feed data fetched: ${finalFeedItems.length} items`);
+
+        // Final categorization and analysis
+        const categorizedContent = BlueskyDataProcessor.preprocessFeedData(
+          finalFeedItems,
+          profileData
+        );
+
+        const processedFeed = await FeedAnalyzer.analyzeCategorizedContent(
+          categorizedContent,
+          {
+            userHandle: handle,
+            userTimezone: "UTC",
+          }
+        );
+
+        // Set final data
+        setData({
+          profile: profileData,
+          processedFeed,
+          categorizedContent,
+        });
+
+        setProgress((prev) => ({
+          ...prev,
+          currentStep: "Complete",
+          percentage: 100,
+          pagesLoaded: prev.totalPages,
+        }));
+
+        setIsDataComplete(true);
+        console.log("🎉 All data processing completed successfully!");
+      } catch (err) {
+        console.error("Error in progressive data fetching:", err);
+        const errorMessage =
+          err instanceof Error
+            ? err.message === "USER_NOT_FOUND"
+              ? "User not found"
+              : err.message
+            : "Failed to fetch data";
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDataProgressively();
+  }, [handle, customMaxPages]);
 
   return {
-    data: data || null,
+    data,
     error,
     isLoading,
+    isDataComplete,
     progress,
   };
 }

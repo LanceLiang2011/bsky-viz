@@ -7,9 +7,9 @@ import ProfileCard from "../../components/ProfileCard";
 import AnalysisResults from "../../components/AnalysisResults";
 import BackButton from "../../components/BackButton";
 import OpenAISummaryCard from "../../components/OpenAISummaryCard";
-import LoadingState from "../../components/LoadingState";
 import { Card, CardContent } from "@/components/ui/card";
 import { useBlueskyData, analyzeWithOpenAI } from "../../hooks/useBlueskyData";
+import LoadingState from "@/app/components/LoadingState";
 
 interface HandlePageProps {
   params: Promise<{ handle: string; locale: string }>;
@@ -40,14 +40,20 @@ export default function HandlePage({ params, searchParams }: HandlePageProps) {
     : undefined;
 
   // Use the custom hook for data fetching
-  const { data, error, isLoading } = useBlueskyData(
+  const { data, error, isDataComplete } = useBlueskyData(
     decodeURIComponent(handle),
     customMaxPages
   );
 
-  // Effect to trigger OpenAI analysis when data is ready
+  // Effect to trigger OpenAI analysis when data is complete
   useEffect(() => {
-    if (data && data.categorizedContent && !openAISummary && !openAILoading) {
+    if (
+      data &&
+      data.categorizedContent &&
+      isDataComplete &&
+      !openAISummary &&
+      !openAILoading
+    ) {
       const performOpenAIAnalysis = async () => {
         setOpenAILoading(true);
         setOpenAIError(null);
@@ -72,15 +78,12 @@ export default function HandlePage({ params, searchParams }: HandlePageProps) {
 
       performOpenAIAnalysis();
     }
-  }, [data, locale, openAISummary, openAILoading]);
-
-  // Loading state
-  if (isLoading) {
-    return <LoadingState message={t("loading.analyzing")} />;
-  }
+  }, [data, locale, openAISummary, openAILoading, isDataComplete]);
 
   // Error states
   if (error) {
+    console.error("Error fetching data:", error);
+
     if (error === "User not found") {
       return (
         <div className="container mx-auto px-4 py-8 space-y-6">
@@ -114,19 +117,7 @@ export default function HandlePage({ params, searchParams }: HandlePageProps) {
 
   // No data state
   if (!data || !data.profile) {
-    return (
-      <div className="container mx-auto px-4 py-8 space-y-6">
-        <BackButton locale={locale} />
-        <Card className="mx-auto max-w-md">
-          <CardContent className="pt-6 text-center">
-            <h2 className="text-lg font-semibold mb-2">{t("errors.title")}</h2>
-            <p className="text-muted-foreground">
-              {t("errors.unexpectedError")}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   return (

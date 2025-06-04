@@ -23,12 +23,6 @@ export default function InteractionsList({
   const t = useTranslations();
   const router = useRouter();
 
-  // Debug logging
-  console.log("📜 InteractionsList Debug:");
-  console.log("  Interactions to render:", interactions?.length || 0);
-  console.log("  Max items:", maxItems);
-  console.log("  First interaction:", interactions?.[0]);
-
   const handleUserClick = (handle: string) => {
     // Navigate to the user's handle page with current locale
     router.push(`/${encodeURIComponent(handle)}`);

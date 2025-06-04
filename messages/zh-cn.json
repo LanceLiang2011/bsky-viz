@@ -81,7 +81,6 @@
     "wordCloud": "词云",
     "wordCloudSubtitle": "在帖子和回复中最常使用的词汇",
     "noWordCloudData": "无词云数据可用",
-    "noData": "暂无数据",
     "youLabel": "(你)",
     "interactionCount": "{count} 次互动",
     "activityHeatmap": "活动日历",
@@ -91,7 +90,17 @@
     "avgPerDay": "日均",
     "maxDay": "最佳天",
     "totalYear": "今年总计",
-    "total": "总计"
+    "total": "总计",
+    "barChart": "柱状图",
+    "scatterPlot": "散点图",
+    "noData": "暂无数据",
+    "points": "个点",
+    "scatterPlotDescription": "每个点代表特定时间的帖子。颜色表示帖子类型。",
+    "noScatterData": "无可用于散点图可视化的分钟级数据。",
+    "postCount": "帖子数量",
+    "time": "时间",
+    "time24h": "时间 (24小时制)",
+    "totalPosts": "总帖子数"
   },
   "loading": {
     "analyzing": "正在分析用户数据",

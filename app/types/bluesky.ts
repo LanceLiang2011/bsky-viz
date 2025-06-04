@@ -194,6 +194,13 @@ export interface ProcessedFeedData {
     replies: Record<number, number>;
     reposts: Record<number, number>;
   };
+  activityByMinute?: Array<{
+    hour: number;
+    minute: number;
+    timestamp: number; // For scatter plot x-axis (minutes from start of day)
+    type: "post" | "reply" | "repost";
+    createdAt: string; // Original timestamp for reference
+  }>;
   activityTimeline: Array<{
     date: string;
     posts: number;

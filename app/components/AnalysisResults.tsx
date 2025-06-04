@@ -13,46 +13,7 @@ import WordCloud from "./WordCloud";
 import ChineseWordCloud from "./ChineseWordCloud";
 import UnifiedActivity from "./UnifiedActivity";
 import { KeyInsights, TopInteractions } from "./analysis-components";
-
-interface ProcessedFeedData {
-  activityByHour: Record<number, number>;
-  activityByHourAndType?: {
-    posts: Record<number, number>;
-    replies: Record<number, number>;
-    reposts: Record<number, number>;
-  };
-  activityTimeline: Array<{
-    date: string;
-    posts: number;
-    replies: number;
-    reposts: number;
-    likes: number;
-    total: number;
-  }>;
-  topInteractions: Array<{
-    did: string;
-    handle: string;
-    displayName: string;
-    avatar?: string;
-    count: number;
-  }>;
-  commonHashtags: Array<{
-    tag: string;
-    count: number;
-  }>;
-  rawText?: string; // Raw text for client-side processing
-  isChineseContent?: boolean; // Flag to indicate Chinese content
-  insights: {
-    totalPosts: number;
-    totalReplies: number;
-    totalReposts: number;
-    averagePostLength: number;
-    mostActiveHour: number;
-    mostActiveDay: string;
-    postsWithMedia: number;
-    postsWithLinks: number;
-  };
-}
+import { ProcessedFeedData } from "../types/bluesky";
 
 interface AnalysisResultsProps {
   processedFeed: ProcessedFeedData;
@@ -89,36 +50,13 @@ export default function AnalysisResults({
           data={{
             activityByHour: processedFeed.activityByHour,
             activityByHourAndType: processedFeed.activityByHourAndType,
+            activityByMinute: processedFeed.activityByMinute,
             activityTimeline: processedFeed.activityTimeline,
             insights: processedFeed.insights,
           }}
         />
 
         {/* Top interactions */}
-        {(() => {
-          console.log("📊 AnalysisResults Debug - TopInteractions data:");
-          console.log(
-            "  Raw topInteractions:",
-            processedFeed.topInteractions?.length || 0
-          );
-          console.log(
-            "  Sample raw interactions:",
-            processedFeed.topInteractions?.slice(0, 3)
-          );
-
-          const filteredInteractions = processedFeed.topInteractions.filter(
-            (i) => i.did && i.handle // Filter out any interactions without did or handle
-          );
-
-          console.log(
-            "  Filtered interactions:",
-            filteredInteractions?.length || 0
-          );
-          console.log("  Sample filtered:", filteredInteractions?.slice(0, 2));
-          console.log("  Current user passed:", currentUser);
-
-          return null;
-        })()}
         <TopInteractions
           interactions={processedFeed.topInteractions.filter(
             (i) => i.did && i.handle // Filter out any interactions without did or handle
@@ -172,6 +110,9 @@ export default function AnalysisResults({
             }}
           />
         )}
+
+        {/* Debug panel - Uncomment to use */}
+        {/* <DebugPanel data={processedFeed} /> */}
       </CardContent>
       <CardFooter className="px-4 sm:px-6">
         <details className="cursor-pointer w-full">

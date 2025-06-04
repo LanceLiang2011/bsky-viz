@@ -22,6 +22,13 @@ interface ActivityData {
     replies: Record<number, number>;
     reposts: Record<number, number>;
   };
+  activityByMinute?: Array<{
+    hour: number;
+    minute: number;
+    timestamp: number;
+    type: "post" | "reply" | "repost";
+    createdAt: string;
+  }>;
   activityTimeline: Array<{
     date: string;
     posts: number;
@@ -49,6 +56,52 @@ interface UnifiedActivityProps {
 export default function UnifiedActivity({ data }: UnifiedActivityProps) {
   const t = useTranslations();
   const [filter, setFilter] = useState<PostTypeFilter>("all");
+
+  // Temporary: Create mock minute data if none exists (for testing)
+  const mockMinuteData =
+    !data.activityByMinute || data.activityByMinute.length === 0
+      ? [
+          {
+            hour: 9,
+            minute: 30,
+            timestamp: 570,
+            type: "post" as const,
+            createdAt: "2024-01-01T09:30:00Z",
+          },
+          {
+            hour: 14,
+            minute: 15,
+            timestamp: 855,
+            type: "reply" as const,
+            createdAt: "2024-01-01T14:15:00Z",
+          },
+          {
+            hour: 18,
+            minute: 45,
+            timestamp: 1125,
+            type: "repost" as const,
+            createdAt: "2024-01-01T18:45:00Z",
+          },
+          {
+            hour: 10,
+            minute: 0,
+            timestamp: 600,
+            type: "post" as const,
+            createdAt: "2024-01-01T10:00:00Z",
+          },
+          {
+            hour: 16,
+            minute: 30,
+            timestamp: 990,
+            type: "reply" as const,
+            createdAt: "2024-01-01T16:30:00Z",
+          },
+        ]
+      : undefined;
+
+  if (mockMinuteData) {
+    console.log("🧪 Using mock minute data for testing:", mockMinuteData);
+  }
 
   // Calculate filtered activity data based on the selected filter
   const filteredActivityData = useMemo(() => {
@@ -109,6 +162,30 @@ export default function UnifiedActivity({ data }: UnifiedActivityProps) {
       totalItems,
     };
   }, [filter, data]);
+
+  // Filter minute data based on selected filter
+  const filteredMinuteData = useMemo(() => {
+    if (!data.activityByMinute) return undefined;
+
+    if (filter === "all") {
+      return data.activityByMinute;
+    }
+
+    // Map filter to activity type
+    const typeMap: Record<PostTypeFilter, string> = {
+      posts: "post",
+      replies: "reply",
+      reposts: "repost",
+      all: "all", // handled above
+    };
+
+    const targetType = typeMap[filter];
+    const filtered = data.activityByMinute.filter(
+      (item) => item.type === targetType
+    );
+
+    return filtered;
+  }, [data.activityByMinute, filter]);
 
   // Convert UTC-based activity to user's local timezone
   const localizedActivityByHour = useMemo(() => {
@@ -201,6 +278,7 @@ export default function UnifiedActivity({ data }: UnifiedActivityProps) {
 
         <ActivityByHourChart
           activityByHour={localizedActivityByHour}
+          activityByMinute={filteredMinuteData}
           className=""
         />
 

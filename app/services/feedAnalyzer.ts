@@ -28,6 +28,28 @@ function extractHourWithTimezone(
   }
 }
 
+/**
+ * Extract minute-level data from ISO string with proper timezone support
+ */
+function extractMinuteDataWithTimezone(
+  isoString: string,
+  userTimezone?: string
+): { hour: number; minute: number; timestamp: number } {
+  try {
+    const timezone =
+      userTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const date = parseISO(isoString);
+    const zonedDate = toZonedTime(date, timezone);
+    const hour = zonedDate.getHours();
+    const minute = zonedDate.getMinutes();
+    const timestamp = hour * 60 + minute; // Minutes from start of day
+    return { hour, minute, timestamp };
+  } catch (e) {
+    console.error("Error parsing date:", isoString, e);
+    return { hour: 0, minute: 0, timestamp: 0 };
+  }
+}
+
 export class FeedAnalyzer {
   /**
    * Analyze preprocessed categorized content
@@ -36,8 +58,6 @@ export class FeedAnalyzer {
     content: CategorizedContent,
     options: FeedAnalysisOptions = {}
   ): Promise<ProcessedFeedData> {
-    console.log("🔍 Starting feed analysis with preprocessed data...");
-
     const { ownPosts, ownReplies, ownReposts } = content;
 
     // Combine all user content for analysis
@@ -57,10 +77,6 @@ export class FeedAnalyzer {
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
-    console.log(
-      `  📊 Analyzing ${allUserContent.length} user content items...`
-    );
-
     // Build activity timeline
     const activityTimeline = this.buildActivityTimeline(allUserContent);
 
@@ -72,6 +88,12 @@ export class FeedAnalyzer {
 
     // Build hourly activity by type
     const activityByHourAndType = this.buildHourlyActivityByType(
+      allUserContent,
+      options.userTimezone
+    );
+
+    // Build minute-level activity
+    const activityByMinute = this.buildActivityByMinute(
       allUserContent,
       options.userTimezone
     );
@@ -99,6 +121,7 @@ export class FeedAnalyzer {
     const result: ProcessedFeedData = {
       activityByHour,
       activityByHourAndType,
+      activityByMinute,
       activityTimeline,
       topInteractions,
       commonHashtags,
@@ -106,11 +129,6 @@ export class FeedAnalyzer {
       isChineseContent,
       insights,
     };
-
-    console.log("🔍 Feed analysis complete:");
-    console.log("  Timeline items:", activityTimeline.length);
-    console.log("  Total user content:", allUserContent.length);
-    console.log("  Result timeline:", result.activityTimeline.length);
 
     // Log results for debugging
     this.logAnalysisResults(result);
@@ -122,8 +140,6 @@ export class FeedAnalyzer {
    * Build activity timeline
    */
   private static buildActivityTimeline(content: any[]): any[] {
-    console.log("📅 Building activity timeline from", content.length, "items");
-
     const timelineMap = new Map<string, any>();
 
     content.forEach((item) => {
@@ -149,15 +165,6 @@ export class FeedAnalyzer {
     const timeline = Array.from(timelineMap.values()).sort((a, b) =>
       a.date.localeCompare(b.date)
     );
-
-    console.log("📅 Timeline result:", {
-      totalDays: timeline.length,
-      dateRange: {
-        start: timeline[0]?.date,
-        end: timeline[timeline.length - 1]?.date,
-      },
-      sampleDays: timeline.slice(0, 3),
-    });
 
     return timeline;
   }
@@ -214,6 +221,56 @@ export class FeedAnalyzer {
     });
 
     return { posts, replies, reposts };
+  }
+
+  /**
+   * Build minute-level activity data for scatter plot visualization
+   */
+  private static buildActivityByMinute(
+    content: any[],
+    userTimezone?: string
+  ): Array<{
+    hour: number;
+    minute: number;
+    timestamp: number;
+    type: "post" | "reply" | "repost";
+    createdAt: string;
+  }> {
+    if (content.length === 0) {
+      return [];
+    }
+
+    const minuteData: Array<{
+      hour: number;
+      minute: number;
+      timestamp: number;
+      type: "post" | "reply" | "repost";
+      createdAt: string;
+    }> = [];
+
+    content.forEach((item) => {
+      try {
+        const { hour, minute, timestamp } = extractMinuteDataWithTimezone(
+          item.createdAt,
+          userTimezone
+        );
+
+        minuteData.push({
+          hour,
+          minute,
+          timestamp,
+          type: item.type as "post" | "reply" | "repost",
+          createdAt: item.createdAt,
+        });
+      } catch (error) {
+        console.error(`Error processing item:`, error);
+      }
+    });
+
+    // Sort by timestamp for better visualization
+    const sortedData = minuteData.sort((a, b) => a.timestamp - b.timestamp);
+
+    return sortedData;
   }
 
   /**

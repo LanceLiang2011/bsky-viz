@@ -145,10 +145,7 @@ export default function ActivityByHourChart({
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="bar">{t("analysis.barChart")}</TabsTrigger>
           <TabsTrigger value="histogram" disabled={!activityByMinute}>
-            {t("analysis.histogram")}{" "}
-            {!activityByMinute
-              ? `(${t("analysis.noData")})`
-              : `(${activityByMinute.length} ${t("analysis.points")})`}
+            {t("analysis.histogram")}
           </TabsTrigger>
         </TabsList>
 

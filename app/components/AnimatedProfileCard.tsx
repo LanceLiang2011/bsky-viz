@@ -282,7 +282,8 @@ const AnimatedProfileCardComponent: React.FC<AnimatedProfileCardProps> = ({
               alt={`${name || "User"} avatar`}
               width={170}
               height={170}
-              unoptimized
+              loading="eager"
+              unoptimized // TODO: recover in the next charge cycle
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.style.display = "none";

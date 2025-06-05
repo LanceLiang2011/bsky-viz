@@ -408,8 +408,8 @@
 .animal-card .apc-details p {
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  font-size: 1.1rem; /* Larger text on desktop */
-  line-height: 1.4;
+  font-size: 0.95rem; /* Reduced font size to prevent overflow */
+  line-height: 1.45; /* Slightly increased line height for better readability */
   margin: 0;
   padding: 0 0.75rem;
   text-align: center;
@@ -442,6 +442,19 @@
 }
 
 /* Responsive animal card adjustments */
+@media (min-width: 1200px) {
+  /* Larger cards on extra large screens */
+  .animal-card {
+    width: 420px;
+    height: 600px;
+  }
+
+  .animal-card .apc-details p {
+    font-size: 1rem; /* Slightly larger text on XL screens */
+    max-height: 220px; /* More space for text */
+  }
+}
+
 @media (max-width: 768px) {
   .animal-card {
     width: 340px;

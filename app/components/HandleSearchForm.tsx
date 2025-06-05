@@ -162,6 +162,7 @@ export default function HandleSearchForm() {
                           width={32}
                           height={32}
                           className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                          quality={75}
                         />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">

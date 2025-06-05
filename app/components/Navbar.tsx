@@ -24,6 +24,7 @@ export default function Navbar() {
               width={32}
               height={26}
               className="h-8 w-auto"
+              unoptimized
             />
             <span className="font-semibold text-lg hidden sm:inline-block">
               Bluesky Analytics

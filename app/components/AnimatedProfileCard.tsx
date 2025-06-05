@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useCallback, useMemo } from "react";
+import Image from "next/image";
 import "./AnimatedProfileCard.css";
 
 interface AnimatedProfileCardProps {
@@ -275,11 +276,13 @@ const AnimatedProfileCardComponent: React.FC<AnimatedProfileCardProps> = ({
           <div className="apc-shine" />
           <div className="apc-glare" />
           <div className="apc-content apc-avatar-content">
-            <img
+            <Image
               className="avatar"
               src={avatarUrl}
               alt={`${name || "User"} avatar`}
-              loading="lazy"
+              width={170}
+              height={170}
+              unoptimized={avatarUrl.startsWith("/assets/animals/")}
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.style.display = "none";
@@ -287,12 +290,17 @@ const AnimatedProfileCardComponent: React.FC<AnimatedProfileCardProps> = ({
             />
             {showUserInfo && (
               <div className="apc-user-info">
+                {" "}
                 <div className="apc-user-details">
                   <div className="apc-mini-avatar">
-                    <img
+                    <Image
                       src={miniAvatarUrl || avatarUrl}
                       alt={`${name || "User"} mini avatar`}
-                      loading="lazy"
+                      width={32}
+                      height={32}
+                      unoptimized={(miniAvatarUrl || avatarUrl).startsWith(
+                        "/assets/animals/"
+                      )}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.style.opacity = "0.5";

@@ -88,6 +88,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={75}
           />
           <div className="absolute inset-0 bg-black/10"></div>
         </div>
@@ -108,6 +109,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
                   height={96}
                   className="object-cover"
                   sizes="96px"
+                  quality={75}
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">

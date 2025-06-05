@@ -59,7 +59,7 @@ export default function AnimalCard({
 
       {/* Animated Profile Card with Animal */}
       <AnimatedProfileCard
-        avatarUrl={getAnimalImage(animal)}
+        avatarUrl={getAnimalImage(animal).src}
         name={displayAnimalName}
         title={displayReason}
         identityLabel={t("animalIdentityLabel", {
@@ -70,7 +70,7 @@ export default function AnimalCard({
         contactText="Analysis"
         showUserInfo={true}
         enableTilt={true}
-        miniAvatarUrl={getAnimalImage(animal)}
+        miniAvatarUrl={getAnimalImage(animal).src}
         className="animal-card"
         onContactClick={() => {
           // Optional: Add interaction tracking or modal

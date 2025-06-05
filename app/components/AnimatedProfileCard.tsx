@@ -282,7 +282,7 @@ const AnimatedProfileCardComponent: React.FC<AnimatedProfileCardProps> = ({
               alt={`${name || "User"} avatar`}
               width={170}
               height={170}
-              unoptimized={avatarUrl.startsWith("/assets/animals/")}
+              unoptimized
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.style.display = "none";

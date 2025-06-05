@@ -10,6 +10,7 @@ import OpenAISummaryCard from "../../components/OpenAISummaryCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { useBlueskyData, analyzeWithOpenAI } from "../../hooks/useBlueskyData";
 import LoadingState from "@/app/components/LoadingState";
+import { type Animal } from "../../types/animals";
 
 interface HandlePageProps {
   params: Promise<{ handle: string; locale: string }>;
@@ -23,7 +24,11 @@ export default function HandlePage({ params }: HandlePageProps) {
   const { handle } = use(params);
 
   // State for OpenAI analysis
-  const [openAISummary, setOpenAISummary] = useState<string | null>(null);
+  const [openAIResult, setOpenAIResult] = useState<{
+    summary: string | null;
+    animal: Animal | null;
+    animalReason: string | null;
+  } | null>(null);
   const [openAILoading, setOpenAILoading] = useState(false);
   const [openAIError, setOpenAIError] = useState<string | null>(null);
 
@@ -42,7 +47,7 @@ export default function HandlePage({ params }: HandlePageProps) {
       data &&
       data.categorizedContent &&
       isDataComplete &&
-      !openAISummary &&
+      !openAIResult &&
       !openAILoading
     ) {
       const performOpenAIAnalysis = async () => {
@@ -50,17 +55,23 @@ export default function HandlePage({ params }: HandlePageProps) {
         setOpenAIError(null);
 
         try {
-          const summary = await analyzeWithOpenAI(
+          const result = await analyzeWithOpenAI(
             data.categorizedContent,
             data.profile.displayName || data.profile.handle,
             locale
           );
-          setOpenAISummary(summary);
-          console.log("✓ OpenAI summary generated");
+          setOpenAIResult(
+            result as {
+              summary: string | null;
+              animal: Animal | null;
+              animalReason: string | null;
+            }
+          );
+          console.log("✓ OpenAI analysis generated");
         } catch (err) {
-          console.error("Error generating OpenAI summary:", err);
+          console.error("Error generating OpenAI analysis:", err);
           setOpenAIError(
-            err instanceof Error ? err.message : "Failed to generate summary"
+            err instanceof Error ? err.message : "Failed to generate analysis"
           );
         } finally {
           setOpenAILoading(false);
@@ -69,7 +80,7 @@ export default function HandlePage({ params }: HandlePageProps) {
 
       performOpenAIAnalysis();
     }
-  }, [data, locale, openAISummary, openAILoading, isDataComplete]);
+  }, [data, locale, openAIResult, openAILoading, isDataComplete]);
 
   // Error states
   if (error) {
@@ -121,7 +132,7 @@ export default function HandlePage({ params }: HandlePageProps) {
         <>
           {/* Show loading state while data is incomplete or OpenAI is analyzing */}
           {(!isDataComplete || openAILoading) &&
-            !openAISummary &&
+            !openAIResult &&
             !openAIError && (
               <Card className="mx-auto max-w-4xl">
                 <CardContent className="pt-6 text-center">
@@ -138,12 +149,14 @@ export default function HandlePage({ params }: HandlePageProps) {
               </Card>
             )}
 
-          {/* Show actual summary when ready */}
-          {openAISummary && !openAILoading && (
+          {/* Show actual analysis when ready */}
+          {openAIResult && !openAILoading && (
             <OpenAISummaryCard
-              summary={openAISummary}
+              summary={openAIResult.summary || ""}
               username={data.profile.displayName}
               handle={data.profile.handle}
+              animal={openAIResult.animal}
+              animalReason={openAIResult.animalReason}
             />
           )}
 

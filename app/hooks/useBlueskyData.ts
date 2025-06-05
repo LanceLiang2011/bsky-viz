@@ -8,6 +8,7 @@ import type {
   ProcessedFeedData,
   BlueskyFeedItem,
 } from "../types/bluesky";
+import { type Animal } from "../types/animals";
 
 interface BlueskyDataResult {
   profile: BlueskyProfile;
@@ -30,6 +31,8 @@ interface UseBlueskyDataReturn {
 
 interface AnalyzeResponse {
   summary: string | null;
+  animal?: Animal | null;
+  animalReason?: string | null;
   error?: string;
 }
 
@@ -221,7 +224,11 @@ export async function analyzeWithOpenAI(
   categorizedContent: CategorizedContent,
   userDisplayName: string | undefined,
   locale: string
-): Promise<string | null> {
+): Promise<{
+  summary: string | null;
+  animal: string | null;
+  animalReason: string | null;
+} | null> {
   try {
     const aiContent = BlueskyDataProcessor.getContentForAI(categorizedContent);
 
@@ -243,7 +250,11 @@ export async function analyzeWithOpenAI(
       throw new Error(response.data.error);
     }
 
-    return response.data.summary;
+    return {
+      summary: response.data.summary,
+      animal: response.data.animal || null,
+      animalReason: response.data.animalReason || null,
+    };
   } catch (error) {
     console.error("Error calling OpenAI analysis API:", error);
     if (axios.isAxiosError(error) && error.response?.data?.error) {

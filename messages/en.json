@@ -117,6 +117,7 @@
   "openai": {
     "summaryTitle": "AI Generated Summary",
     "animalTitle": "What Animal Are You?",
+    "animalIdentityLabel": "{username}'s true identity is:",
     "animalReasonTitle": "Why this animal?",
     "biasWarning": "⚠️ AI summaries can be biased and imprecise. This is just for fun!",
     "systemPrompt": "You are an insightful social media analyst. Based on the user's original posts and replies, provide a concise summary (around 150-200 words) of their personality, main topics of interest, and general tone. Original posts show their main interests and thoughts, while replies show their conversational style and engagement patterns. Highlight any recurring themes or notable characteristics. Be objective.",

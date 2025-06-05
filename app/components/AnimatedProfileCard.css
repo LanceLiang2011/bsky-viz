@@ -1,0 +1,477 @@
+/* Animated Profile Card Styles */
+
+.apc-card-wrapper {
+  --card-opacity: 0.8;
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  --background-x: 50%;
+  --background-y: 50%;
+  --pointer-from-center: 0;
+  --pointer-from-top: 0.5;
+  --pointer-from-left: 0.5;
+  --rotate-x: 0deg;
+  --rotate-y: 0deg;
+
+  position: relative;
+  perspective: 800px;
+  width: 320px;
+  height: 420px;
+  margin: 2rem auto;
+}
+
+.apc-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  background: var(--behind-gradient);
+  padding: 3px;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transform: rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
+  will-change: transform;
+}
+
+.apc-card.active {
+  transition: transform 0.1s ease-out;
+}
+
+.apc-inside {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 21px;
+  background: var(--inner-gradient);
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.apc-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    600px circle at var(--pointer-x) var(--pointer-y),
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.2) 20%,
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border-radius: 21px;
+}
+
+.apc-card.active .apc-shine {
+  opacity: 1;
+}
+
+.apc-glare {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  opacity: 0.6;
+  pointer-events: none;
+  border-radius: 21px;
+}
+
+.apc-content {
+  position: relative;
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 10;
+}
+
+.apc-avatar-content {
+  padding: 2rem 2rem 0;
+  justify-content: flex-start;
+}
+
+.apc-content .avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  margin: 0 auto 1.5rem;
+  display: block;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.apc-details {
+  text-align: center;
+  color: white;
+}
+
+.apc-details h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.02em;
+}
+
+.apc-details p {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0;
+  font-weight: 500;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.apc-user-info {
+  margin-top: auto;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.apc-user-details {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.apc-mini-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.apc-mini-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.apc-user-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.apc-handle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  opacity: 0.9;
+}
+
+.apc-status {
+  font-size: 0.75rem;
+  color: #4ade80;
+  font-weight: 500;
+}
+
+.apc-contact-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.apc-contact-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.apc-contact-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Grain texture overlay */
+.apc-inside::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--grain);
+  opacity: 0.3;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  border-radius: 21px;
+}
+
+/* Icon overlay */
+.apc-inside::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  background-image: var(--icon);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .apc-card-wrapper {
+    width: 280px;
+    height: 380px;
+    margin: 1rem auto;
+  }
+
+  .apc-content {
+    padding: 1.5rem;
+  }
+
+  .apc-avatar-content {
+    padding: 1.5rem 1.5rem 0;
+  }
+
+  .apc-content .avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .apc-details h3 {
+    font-size: 1.25rem;
+  }
+
+  .apc-details p {
+    font-size: 0.875rem;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .apc-card {
+    transition: none;
+    transform: none;
+  }
+
+  .apc-card.active {
+    transition: none;
+  }
+
+  .apc-shine {
+    transition: none;
+  }
+
+  .apc-contact-btn {
+    transition: none;
+  }
+
+  .apc-contact-btn:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .apc-inside {
+    border: 2px solid white;
+  }
+
+  .apc-content .avatar {
+    border: 3px solid white;
+  }
+
+  .apc-contact-btn {
+    border: 2px solid white;
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Animal card specific styles */
+.animal-card {
+  width: 400px;
+  height: 580px;
+
+  --behind-gradient: radial-gradient(
+      farthest-side circle at var(--pointer-x) var(--pointer-y),
+      hsla(45, 100%, 85%, var(--card-opacity)) 4%,
+      hsla(30, 80%, 70%, calc(var(--card-opacity) * 0.75)) 10%,
+      hsla(15, 60%, 60%, calc(var(--card-opacity) * 0.5)) 50%,
+      hsla(0, 40%, 50%, 0) 100%
+    ),
+    linear-gradient(
+      135deg,
+      #ff9a56 0%,
+      #ff6b35 25%,
+      #f7931e 50%,
+      #ffcc02 75%,
+      #fff200 100%
+    ),
+    radial-gradient(circle at 30% 80%, #ff6b35 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, #f7931e 0%, transparent 50%);
+
+  --inner-gradient: linear-gradient(
+    145deg,
+    rgba(255, 154, 86, 0.9) 0%,
+    rgba(255, 107, 53, 0.8) 25%,
+    rgba(247, 147, 30, 0.7) 50%,
+    rgba(255, 204, 2, 0.6) 75%,
+    rgba(255, 242, 0, 0.5) 100%
+  );
+}
+
+/* Override the content layout for animal cards */
+.animal-card .apc-content {
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.animal-card .apc-avatar-content {
+  padding: 1.5rem 1.5rem 0;
+  justify-content: flex-start;
+  height: auto;
+  flex: none;
+}
+
+.animal-card .apc-content .avatar {
+  width: 150px;
+  height: 150px;
+  border: 4px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(255, 154, 86, 0.4),
+    0 4px 16px rgba(255, 107, 53, 0.3), inset 0 2px 8px rgba(255, 255, 255, 0.2);
+  margin: 0 auto 0.75rem;
+}
+
+.animal-card .apc-details {
+  text-align: center;
+  color: white;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.animal-card .apc-identity-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  margin: 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+.animal-card .apc-details h3 {
+  font-size: 2rem;
+  background: linear-gradient(135deg, #fff 0%, #ffe4b3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 8px rgba(255, 154, 86, 0.3);
+  margin: 0;
+  font-weight: 700;
+}
+
+.animal-card .apc-details p {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  font-size: 1.1rem; /* Larger text on desktop */
+  line-height: 1.4;
+  margin: 0;
+  padding: 0 0.75rem;
+  text-align: center;
+  font-weight: 500;
+  max-height: 200px; /* Fixed height container */
+  overflow-y: auto; /* Allow vertical scrolling */
+  overflow-x: hidden; /* Hide horizontal overflow */
+  scrollbar-width: none; /* Firefox: hide scrollbar */
+  -ms-overflow-style: none; /* IE/Edge: hide scrollbar */
+}
+
+/* Hide scrollbar for Webkit browsers (Chrome, Safari, etc.) */
+.animal-card .apc-details p::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide user info section for animal cards but keep it in DOM */
+.animal-card .apc-user-info {
+  display: none;
+}
+
+/* Dark theme adjustments for animal cards */
+@media (prefers-color-scheme: dark) {
+  .animal-card .apc-details h3 {
+    background: linear-gradient(135deg, #ffffff 0%, #fff8e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* Responsive animal card adjustments */
+@media (max-width: 768px) {
+  .animal-card {
+    width: 340px;
+    height: 520px;
+  }
+
+  .animal-card .apc-content {
+    padding: 1rem;
+  }
+
+  .animal-card .apc-avatar-content {
+    padding: 1rem 1rem 0;
+  }
+
+  .animal-card .apc-content .avatar {
+    width: 120px;
+    height: 120px;
+  }
+
+  .animal-card .apc-details h3 {
+    font-size: 1.5rem;
+  }
+
+  .animal-card .apc-details p {
+    font-size: 0.9rem;
+    padding: 0 0.5rem;
+    max-height: 160px; /* Slightly smaller on mobile */
+  }
+
+  .animal-card .apc-identity-label {
+    font-size: 0.8rem;
+  }
+}

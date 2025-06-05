@@ -22,18 +22,18 @@ const FIELD_PROMPTS = {
   en: {
     summary:
       "Write a comprehensive 150-200 word personality profile analyzing this person's communication style, interests, emotional expression, problem-solving approach, and social dynamics based on their posts. Focus on psychological traits and behavioral patterns that define their personality.",
-    animal:
-      "Based on the personality analysis, select one animal from the available list that best represents their core characteristics and behavioral patterns.",
-    animalReason:
-      "Explain the specific behavioral and personality connections between this person and the chosen animal, citing concrete examples from their demonstrated patterns.",
+    animalSelection:
+      "Select ONE animal from the available list that best represents their core characteristics. Consider their communication style, problem-solving approach, social dynamics, and behavioral patterns. Be creative and avoid common defaults like owl, wolf, or cat unless they truly fit.",
+    animalExplanation:
+      "Write a 120-150 word explanation of why the SPECIFIC animal you selected above perfectly matches this person's demonstrated characteristics. Connect their actual behavioral patterns from their posts to this animal's typical traits. Be specific about which behaviors led to this exact choice - do not use generic animal descriptions. Keep the explanation concise enough to fit in a display card.",
   },
   "zh-cn": {
     summary:
       "撰写一份150-200字的全面个性档案，基于此人的帖子分析其沟通风格、兴趣爱好、情感表达、解决问题的方法和社交动态。重点关注定义其个性的心理特征和行为模式。",
-    animal:
-      "基于个性分析，从可用列表中选择一个最能代表其核心特征和行为模式的动物。",
-    animalReason:
-      "解释此人与所选动物之间的具体行为和个性联系，引用其展示模式中的具体例子。",
+    animalSelection:
+      "从可用列表中选择一个最能代表其核心特征的动物。考虑其沟通风格、解决问题的方法、社交动态和行为模式。发挥创意，避免常见的默认选择如猫头鹰、狼或猫，除非它们真正符合。",
+    animalExplanation:
+      "写一段120-150字的解释，说明为什么你上面选择的特定动物完美匹配此人展示的特征。将其帖子中的实际行为模式与该动物的典型特质联系起来。具体说明哪些行为导致了这个确切的选择 - 不要使用通用的动物描述。保持解释简洁，适合在显示卡片中展示。",
   },
 };
 
@@ -46,8 +46,8 @@ function createAnimalAnalysisSchema(locale: string) {
 
   return z.object({
     summary: z.string().describe(prompts.summary),
-    animal: z.enum(config.animals).describe(prompts.animal),
-    animalReason: z.string().describe(prompts.animalReason),
+    animal: z.enum(config.animals).describe(prompts.animalSelection),
+    animalReason: z.string().describe(prompts.animalExplanation),
   });
 }
 
@@ -55,7 +55,7 @@ function createAnimalAnalysisSchema(locale: string) {
 const PROMPTS = {
   en: {
     systemPrompt:
-      "You are a creative social media psychologist specializing in personality analysis. Analyze the user's posts and replies to understand their deeper traits, communication patterns, and behavioral tendencies.\n\nYour task is to provide three distinct analyses:\n\n1. Personality Summary: Focus on psychological traits, communication style, interests, emotional expression, problem-solving approach, and social dynamics.\n\n2. Animal Selection: Choose from the available animals list based on behavioral patterns. Be creative and diverse - consider the full spectrum rather than defaulting to common choices like owl, wolf, or cat.\n\n3. Animal Reasoning: Connect the person's demonstrated characteristics to the animal's typical behaviors and traits.\n\nWeight original posts more heavily than replies when determining core interests and personality traits.",
+      "You are a creative social media psychologist specializing in personality analysis. Analyze the user's posts and replies to understand their deeper traits, communication patterns, and behavioral tendencies.\n\nYour task has two main parts:\n\n1. Personality Summary: Write a detailed psychological profile focusing on their communication style, interests, emotional expression, problem-solving approach, and social dynamics.\n\n2. Animal Analysis (TWO CONNECTED STEPS):\n   - First: Select ONE specific animal from the available list that matches their demonstrated characteristics\n   - Second: Explain why THAT EXACT animal fits them, connecting their actual behaviors to that animal's traits\n\nCRITICAL: The animal you select and the explanation must perfectly match. Do not select one animal and explain a different one. Be creative and diverse - avoid defaulting to owl, wolf, or cat unless they truly fit.\n\nWeight original posts more heavily than replies when determining core interests and personality traits.",
     noTextMessage:
       "Not enough text content from recent posts to generate an AI summary.",
     disabledMessage:
@@ -66,7 +66,7 @@ const PROMPTS = {
   },
   "zh-cn": {
     systemPrompt:
-      "你是一位富有创意的社交媒体心理学家，专门进行个性分析。分析用户的帖子和回复，理解他们深层的个性特征、沟通模式和行为倾向。\n\n你的任务是提供三个不同的分析：\n\n1. 个性摘要：关注心理特征、沟通风格、兴趣爱好、情感表达、解决问题的方法和社交动态。\n\n2. 动物选择：从可用动物列表中基于行为模式进行选择。发挥创意并保持多样性 - 考虑全部范围而不是默认选择猫头鹰、狼或猫等常见选择。\n\n3. 动物原因：将此人展示的特征与动物的典型行为和特质联系起来。\n\n在确定核心兴趣和个性特征时，原创帖子的权重应超过回复内容。",
+      "你是一位富有创意的社交媒体心理学家，专门进行个性分析。分析用户的帖子和回复，理解他们深层的个性特征、沟通模式和行为倾向。\n\n你的任务有两个主要部分：\n\n1. 个性摘要：撰写详细的心理档案，重点关注其沟通风格、兴趣爱好、情感表达、解决问题的方法和社交动态。\n\n2. 动物分析（两个相关步骤）：\n   - 首先：从可用列表中选择一个与其展示特征匹配的特定动物\n   - 其次：解释为什么那个确切的动物适合他们，将其实际行为与该动物的特质联系起来\n\n关键：你选择的动物和解释必须完美匹配。不要选择一个动物然后解释不同的动物。发挥创意并保持多样性 - 避免默认选择猫头鹰、狼或猫，除非它们真正符合。\n\n在确定核心兴趣和个性特征时，原创帖子的权重应超过回复内容。",
     noTextMessage: "近期帖子文本内容不足，无法生成 AI 摘要。",
     disabledMessage:
       "AI 摘要生成功能当前已禁用。用户 {username} 发布了各种内容。",

@@ -42,64 +42,43 @@ export type AnimalEN = (typeof ANIMALS_EN)[number];
 export type AnimalZH = (typeof ANIMALS_ZH)[number];
 export type Animal = AnimalEN | AnimalZH;
 
-// Import animal images for better performance and optimization
-import BearImg from "@/assets/animals/Bear.png";
-import CatImg from "@/assets/animals/Cat.png";
-import CowImg from "@/assets/animals/Cow.png";
-import DeerImg from "@/assets/animals/Deer.png";
-import DogImg from "@/assets/animals/Dog.png";
-import DuckImg from "@/assets/animals/Duck.png";
-import FishImg from "@/assets/animals/Fish.png";
-import GiraffeImg from "@/assets/animals/Giraffe .png"; // Note: space in filename
-import HamsterImg from "@/assets/animals/Hamster.png";
-import HorseImg from "@/assets/animals/Horse.png";
-import LionImg from "@/assets/animals/Lion.png";
-import OwlImg from "@/assets/animals/Owl.png";
-import PenguinImg from "@/assets/animals/Penguin.png";
-import RabbitImg from "@/assets/animals/Rabbit.png";
-import SheepImg from "@/assets/animals/Sheep.png";
-import WolfImg from "@/assets/animals/Wolf.png";
-
-// Type for imported images
-type ImageImport = typeof BearImg;
-
-// Animal image mapping - optimized imports for better performance (16 animals)
-export const ANIMAL_IMAGES: Record<string, ImageImport> = {
+// Animal image mapping using static paths (16 animals)
+export const ANIMAL_IMAGES: Record<string, string> = {
   // English animals
-  bear: BearImg,
-  cat: CatImg,
-  cow: CowImg,
-  deer: DeerImg,
-  dog: DogImg,
-  duck: DuckImg,
-  fish: FishImg,
-  giraffe: GiraffeImg,
-  hamster: HamsterImg,
-  horse: HorseImg,
-  lion: LionImg,
-  owl: OwlImg,
-  penguin: PenguinImg,
-  rabbit: RabbitImg,
-  sheep: SheepImg,
-  wolf: WolfImg,
+  bear: "/assets/animals/Bear.png",
+  cat: "/assets/animals/Cat.png",
+  cow: "/assets/animals/Cow.png",
+  deer: "/assets/animals/Deer.png",
+  dog: "/assets/animals/Dog.png",
+  duck: "/assets/animals/Duck.png",
+  fish: "/assets/animals/Fish.png",
+  giraffe: "/assets/animals/Giraffe .png",
+  hamster: "/assets/animals/Hamster.png",
+  horse: "/assets/animals/Horse.png",
+  lion: "/assets/animals/Lion.png",
+  owl: "/assets/animals/Owl.png",
+  penguin: "/assets/animals/Penguin.png",
+  rabbit: "/assets/animals/Rabbit.png",
+  sheep: "/assets/animals/Sheep.png",
+  wolf: "/assets/animals/Wolf.png",
 
   // Chinese animals (same images)
-  熊: BearImg,
-  猫: CatImg,
-  奶牛: CowImg,
-  鹿: DeerImg,
-  狗: DogImg,
-  鸭子: DuckImg,
-  鱼: FishImg,
-  长颈鹿: GiraffeImg,
-  仓鼠: HamsterImg,
-  马: HorseImg,
-  狮子: LionImg,
-  猫头鹰: OwlImg,
-  企鹅: PenguinImg,
-  兔子: RabbitImg,
-  羊: SheepImg,
-  狼: WolfImg,
+  熊: "/assets/animals/Bear.png",
+  猫: "/assets/animals/Cat.png",
+  奶牛: "/assets/animals/Cow.png",
+  鹿: "/assets/animals/Deer.png",
+  狗: "/assets/animals/Dog.png",
+  鸭子: "/assets/animals/Duck.png",
+  鱼: "/assets/animals/Fish.png",
+  长颈鹿: "/assets/animals/Giraffe .png",
+  仓鼠: "/assets/animals/Hamster.png",
+  马: "/assets/animals/Horse.png",
+  狮子: "/assets/animals/Lion.png",
+  猫头鹰: "/assets/animals/Owl.png",
+  企鹅: "/assets/animals/Penguin.png",
+  兔子: "/assets/animals/Rabbit.png",
+  羊: "/assets/animals/Sheep.png",
+  狼: "/assets/animals/Wolf.png",
 };
 
 // Multilingual animal configuration
@@ -118,8 +97,8 @@ export const ANIMAL_CONFIG = {
   },
 } as const;
 
-// Helper function to get animal image (now returns imported image object)
-export function getAnimalImage(animal: string): ImageImport {
+// Helper function to get animal image (returns static path)
+export function getAnimalImage(animal: string): string {
   const image = ANIMAL_IMAGES[animal] || ANIMAL_IMAGES[animal.toLowerCase()];
-  return image || CatImg; // fallback to cat image
+  return image || "/assets/animals/Cat.png"; // fallback to cat image
 }
